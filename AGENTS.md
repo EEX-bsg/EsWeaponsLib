@@ -140,6 +140,10 @@ XML カスタムモジュールと C# API を提供します。E'sTankCannonsMod
 | Besiege 本体内部の調査(`.internal-docs/decompiled/` の探索) | `besiege-internals` |
 | 実機ログ(output_log.txt)の解析・既知イシュー対応付け | `mp-log-analyst` |
 
+まとまった実装もサブエージェント(`general-purpose` 等)に書かせてよく、メインは分割・指示・検収に回る。
+ただし品質を落とさないことが条件: 指示に AGENTS.md の規約と範囲を含め、成果物はメインがビルド・IL 検査・差分確認で検収してからコミットする。
+小さく自分でやる方が速く確実な作業は委譲しない。
+
 ## 確認が必要な場合
 
 - 公開済み ID・保存形式・ネットワーク形式・公開面(1.0 以降)を壊す。
