@@ -1,0 +1,27 @@
+<Mod>
+	<!-- EWL の XML モジュールだけを使う最小サンプル(C# なし)。EWL が先にロードされている前提。 -->
+	<Name>EWL Sample</Name>
+	<Author>EEX-slime</Author>
+	<Version>0.0.1</Version>
+	<Description>Minimal sample block using E'sWeaponsLib's EwlWeapon module.</Description>
+	<Debug>true</Debug>
+	<MultiplayerCompatible>true</MultiplayerCompatible>
+
+	<Assemblies />
+
+	<Blocks>
+		<Block path="Blocks/SampleGun.xml" />
+	</Blocks>
+
+	<Entities />
+	<Triggers />
+	<Events />
+	<Keys />
+
+	<Resources>
+		<Mesh name="box" path="box.obj" />
+		<Texture name="olive" path="olive.png" />
+	</Resources>
+
+	<ID>f54bd8d6-aa10-4313-a84b-f65905fc52fc</ID>
+</Mod>

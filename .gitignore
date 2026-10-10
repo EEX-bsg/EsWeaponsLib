@@ -1,0 +1,19 @@
+# Besiege Mod .gitignore
+# This prevents build artifacts and other junk from being committed to Git repositories, if you decide to use Git for version control.
+
+/src/.vs/
+/src/**/bin/
+/src/**/obj/
+**/*.dll
+*.pdb
+*.user
+
+# BesiegeModding local internal documentation (contains notes derived from decompiled sources; never commit)
+/.internal-docs/
+
+# Decompiled Besiege sources must never be committed, wherever they are placed
+**/decompiled/
+**/old_decompiled/
+
+# Local AI agent settings (same policy as ACMu: keep Claude Code setup out of the public repository)
+/.claude/

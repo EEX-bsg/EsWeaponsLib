@@ -1,0 +1,63 @@
+<Block>
+	<Debug>false</Debug>
+	<ID>1</ID>
+	<Name>EWL Sample Gun</Name>
+	<Mass>1.0</Mass>
+	<Fallback>Cannon</Fallback>
+
+	<ModuleMapperTypes>
+		<Key displayName="Fire" key="fire" default="C" />
+	</ModuleMapperTypes>
+	<Modules>
+		<!-- 省略した要素は既定値。全要素は src/EsWeaponsLib/Modules/EwlWeaponModule.cs を参照。 -->
+		<EwlWeapon modid="0d219960-b202-4906-b29d-8d90a61a89b8">
+			<FireKey key="fire" />
+			<Muzzle>
+				<Position x="0" y="0" z="1.3" />
+			</Muzzle>
+			<Fire>
+				<Velocity>150</Velocity>
+				<Interval>0.3</Interval>
+				<Hold>true</Hold>
+				<Spread>0.5</Spread>
+			</Fire>
+			<Projectile>
+				<Mass>0.5</Mass>
+				<Lifetime>8</Lifetime>
+			</Projectile>
+			<Impact>
+				<BlockDamage>1</BlockDamage>
+				<EntityDamage>50</EntityDamage>
+				<ExplosionRadius>2</ExplosionRadius>
+				<ExplosionPower>1500</ExplosionPower>
+				<ExplosionUpPower>0.5</ExplosionUpPower>
+			</Impact>
+		</EwlWeapon>
+	</Modules>
+
+	<Mesh name="box">
+		<Position x="0" y="0" z="0.5" />
+		<Rotation x="0" y="0" z="0" />
+		<Scale x="0.5" y="0.5" z="1.5" />
+	</Mesh>
+	<Texture name="olive" />
+	<Icon>
+		<Position x="0" y="0" z="0" />
+		<Rotation x="30" y="30" z="0" />
+		<Scale x="0.4" y="0.4" z="0.4" />
+	</Icon>
+
+	<Colliders>
+		<BoxCollider>
+			<Position x="0" y="0" z="0.5" />
+			<Rotation x="0" y="0" z="0" />
+			<Scale x="0.5" y="0.5" z="1.5" />
+		</BoxCollider>
+	</Colliders>
+
+	<BasePoint hasAddingPoint="false">
+		<Stickiness enabled="true" radius="0.6" />
+		<Motion x="false" y="false" z="false" />
+	</BasePoint>
+	<AddingPoints />
+</Block>

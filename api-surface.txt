@@ -1,0 +1,180 @@
+assembly EsWeaponsLib 1.0.0.0
+class EWL.Api.ColliderShape : System.Object
+class EWL.Api.EffectSpec : System.Object
+class EWL.Api.FireSpec : System.Object
+class EWL.Api.ImpactSpec : System.Object
+class EWL.Api.ProjectileSpec : System.Object
+class EWL.Api.Weapon : System.Object
+class EWL.Api.WeaponSpec : System.Object
+class EWL.Mod : Modding.ModEntryPoint
+class EWL.Modules.BlockMaterialXml : Modding.Serialization.Element
+class EWL.Modules.EffectsXml : Modding.Serialization.Element
+class EWL.Modules.EwlBlockPhysicsBehaviour : Modding.Modules.BlockModuleBehaviour`1<EWL.Modules.EwlBlockPhysicsModule>
+class EWL.Modules.EwlBlockPhysicsModule : Modding.Modules.BlockModule
+class EWL.Modules.EwlWeaponBehaviour : Modding.Modules.BlockModuleBehaviour`1<EWL.Modules.EwlWeaponModule>
+class EWL.Modules.EwlWeaponModule : Modding.Modules.BlockModule
+class EWL.Modules.FireXml : Modding.Serialization.Element
+class EWL.Modules.ImpactXml : Modding.Serialization.Element
+class EWL.Modules.JointRotationXml : Modding.Serialization.Element
+class EWL.Modules.MuzzleXml : Modding.Serialization.Element
+class EWL.Modules.ProjectileXml : Modding.Serialization.Element
+enum EWL.Api.ColliderKind : System.Enum
+EWL.Api.ColliderKind::Box : EWL.Api.ColliderKind
+EWL.Api.ColliderKind::Capsule : EWL.Api.ColliderKind
+EWL.Api.ColliderKind::Sphere : EWL.Api.ColliderKind
+EWL.Api.ColliderShape::Direction : System.Int32
+EWL.Api.ColliderShape::Height : System.Single
+EWL.Api.ColliderShape::Kind : EWL.Api.ColliderKind
+EWL.Api.ColliderShape::Position : UnityEngine.Vector3
+EWL.Api.ColliderShape::Radius : System.Single
+EWL.Api.ColliderShape::Rotation : UnityEngine.Vector3
+EWL.Api.ColliderShape::Size : UnityEngine.Vector3
+EWL.Api.ColliderShape::System.Void .ctor()
+EWL.Api.EffectSpec::Bullet : UnityEngine.GameObject
+EWL.Api.EffectSpec::Explosion : UnityEngine.GameObject
+EWL.Api.EffectSpec::ExplosionFacesNormal : System.Boolean
+EWL.Api.EffectSpec::ExplosionSounds : System.Collections.Generic.List`1<UnityEngine.AudioClip>
+EWL.Api.EffectSpec::FireSounds : System.Collections.Generic.List`1<UnityEngine.AudioClip>
+EWL.Api.EffectSpec::ShotFlash : UnityEngine.GameObject
+EWL.Api.EffectSpec::ShotFlashPosition : UnityEngine.Vector3
+EWL.Api.EffectSpec::ShotFlashRotation : UnityEngine.Vector3
+EWL.Api.EffectSpec::ShotFlashScale : UnityEngine.Vector3
+EWL.Api.EffectSpec::System.Void .ctor()
+EWL.Api.EffectSpec::Trail : UnityEngine.GameObject
+EWL.Api.FireSpec::Ammo : System.Int32
+EWL.Api.FireSpec::Delay : System.Single
+EWL.Api.FireSpec::Interval : System.Single
+EWL.Api.FireSpec::MuzzlePosition : UnityEngine.Vector3
+EWL.Api.FireSpec::MuzzleRotation : UnityEngine.Quaternion
+EWL.Api.FireSpec::RandomDelay : System.Single
+EWL.Api.FireSpec::Recoil : System.Single
+EWL.Api.FireSpec::Spread : System.Single
+EWL.Api.FireSpec::System.Void .ctor()
+EWL.Api.FireSpec::Velocity : System.Single
+EWL.Api.ImpactSpec::Attach : System.Boolean
+EWL.Api.ImpactSpec::BlockDamage : System.Single
+EWL.Api.ImpactSpec::DespawnOnHit : System.Boolean
+EWL.Api.ImpactSpec::EntityDamage : System.Single
+EWL.Api.ImpactSpec::ExplosionPower : System.Single
+EWL.Api.ImpactSpec::ExplosionRadius : System.Single
+EWL.Api.ImpactSpec::ExplosionUpPower : System.Single
+EWL.Api.ImpactSpec::FuseDelay : System.Single
+EWL.Api.ImpactSpec::FuseRandom : System.Single
+EWL.Api.ImpactSpec::ImpactForce : System.Single
+EWL.Api.ImpactSpec::System.Void .ctor()
+EWL.Api.ProjectileSpec::AngularDrag : System.Single
+EWL.Api.ProjectileSpec::BounceCombine : UnityEngine.PhysicMaterialCombine
+EWL.Api.ProjectileSpec::Bounciness : System.Single
+EWL.Api.ProjectileSpec::Colliders : System.Collections.Generic.List`1<EWL.Api.ColliderShape>
+EWL.Api.ProjectileSpec::CollisionMode : UnityEngine.CollisionDetectionMode
+EWL.Api.ProjectileSpec::Drag : System.Single
+EWL.Api.ProjectileSpec::Friction : System.Single
+EWL.Api.ProjectileSpec::FrictionCombine : UnityEngine.PhysicMaterialCombine
+EWL.Api.ProjectileSpec::IgnoreGravity : System.Boolean
+EWL.Api.ProjectileSpec::Lifetime : System.Single
+EWL.Api.ProjectileSpec::Mass : System.Single
+EWL.Api.ProjectileSpec::Mesh : UnityEngine.Mesh
+EWL.Api.ProjectileSpec::MeshPosition : UnityEngine.Vector3
+EWL.Api.ProjectileSpec::MeshRotation : UnityEngine.Vector3
+EWL.Api.ProjectileSpec::MeshScale : UnityEngine.Vector3
+EWL.Api.ProjectileSpec::System.Void .ctor()
+EWL.Api.ProjectileSpec::Texture : UnityEngine.Texture
+EWL.Api.ProjectileSpec::TimeFuse : System.Single
+EWL.Api.Weapon::Ammo : System.Int32 {get}
+EWL.Api.Weapon::event System.Action Fired
+EWL.Api.Weapon::IsAlive : System.Boolean {get}
+EWL.Api.Weapon::Spec : EWL.Api.WeaponSpec {get;set}
+EWL.Api.Weapon::static EWL.Api.Weapon Create(BlockBehaviour, EWL.Api.WeaponSpec)
+EWL.Api.Weapon::static EWL.Api.Weapon[] GetAll(UnityEngine.GameObject)
+EWL.Api.Weapon::System.Boolean TryFire()
+EWL.Api.Weapon::System.Void Destroy()
+EWL.Api.WeaponSpec::Effects : EWL.Api.EffectSpec
+EWL.Api.WeaponSpec::Fire : EWL.Api.FireSpec
+EWL.Api.WeaponSpec::Impact : EWL.Api.ImpactSpec
+EWL.Api.WeaponSpec::Projectile : EWL.Api.ProjectileSpec
+EWL.Api.WeaponSpec::System.Void .ctor()
+EWL.Mod::System.Void .ctor()
+EWL.Mod::virtual System.Void OnLoad()
+EWL.Modules.BlockMaterialXml::BounceCombine : UnityEngine.PhysicMaterialCombine XmlElement() DefaultValue()
+EWL.Modules.BlockMaterialXml::Bounciness : System.Single XmlElement() DefaultValue()
+EWL.Modules.BlockMaterialXml::Friction : System.Single XmlElement() DefaultValue()
+EWL.Modules.BlockMaterialXml::FrictionCombine : UnityEngine.PhysicMaterialCombine XmlElement() DefaultValue()
+EWL.Modules.BlockMaterialXml::System.Void .ctor()
+EWL.Modules.EffectsXml::AssetBundle : Modding.Serialization.ResourceReference XmlElement() DefaultValue()
+EWL.Modules.EffectsXml::Bullet : System.String XmlElement() DefaultValue()
+EWL.Modules.EffectsXml::Explosion : System.String XmlElement() DefaultValue()
+EWL.Modules.EffectsXml::ExplosionFacesNormal : System.Boolean XmlElement() DefaultValue()
+EWL.Modules.EffectsXml::ExplosionSounds : System.Collections.Generic.List`1<Modding.Serialization.ResourceReference> XmlArray(ExplosionSounds) DefaultValue()
+EWL.Modules.EffectsXml::FireSounds : System.Collections.Generic.List`1<Modding.Serialization.ResourceReference> XmlArray(FireSounds) DefaultValue()
+EWL.Modules.EffectsXml::ShotFlash : System.String XmlElement() DefaultValue()
+EWL.Modules.EffectsXml::ShotFlashPosition : Modding.Serialization.Vector3 XmlElement() DefaultValue()
+EWL.Modules.EffectsXml::ShotFlashRotation : Modding.Serialization.Vector3 XmlElement() DefaultValue()
+EWL.Modules.EffectsXml::ShotFlashScale : Modding.Serialization.Vector3 XmlElement() DefaultValue()
+EWL.Modules.EffectsXml::System.Void .ctor()
+EWL.Modules.EffectsXml::Trail : System.String XmlElement() DefaultValue()
+EWL.Modules.EwlBlockPhysicsBehaviour::System.Void .ctor()
+EWL.Modules.EwlBlockPhysicsBehaviour::virtual System.Void SafeAwake()
+EWL.Modules.EwlBlockPhysicsModule [XmlRootAttribute(EwlBlockPhysics)]
+EWL.Modules.EwlBlockPhysicsModule::JointStrength : System.Single XmlElement() DefaultValue()
+EWL.Modules.EwlBlockPhysicsModule::Material : EWL.Modules.BlockMaterialXml XmlElement() DefaultValue()
+EWL.Modules.EwlBlockPhysicsModule::Rotation : EWL.Modules.JointRotationXml XmlElement() DefaultValue()
+EWL.Modules.EwlBlockPhysicsModule::System.Void .ctor()
+EWL.Modules.EwlWeaponBehaviour::System.Void .ctor()
+EWL.Modules.EwlWeaponBehaviour::virtual System.Void OnSimulateStart()
+EWL.Modules.EwlWeaponBehaviour::virtual System.Void OnSimulateStop()
+EWL.Modules.EwlWeaponBehaviour::virtual System.Void SafeAwake()
+EWL.Modules.EwlWeaponBehaviour::virtual System.Void SimulateUpdateHost()
+EWL.Modules.EwlWeaponModule [XmlRootAttribute(EwlWeapon)]
+EWL.Modules.EwlWeaponModule::Effects : EWL.Modules.EffectsXml XmlElement() DefaultValue()
+EWL.Modules.EwlWeaponModule::Fire : EWL.Modules.FireXml XmlElement() DefaultValue()
+EWL.Modules.EwlWeaponModule::FireKey : Modding.Serialization.MKeyReference XmlElement() RequireToValidate()
+EWL.Modules.EwlWeaponModule::HoldToFireToggle : Modding.Serialization.MToggleReference XmlElement() DefaultValue()
+EWL.Modules.EwlWeaponModule::Impact : EWL.Modules.ImpactXml XmlElement() DefaultValue()
+EWL.Modules.EwlWeaponModule::Muzzle : EWL.Modules.MuzzleXml XmlElement() DefaultValue()
+EWL.Modules.EwlWeaponModule::Projectile : EWL.Modules.ProjectileXml XmlElement() DefaultValue()
+EWL.Modules.EwlWeaponModule::System.Void .ctor()
+EWL.Modules.FireXml::Ammo : System.Int32 XmlElement() DefaultValue()
+EWL.Modules.FireXml::Delay : System.Single XmlElement() DefaultValue()
+EWL.Modules.FireXml::Hold : System.Boolean XmlElement() DefaultValue()
+EWL.Modules.FireXml::Interval : System.Single XmlElement() DefaultValue()
+EWL.Modules.FireXml::RandomDelay : System.Single XmlElement() DefaultValue()
+EWL.Modules.FireXml::Recoil : System.Single XmlElement() DefaultValue()
+EWL.Modules.FireXml::Spread : System.Single XmlElement() DefaultValue()
+EWL.Modules.FireXml::System.Void .ctor()
+EWL.Modules.FireXml::Velocity : System.Single XmlElement() DefaultValue()
+EWL.Modules.ImpactXml::Attach : System.Boolean XmlElement() DefaultValue()
+EWL.Modules.ImpactXml::BlockDamage : System.Single XmlElement() DefaultValue()
+EWL.Modules.ImpactXml::DespawnOnHit : System.Boolean XmlElement() DefaultValue()
+EWL.Modules.ImpactXml::EntityDamage : System.Single XmlElement() DefaultValue()
+EWL.Modules.ImpactXml::ExplosionPower : System.Single XmlElement() DefaultValue()
+EWL.Modules.ImpactXml::ExplosionRadius : System.Single XmlElement() DefaultValue()
+EWL.Modules.ImpactXml::ExplosionUpPower : System.Single XmlElement() DefaultValue()
+EWL.Modules.ImpactXml::FuseDelay : System.Single XmlElement() DefaultValue()
+EWL.Modules.ImpactXml::FuseRandom : System.Single XmlElement() DefaultValue()
+EWL.Modules.ImpactXml::ImpactForce : System.Single XmlElement() DefaultValue()
+EWL.Modules.ImpactXml::System.Void .ctor()
+EWL.Modules.JointRotationXml::AxisX : UnityEngine.ConfigurableJointMotion XmlElement() DefaultValue()
+EWL.Modules.JointRotationXml::AxisY : UnityEngine.ConfigurableJointMotion XmlElement() DefaultValue()
+EWL.Modules.JointRotationXml::AxisZ : UnityEngine.ConfigurableJointMotion XmlElement() DefaultValue()
+EWL.Modules.JointRotationXml::Damper : System.Single XmlElement() DefaultValue()
+EWL.Modules.JointRotationXml::Limit : System.Single XmlElement() DefaultValue()
+EWL.Modules.JointRotationXml::Spring : System.Single XmlElement() DefaultValue()
+EWL.Modules.JointRotationXml::System.Void .ctor()
+EWL.Modules.MuzzleXml::Position : Modding.Serialization.Vector3 XmlElement() DefaultValue()
+EWL.Modules.MuzzleXml::Rotation : Modding.Serialization.Vector3 XmlElement() DefaultValue()
+EWL.Modules.MuzzleXml::System.Void .ctor()
+EWL.Modules.ProjectileXml::AngularDrag : System.Single XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::BounceCombine : UnityEngine.PhysicMaterialCombine XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::Bounciness : System.Single XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::Colliders : System.Collections.Generic.List`1<Modding.Serialization.ModCollider> XmlArray(Colliders) DefaultValue()
+EWL.Modules.ProjectileXml::CollisionMode : UnityEngine.CollisionDetectionMode XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::Drag : System.Single XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::Friction : System.Single XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::FrictionCombine : UnityEngine.PhysicMaterialCombine XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::IgnoreGravity : System.Boolean XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::Lifetime : System.Single XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::Mass : System.Single XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::Mesh : Modding.Serialization.MeshReference XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::System.Void .ctor()
+EWL.Modules.ProjectileXml::Texture : Modding.Serialization.ResourceReference XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::TimeFuse : System.Single XmlElement() DefaultValue()
