@@ -15,6 +15,7 @@ namespace EWL.Modules
 		private MToggle _holdToggle;
 		private Weapon _weapon;
 		private bool _autoFire;
+		private ModAssetBundle _effectBundle;
 
 		public override void SafeAwake()
 		{
@@ -26,10 +27,16 @@ namespace EWL.Modules
 		{
 			_autoFire = false;
 			_weapon = Weapon.Create(BlockBehaviour, BuildSpec());
+			_effectBundle = ResolveBundle(Module.Effects.AssetBundle);
+			// 本体はバンドルを非同期で読む。未読込なら読込完了で差し込む(読込済みで購読すると本体が全アセットを読み直すので、そのときは購読しない)
+			if (_effectBundle != null && !_effectBundle.Loaded) _effectBundle.OnLoad += SetEffectPrefabs;
+			else SetEffectPrefabs();
 		}
 
 		public override void OnSimulateStop()
 		{
+			if (_effectBundle != null) _effectBundle.OnLoad -= SetEffectPrefabs;
+			_effectBundle = null;
 			if (_weapon != null) _weapon.Destroy();
 			_weapon = null;
 		}
@@ -102,18 +109,25 @@ namespace EWL.Modules
 
 			var effectsXml = Module.Effects;
 			var effects = spec.Effects;
-			var bundle = ResolveBundle(effectsXml.AssetBundle);
-			effects.ShotFlash = Prefab(bundle, effectsXml.ShotFlash);
 			effects.ShotFlashPosition = effectsXml.ShotFlashPosition;
 			effects.ShotFlashRotation = effectsXml.ShotFlashRotation;
 			effects.ShotFlashScale = effectsXml.ShotFlashScale;
-			effects.Trail = Prefab(bundle, effectsXml.Trail);
-			effects.Bullet = Prefab(bundle, effectsXml.Bullet);
-			effects.Explosion = Prefab(bundle, effectsXml.Explosion);
 			effects.ExplosionFacesNormal = effectsXml.ExplosionFacesNormal;
 			AddClips(effectsXml.FireSounds, effects.FireSounds, "Effects/FireSounds");
 			AddClips(effectsXml.ExplosionSounds, effects.ExplosionSounds, "Effects/ExplosionSounds");
 			return spec;
+		}
+
+		// Spec は発射のたびに読まれるので、シミュ中に差し込んでも次の弾から反映される。
+		private void SetEffectPrefabs()
+		{
+			if (this == null || _weapon == null) return; // OnSimulateStop を経ずに破棄された後の OnLoad
+			var effectsXml = Module.Effects;
+			var effects = _weapon.Spec.Effects;
+			effects.ShotFlash = Prefab(effectsXml.ShotFlash);
+			effects.Trail = Prefab(effectsXml.Trail);
+			effects.Bullet = Prefab(effectsXml.Bullet);
+			effects.Explosion = Prefab(effectsXml.Explosion);
 		}
 
 		// モジュールのインスタンスはブロック定義ごとに1つなので、同じブロック種別の武装は弾のプールを共有する。
@@ -172,25 +186,13 @@ namespace EWL.Modules
 			return Resolve<ModAssetBundle>(r, "Effects/AssetBundle");
 		}
 
-		// ModAssetBundle.LoadAsset は呼ぶたびにバンドルの全アセットを読む(本体の空バンドル検出)ので重い。取り出したプレハブを覚えておく。
-		// 本体がバンドルを読み直しても(Unload(false))取り出し済みのアセットは残るので、破棄されていない限りそのまま使える。
-		private static readonly Dictionary<ModAssetBundle, Dictionary<string, GameObject>> PrefabCache =
-			new Dictionary<ModAssetBundle, Dictionary<string, GameObject>>();
-
-		private GameObject Prefab(ModAssetBundle bundle, string name)
+		private GameObject Prefab(string name)
 		{
 			if (string.IsNullOrEmpty(name) || name == "none") return null;
-			if (bundle == null) { LogMissing("Effects", "AssetBundle (needed for '" + name + "')"); return null; }
-			Dictionary<string, GameObject> prefabs;
-			if (!PrefabCache.TryGetValue(bundle, out prefabs)) PrefabCache[bundle] = prefabs = new Dictionary<string, GameObject>();
-			GameObject prefab;
-			if (prefabs.TryGetValue(name, out prefab) && prefab != null) return prefab;
-
-			if (!bundle.Loaded) { LogMissing("Effects", "AssetBundle (still loading, needed for '" + name + "')"); return null; }
-			if (bundle.HasError) { LogMissing("Effects", "AssetBundle (load error: " + bundle.Error + ")"); return null; }
-			prefab = bundle.LoadAsset<GameObject>(name);
+			if (_effectBundle == null) { LogMissing("Effects", "AssetBundle (needed for '" + name + "')"); return null; }
+			if (_effectBundle.HasError) { LogMissing("Effects", "AssetBundle (load error: " + _effectBundle.Error + ")"); return null; }
+			var prefab = BundleAssets.Load<GameObject>(_effectBundle, name);
 			if (prefab == null) LogMissing("Effects", "prefab '" + name + "' in the AssetBundle");
-			else prefabs[name] = prefab;
 			return prefab;
 		}
 

@@ -54,6 +54,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\BundleAssets.cs" />
     <Compile Include="Api\Weapon.cs" />
     <Compile Include="Api\WeaponSpec.cs" />
     <Compile Include="Besiege\Damage.cs" />

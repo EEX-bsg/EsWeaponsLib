@@ -25,9 +25,12 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
 - 弾とエフェクトのプール。`ProjectileSpec.PoolSize`(既定 50。同時に飛べる弾の上限で、武装の生成時にこの数まで事前生成し、
   上限では最古の弾を回収して撃つ。エフェクトもプレハブごとにこの数まで)、`ProjectileSpec.PoolKey`(弾のオブジェクトを共有するキー。
   null なら武装ごと)。XML は `EwlWeapon/Projectile/PoolSize`。`EwlWeapon` モジュールは同じブロック種別で弾を共有する。
+- `BundleAssets.Load<T>(ModAssetBundle, string)`。AssetBundle からアセットを取り出し、バンドル・名前・型ごとに覚える
+  (見つからなかった名前も覚える)。未読込・読込エラー・見つからないときは null。未読込時の待ち方は型の説明を参照。
 
 ### Changed
 - `EwlWeapon` のエフェクト用プレハブを AssetBundle から一度だけ取り出して使い回すようにした(シミュ開始時の負荷を軽減)。
+- `EwlWeapon` はシミュ開始時に AssetBundle が読込中なら、読込完了の時点でエフェクトを差し込む(従来はそのシミュ中エフェクトなし)。
 - [Breaking] `EwlWeapon` のたたき台からの変更(α 内):
   - `Impact/ExplodeRadius` → `Impact/ExplosionRadius`(`ExplodePower`/`ExplodeUpPower` も同様に `Explosion*`)。
     旧 `<ExplodeRadius>2</ExplodeRadius>` → 新 `<ExplosionRadius>2</ExplosionRadius>`。

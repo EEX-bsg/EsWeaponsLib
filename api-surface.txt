@@ -1,4 +1,5 @@
 assembly EsWeaponsLib 1.0.0.0
+class EWL.Api.BundleAssets : System.Object
 class EWL.Api.ColliderShape : System.Object
 class EWL.Api.EffectSpec : System.Object
 class EWL.Api.FireSpec : System.Object
@@ -19,6 +20,7 @@ class EWL.Modules.JointRotationXml : Modding.Serialization.Element
 class EWL.Modules.MuzzleXml : Modding.Serialization.Element
 class EWL.Modules.ProjectileXml : Modding.Serialization.Element
 enum EWL.Api.ColliderKind : System.Enum
+EWL.Api.BundleAssets::static T Load(Modding.ModAssetBundle, System.String)
 EWL.Api.ColliderKind::Box : EWL.Api.ColliderKind
 EWL.Api.ColliderKind::Capsule : EWL.Api.ColliderKind
 EWL.Api.ColliderKind::Sphere : EWL.Api.ColliderKind
