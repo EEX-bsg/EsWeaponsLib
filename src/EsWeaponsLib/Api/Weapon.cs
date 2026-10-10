@@ -60,7 +60,7 @@ namespace EWL.Api
 			return _driver != null && _driver.TryFire();
 		}
 
-		/// <summary>武装を外す。飛んでいる弾はそのまま(シミュ終了で消える)。ただし見た目のマテリアルは武装と一緒に破棄される。</summary>
+		/// <summary>武装を外す。飛んでいる弾はシミュ終了まで残る。</summary>
 		public void Destroy()
 		{
 			if (_driver != null) UnityEngine.Object.Destroy(_driver);

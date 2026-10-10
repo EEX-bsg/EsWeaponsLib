@@ -68,12 +68,14 @@ namespace EWL.Modules
 			projectile.CollisionMode = projectileXml.CollisionMode;
 			projectile.Lifetime = projectileXml.Lifetime;
 			projectile.TimeFuse = projectileXml.TimeFuse;
+			projectile.PoolSize = projectileXml.PoolSize;
+			projectile.PoolKey = PoolKeyFor(Module);
 			projectile.Friction = projectileXml.Friction;
 			projectile.Bounciness = projectileXml.Bounciness;
 			projectile.FrictionCombine = projectileXml.FrictionCombine;
 			projectile.BounceCombine = projectileXml.BounceCombine;
 			if (projectileXml.Colliders != null)
-				foreach (var c in projectileXml.Colliders) projectile.Colliders.Add(ToShape(c));
+				foreach (var collider in projectileXml.Colliders) projectile.Colliders.Add(ToShape(collider));
 			if (projectileXml.Mesh != null)
 			{
 				var mesh = Resolve<ModMesh>(projectileXml.Mesh, "Projectile/Mesh");
@@ -114,19 +116,29 @@ namespace EWL.Modules
 			return spec;
 		}
 
-		private static ColliderShape ToShape(ModCollider c)
+		// モジュールのインスタンスはブロック定義ごとに1つなので、同じブロック種別の武装は弾のプールを共有する。
+		private static readonly Dictionary<EwlWeaponModule, string> PoolKeys = new Dictionary<EwlWeaponModule, string>();
+
+		private static string PoolKeyFor(EwlWeaponModule module)
 		{
-			var shape = new ColliderShape { Position = c.Position };
-			var cap = c as CapsuleModCollider;
-			var box = c as BoxModCollider;
-			var sphere = c as SphereModCollider;
-			if (cap != null)
+			string key;
+			if (!PoolKeys.TryGetValue(module, out key)) PoolKeys[module] = key = "EwlWeapon#" + PoolKeys.Count;
+			return key;
+		}
+
+		private static ColliderShape ToShape(ModCollider collider)
+		{
+			var shape = new ColliderShape { Position = collider.Position };
+			var capsule = collider as CapsuleModCollider;
+			var box = collider as BoxModCollider;
+			var sphere = collider as SphereModCollider;
+			if (capsule != null)
 			{
 				shape.Kind = ColliderKind.Capsule;
-				shape.Rotation = cap.Rotation;
-				shape.Radius = cap.Radius;
-				shape.Height = cap.Height;
-				shape.Direction = (int)cap.Dir;
+				shape.Rotation = capsule.Rotation;
+				shape.Radius = capsule.Radius;
+				shape.Height = capsule.Height;
+				shape.Direction = (int)capsule.Dir;
 			}
 			else if (box != null)
 			{
@@ -160,13 +172,26 @@ namespace EWL.Modules
 			return Resolve<ModAssetBundle>(r, "Effects/AssetBundle");
 		}
 
+		// ModAssetBundle.LoadAsset は呼ぶたびにバンドルの全アセットを読む(本体の空バンドル検出)ので重い。取り出したプレハブを覚えておく。
+		// 本体がバンドルを読み直しても(Unload(false))取り出し済みのアセットは残るので、破棄されていない限りそのまま使える。
+		private static readonly Dictionary<ModAssetBundle, Dictionary<string, GameObject>> PrefabCache =
+			new Dictionary<ModAssetBundle, Dictionary<string, GameObject>>();
+
 		private GameObject Prefab(ModAssetBundle bundle, string name)
 		{
 			if (string.IsNullOrEmpty(name) || name == "none") return null;
 			if (bundle == null) { LogMissing("Effects", "AssetBundle (needed for '" + name + "')"); return null; }
-			var go = bundle.LoadAsset<GameObject>(name);
-			if (go == null) LogMissing("Effects", "prefab '" + name + "' in the AssetBundle");
-			return go;
+			Dictionary<string, GameObject> prefabs;
+			if (!PrefabCache.TryGetValue(bundle, out prefabs)) PrefabCache[bundle] = prefabs = new Dictionary<string, GameObject>();
+			GameObject prefab;
+			if (prefabs.TryGetValue(name, out prefab) && prefab != null) return prefab;
+
+			if (!bundle.Loaded) { LogMissing("Effects", "AssetBundle (still loading, needed for '" + name + "')"); return null; }
+			if (bundle.HasError) { LogMissing("Effects", "AssetBundle (load error: " + bundle.Error + ")"); return null; }
+			prefab = bundle.LoadAsset<GameObject>(name);
+			if (prefab == null) LogMissing("Effects", "prefab '" + name + "' in the AssetBundle");
+			else prefabs[name] = prefab;
+			return prefab;
 		}
 
 		private void AddClips(List<ResourceReference> refs, List<AudioClip> into, string element)

@@ -1,35 +1,48 @@
 using System.Collections.Generic;
-using EWL.Besiege;
 using UnityEngine;
 
 namespace EWL.Effects
 {
-	// ponytail: エフェクトは都度 Instantiate/Destroy(プールなし)。機関砲連射で GC・負荷が目立ったらプール化。
+	// エフェクトの再生とプール(ACMu と同じ設計)。プレハブごとに待機キューを持ち、生成数は上限まで。
+	// 上限に達したらそのエフェクトは出さない(負荷を増やさないことを優先)。
+	// 待機中のオブジェクトは DontDestroyOnLoad の置き場に置き、シミュやシーンをまたいで再利用する。
+	// 使用中のエフェクトは持ち主(シミュの目印)が消えたら即座に戻る。親ごと破棄された場合は数だけ減らす。
 	internal static class EffectPlayer
 	{
-		/// <summary>一回再生して、パーティクルが消えたら自動で破棄する。parent が null ならシミュ置き場に置く。</summary>
-		internal static GameObject PlayOnce(GameObject prefab, Transform parent, Vector3 pos, Quaternion rot, Vector3 scale)
+		internal sealed class Pool
 		{
-			var go = Spawn(prefab, parent, pos, rot, scale);
-			if (go == null) return null;
-			foreach (var ps in go.GetComponentsInChildren<ParticleSystem>()) ps.Play();
-			go.AddComponent<EffectAutoDestroy>();
-			return go;
+			internal readonly Queue<PooledEffect> Idle = new Queue<PooledEffect>();
+			internal int Total;
+			internal int MaxCount;
+			internal Transform Root;
 		}
 
-		/// <summary>付け外し用(弾に追従するトレイル等)。終わらせるときは <see cref="Fade"/> か Destroy。</summary>
-		internal static GameObject Attach(GameObject prefab, Transform parent)
+		private static readonly Dictionary<GameObject, Pool> Pools = new Dictionary<GameObject, Pool>();
+		private static Transform _poolRoot;
+
+		/// <summary>一回再生し、パーティクルが消えたらプールへ戻す。parent が null ならワールドに置く。</summary>
+		internal static void PlayOnce(GameObject prefab, Transform parent, Vector3 pos, Quaternion rot, Vector3 scale,
+			Object owner, int maxCount)
 		{
-			return Spawn(prefab, parent, Vector3.zero, Quaternion.identity, Vector3.one);
+			var effect = Rent(prefab, maxCount);
+			if (effect == null) return;
+			effect.Begin(parent, pos, rot, scale, owner);
 		}
 
-		/// <summary>親から切り離して放出を止め、残りのパーティクルが消えたら破棄する。</summary>
-		internal static void Fade(GameObject go)
+		/// <summary>弾に追従させる(トレイル・弾頭)。終わらせるときは <see cref="Fade"/> か <see cref="Return"/>。</summary>
+		internal static PooledEffect Attach(GameObject prefab, Transform parent, Object owner, int maxCount)
 		{
-			if (go == null) return;
-			go.transform.SetParent(Simulation.Root, true);
-			foreach (var ps in go.GetComponentsInChildren<ParticleSystem>()) ps.Stop();
-			go.AddComponent<EffectAutoDestroy>();
+			var effect = Rent(prefab, maxCount);
+			if (effect == null) return null;
+			effect.Begin(parent, Vector3.zero, Quaternion.identity, Vector3.one, owner);
+			effect.KeepAlive = true;
+			return effect;
+		}
+
+		/// <summary>親から切り離して放出を止め、残りのパーティクルが消えたらプールへ戻す。</summary>
+		internal static void Fade(PooledEffect effect)
+		{
+			if (effect != null) effect.BeginFade();
 		}
 
 		internal static void PlaySound(List<AudioClip> clips, Vector3 pos)
@@ -39,36 +52,118 @@ namespace EWL.Effects
 			if (clip != null) AudioSource.PlayClipAtPoint(clip, pos);
 		}
 
-		private static GameObject Spawn(GameObject prefab, Transform parent, Vector3 pos, Quaternion rot, Vector3 scale)
+		private static PooledEffect Rent(GameObject prefab, int maxCount)
 		{
 			if (prefab == null) return null;
-			var go = (GameObject)Object.Instantiate(prefab);
-			go.transform.SetParent(parent != null ? parent : Simulation.Root, false);
-			go.transform.localPosition = pos;
-			go.transform.localRotation = rot;
-			go.transform.localScale = scale;
-			go.SetActive(true);
-			return go;
+			Pool pool;
+			if (!Pools.TryGetValue(prefab, out pool))
+			{
+				pool = new Pool();
+				pool.Root = new GameObject("[EWL] " + prefab.name).transform;
+				pool.Root.SetParent(PoolRoot(), false);
+				Pools[prefab] = pool;
+			}
+			if (maxCount > pool.MaxCount) pool.MaxCount = maxCount;
+
+			while (pool.Idle.Count > 0)
+			{
+				var idle = pool.Idle.Dequeue();
+				if (idle != null) return idle;
+				pool.Total--; // 外部から破棄されていた
+			}
+			if (pool.Total >= pool.MaxCount) return null;
+
+			var instance = (GameObject)Object.Instantiate(prefab);
+			instance.SetActive(false);
+			instance.transform.SetParent(pool.Root, false);
+			var effect = instance.AddComponent<PooledEffect>();
+			effect.Home = pool;
+			pool.Total++;
+			return effect;
+		}
+
+		internal static void Return(PooledEffect effect)
+		{
+			if (effect == null || effect.IsIdle) return;
+			var pool = effect.Home;
+			effect.IsIdle = true;
+			effect.gameObject.SetActive(false);
+			effect.transform.SetParent(pool.Root, false);
+			pool.Idle.Enqueue(effect);
+		}
+
+		/// <summary>使用中に親ごと破棄されたとき。</summary>
+		internal static void Forget(PooledEffect effect)
+		{
+			if (!effect.IsIdle) effect.Home.Total--;
+		}
+
+		private static Transform PoolRoot()
+		{
+			if (_poolRoot != null) return _poolRoot;
+			var root = new GameObject("[EWL] EffectPool");
+			Object.DontDestroyOnLoad(root);
+			_poolRoot = root.transform;
+			return _poolRoot;
 		}
 	}
 
-	internal sealed class EffectAutoDestroy : MonoBehaviour
+	internal sealed class PooledEffect : MonoBehaviour
 	{
 		private const float NoParticleLifetime = 3f;
+
+		internal EffectPlayer.Pool Home;
+		internal bool IsIdle = true;
+		/// <summary>true の間はパーティクルが消えても戻さない(弾に付いている間)。</summary>
+		internal bool KeepAlive;
+
 		private ParticleSystem[] _systems;
+		private Object _owner;
+		private bool _hasOwner;
 		private float _deadline;
 
-		private void Start()
+		internal void Begin(Transform parent, Vector3 pos, Quaternion rot, Vector3 scale, Object owner)
 		{
-			_systems = GetComponentsInChildren<ParticleSystem>();
+			if (_systems == null) _systems = GetComponentsInChildren<ParticleSystem>(true);
+			IsIdle = false;
+			KeepAlive = false;
+			_owner = owner;
+			_hasOwner = owner != null;
+			_deadline = Time.time + NoParticleLifetime;
+
+			transform.SetParent(parent, false);
+			transform.localPosition = pos;
+			transform.localRotation = rot;
+			transform.localScale = scale;
+			gameObject.SetActive(true);
+			foreach (var particles in _systems)
+			{
+				particles.Clear();
+				particles.Play();
+			}
+		}
+
+		internal void BeginFade()
+		{
+			if (IsIdle) return;
+			KeepAlive = false;
+			transform.SetParent(null, true);
+			foreach (var particles in _systems) particles.Stop();
 			_deadline = Time.time + NoParticleLifetime;
 		}
 
 		private void Update()
 		{
-			if (_systems.Length == 0) { if (Time.time >= _deadline) Destroy(gameObject); return; }
-			foreach (var ps in _systems) if (ps != null && ps.IsAlive(true)) return;
-			Destroy(gameObject);
+			if (_hasOwner && _owner == null) { EffectPlayer.Return(this); return; } // シミュ終了
+			if (KeepAlive) return;
+			if (_systems.Length == 0) { if (Time.time >= _deadline) EffectPlayer.Return(this); return; }
+			foreach (var particles in _systems) if (particles.IsAlive(true)) return;
+			EffectPlayer.Return(this);
+		}
+
+		private void OnDestroy()
+		{
+			EffectPlayer.Forget(this);
 		}
 	}
 }

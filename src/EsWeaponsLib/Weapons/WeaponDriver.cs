@@ -22,6 +22,7 @@ namespace EWL.Weapons
 		private PhysicMaterial _physicMaterial;
 		private Material _material;
 		private Texture _materialTexture;
+		private string _privatePoolKey;
 		private readonly List<UnityEngine.Object> _owned = new List<UnityEngine.Object>();
 
 		internal void Init(BlockBehaviour block, WeaponSpec spec)
@@ -30,12 +31,25 @@ namespace EWL.Weapons
 			Spec = spec;
 			Ammo = spec.Fire.Ammo;
 			_ownColliders = block.GetComponentsInChildren<Collider>();
+			_privatePoolKey = "weapon#" + GetInstanceID();
+			ProjectilePool.Prewarm(PoolKey, spec.Projectile);
 		}
 
 		private void OnDestroy()
 		{
+			if (_privatePoolKey != null) ProjectilePool.Discard(_privatePoolKey);
 			foreach (var obj in _owned) Destroy(obj);
 			_owned.Clear();
+		}
+
+		/// <summary>PoolKey 未指定ならこの武装専用のプール。</summary>
+		private string PoolKey
+		{
+			get
+			{
+				var key = Spec.Projectile.PoolKey;
+				return string.IsNullOrEmpty(key) ? _privatePoolKey : key;
+			}
 		}
 
 		internal bool TryFire()
@@ -68,11 +82,15 @@ namespace EWL.Weapons
 				dir = (dir + UnityEngine.Random.insideUnitSphere * Mathf.Tan(fire.Spread * Mathf.Deg2Rad)).normalized;
 
 			var rb = _block.Rigidbody;
-			Projectile.Spawn(this, Spec, pos, rot, rb.velocity + dir * fire.Velocity, _ownColliders, PhysicMaterialFor(projectile), MaterialFor(projectile));
+			var physicMaterial = PhysicMaterialFor(projectile);
+			var material = MaterialFor(projectile);
+			ProjectilePool.Acquire(PoolKey, projectile).Launch(this, Spec, pos, rot, rb.velocity + dir * fire.Velocity, _ownColliders,
+				physicMaterial, material);
 			rb.AddForce(-dir * (fire.Velocity * projectile.Mass * fire.Recoil), ForceMode.Impulse);
 
 			var effects = Spec.Effects;
-			EffectPlayer.PlayOnce(effects.ShotFlash, blockTransform, effects.ShotFlashPosition, Quaternion.Euler(effects.ShotFlashRotation), effects.ShotFlashScale);
+			EffectPlayer.PlayOnce(effects.ShotFlash, blockTransform, effects.ShotFlashPosition, Quaternion.Euler(effects.ShotFlashRotation),
+				effects.ShotFlashScale, Simulation.Scope, projectile.PoolSize);
 			EffectPlayer.PlaySound(effects.FireSounds, blockTransform.TransformPoint(effects.ShotFlashPosition));
 		}
 

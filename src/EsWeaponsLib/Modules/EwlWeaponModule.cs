@@ -59,6 +59,7 @@ namespace EWL.Modules
 		[XmlElement, DefaultValue(CollisionDetectionMode.ContinuousDynamic)] public CollisionDetectionMode CollisionMode = CollisionDetectionMode.ContinuousDynamic;
 		[XmlElement, DefaultValue(null)] public float Lifetime = 20f;
 		[XmlElement, DefaultValue(null)] public float TimeFuse = 0f;
+		[XmlElement, DefaultValue(null)] public int PoolSize = 50;
 		[XmlElement, DefaultValue(null)] public float Friction = 0.6f;
 		[XmlElement, DefaultValue(null)] public float Bounciness = 0f;
 		[XmlElement, DefaultValue(PhysicMaterialCombine.Average)] public PhysicMaterialCombine FrictionCombine = PhysicMaterialCombine.Average;

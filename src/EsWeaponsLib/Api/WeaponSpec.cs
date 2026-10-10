@@ -54,6 +54,13 @@ namespace EWL.Api
 		public float Bounciness = 0f;
 		public PhysicMaterialCombine FrictionCombine = PhysicMaterialCombine.Average;
 		public PhysicMaterialCombine BounceCombine = PhysicMaterialCombine.Average;
+		/// <summary>同時に飛べる弾の上限。武装の生成時にこの数まで弾を事前生成し、上限に達したら最古の弾を回収して撃つ。
+		/// エフェクトもプレハブごとにこの数まで(超えた分は表示しない)。</summary>
+		public int PoolSize = 50;
+		/// <summary>弾のプールを共有するキー。同じ種類の武装(同じブロック種別など)で同じ値にすると、弾のオブジェクトを使い回す。
+		/// 弾の形(Colliders)はキーごとに最初に作ったもので固定される。null か空文字なら武装ごとの専用プール。
+		/// PoolSize は 1〜1000 に丸める。</summary>
+		public string PoolKey;
 		/// <summary>見た目。null なら球を表示。</summary>
 		public Mesh Mesh;
 		public Texture Texture;

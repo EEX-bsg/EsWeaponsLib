@@ -6,8 +6,8 @@ using UnityEngine;
 
 namespace EWL.Weapons
 {
-	// 弾1発。シミュ権威側にだけ存在する(MP 同期は未実装)。
-	// ponytail: 発射ごとに生成・破棄(プールなし)。連射で GC が問題になったらプール化。
+	// 弾1発。シミュ権威側にだけ存在する(MP 同期は未実装)。ProjectilePool が組み立て・貸し出し・回収を行う。
+	// シミュが終わったら次のフレームで回収される。
 	internal sealed class Projectile : MonoBehaviour
 	{
 		private const float ColliderEnableDelay = 0.02f; // 発射直後の自機誤爆防止(ACM と同じ)
@@ -17,55 +17,88 @@ namespace EWL.Weapons
 
 		private static Mesh _sphereMesh;
 
-		private WeaponDriver _owner;
-		private WeaponSpec _spec;
+		internal ProjectilePool.Pool Home;
+
 		private Rigidbody _rb;
 		private Collider[] _colliders;
-		private GameObject _trail;
-		private float _age;
-		private bool _collidersOn, _hit, _detonating;
+		private Transform _visual;
+		private MeshFilter _meshFilter;
+		private MeshRenderer _renderer;
 
-		internal static void Spawn(WeaponDriver owner, WeaponSpec spec, Vector3 pos, Quaternion rot, Vector3 velocity,
+		private WeaponDriver _owner;
+		private Object _simulationScope;
+		private WeaponSpec _spec;
+		private Collider[] _ignored;
+		private PooledEffect _trail, _bullet;
+		private float _age;
+		private bool _active, _collidersOn, _hit, _detonating;
+
+		/// <summary>弾のオブジェクトを組み立てる(非アクティブ)。形はここで固定。</summary>
+		internal static Projectile Build(Transform parent, ProjectileSpec spec)
+		{
+			var projectileObject = new GameObject("EwlProjectile");
+			projectileObject.SetActive(false);
+			projectileObject.transform.SetParent(parent, false);
+			var self = projectileObject.AddComponent<Projectile>();
+			self._colliders = BuildColliders(projectileObject.transform, spec);
+			var visual = new GameObject("Vis");
+			visual.transform.SetParent(projectileObject.transform, false);
+			self._visual = visual.transform;
+			self._meshFilter = visual.AddComponent<MeshFilter>();
+			self._renderer = visual.AddComponent<MeshRenderer>();
+			self._rb = projectileObject.AddComponent<Rigidbody>();
+			return self;
+		}
+
+		/// <summary>発射。発射ごとに Spec の値(質量・見た目・物理マテリアル等)を設定し直す。</summary>
+		internal void Launch(WeaponDriver owner, WeaponSpec spec, Vector3 pos, Quaternion rot, Vector3 velocity,
 			Collider[] ignore, PhysicMaterial physicMaterial, Material material)
 		{
 			var projectileSpec = spec.Projectile;
-			var go = new GameObject("EwlProjectile");
-			go.transform.SetParent(Simulation.Root, false);
-			go.transform.position = pos;
-			go.transform.rotation = rot;
+			_owner = owner;
+			_spec = spec;
+			_simulationScope = Simulation.Scope;
+			_age = 0f;
+			_active = true;
+			_collidersOn = _hit = _detonating = false;
 
-			var self = go.AddComponent<Projectile>();
-			self._owner = owner;
-			self._spec = spec;
-			self._colliders = BuildColliders(go.transform, projectileSpec, physicMaterial);
-			foreach (var c in self._colliders)
+			transform.SetParent(null, false);
+			transform.position = pos;
+			transform.rotation = rot;
+			transform.localScale = Vector3.one;
+
+			foreach (var collider in _colliders)
 			{
-				c.enabled = false;
-				foreach (var o in ignore) if (o != null) Physics.IgnoreCollision(c, o); // シミュ中に破棄済みのことがある
+				collider.enabled = false;
+				collider.sharedMaterial = physicMaterial;
 			}
-			BuildVisual(go.transform, projectileSpec, material);
+			ApplyVisual(projectileSpec, material);
 
-			var rb = self._rb = go.AddComponent<Rigidbody>();
-			rb.mass = projectileSpec.Mass;
-			rb.drag = projectileSpec.Drag;
-			rb.angularDrag = projectileSpec.AngularDrag;
-			rb.useGravity = !projectileSpec.IgnoreGravity;
-			rb.collisionDetectionMode = projectileSpec.CollisionMode;
-			rb.velocity = velocity;
+			gameObject.SetActive(true);
+			_ignored = ignore;
+			SetIgnore(true); // 非アクティブ中に呼ぶと効かないことがあるのでアクティブ化の後
+			_rb.isKinematic = false;
+			_rb.mass = projectileSpec.Mass;
+			_rb.drag = projectileSpec.Drag;
+			_rb.angularDrag = projectileSpec.AngularDrag;
+			_rb.useGravity = !projectileSpec.IgnoreGravity;
+			_rb.collisionDetectionMode = projectileSpec.CollisionMode;
+			_rb.velocity = velocity;
+			_rb.angularVelocity = Vector3.zero;
 
-			self._trail = EffectPlayer.Attach(spec.Effects.Trail, go.transform);
-			EffectPlayer.Attach(spec.Effects.Bullet, go.transform);
+			int effectLimit = projectileSpec.PoolSize;
+			_trail = EffectPlayer.Attach(spec.Effects.Trail, transform, _simulationScope, effectLimit);
+			_bullet = EffectPlayer.Attach(spec.Effects.Bullet, transform, _simulationScope, effectLimit);
 		}
 
-		private static Collider[] BuildColliders(Transform root, ProjectileSpec projectileSpec, PhysicMaterial mat)
+		private static Collider[] BuildColliders(Transform root, ProjectileSpec spec)
 		{
-			var shapes = projectileSpec.Colliders;
+			var shapes = spec.Colliders;
 			var result = new Collider[shapes.Count > 0 ? shapes.Count : 1];
 			if (shapes.Count == 0)
 			{
 				var sphere = root.gameObject.AddComponent<SphereCollider>();
 				sphere.radius = DefaultRadius;
-				sphere.sharedMaterial = mat;
 				result[0] = sphere;
 				return result;
 			}
@@ -76,63 +109,75 @@ namespace EWL.Weapons
 				child.transform.SetParent(root, false);
 				child.transform.localPosition = shape.Position;
 				child.transform.localRotation = Quaternion.Euler(shape.Rotation);
-				Collider c;
+				Collider collider;
 				if (shape.Kind == ColliderKind.Box)
 				{
 					child.transform.localScale = shape.Size; // 本体の BoxModCollider と同じくスケールで大きさを表す
-					c = child.AddComponent<BoxCollider>();
+					collider = child.AddComponent<BoxCollider>();
 				}
 				else if (shape.Kind == ColliderKind.Capsule)
 				{
-					var cap = child.AddComponent<CapsuleCollider>();
-					cap.radius = shape.Radius;
-					cap.height = shape.Height;
-					cap.direction = shape.Direction;
-					c = cap;
+					var capsule = child.AddComponent<CapsuleCollider>();
+					capsule.radius = shape.Radius;
+					capsule.height = shape.Height;
+					capsule.direction = shape.Direction;
+					collider = capsule;
 				}
 				else
 				{
 					var sphere = child.AddComponent<SphereCollider>();
 					sphere.radius = shape.Radius;
-					c = sphere;
+					collider = sphere;
 				}
-				c.sharedMaterial = mat;
-				result[i] = c;
+				result[i] = collider;
 			}
 			return result;
 		}
 
-		private static void BuildVisual(Transform root, ProjectileSpec projectileSpec, Material material)
+		private void ApplyVisual(ProjectileSpec spec, Material material)
 		{
-			var vis = new GameObject("Vis");
-			vis.transform.SetParent(root, false);
-			if (projectileSpec.Mesh != null)
+			if (spec.Mesh != null)
 			{
-				vis.transform.localPosition = projectileSpec.MeshPosition;
-				vis.transform.localRotation = Quaternion.Euler(projectileSpec.MeshRotation);
-				vis.transform.localScale = projectileSpec.MeshScale;
+				_visual.localPosition = spec.MeshPosition;
+				_visual.localRotation = Quaternion.Euler(spec.MeshRotation);
+				_visual.localScale = spec.MeshScale;
+				_meshFilter.sharedMesh = spec.Mesh;
 			}
-			else vis.transform.localScale = Vector3.one * (DefaultRadius * 2f);
-			vis.AddComponent<MeshFilter>().sharedMesh = projectileSpec.Mesh != null ? projectileSpec.Mesh : SphereMesh();
-			vis.AddComponent<MeshRenderer>().sharedMaterial = material;
+			else
+			{
+				_visual.localPosition = Vector3.zero;
+				_visual.localRotation = Quaternion.identity;
+				_visual.localScale = Vector3.one * (DefaultRadius * 2f);
+				_meshFilter.sharedMesh = SphereMesh();
+			}
+			_renderer.sharedMaterial = material;
+		}
+
+		private void SetIgnore(bool ignore)
+		{
+			if (_ignored == null) return;
+			foreach (var collider in _colliders)
+				foreach (var other in _ignored)
+					if (other != null) Physics.IgnoreCollision(collider, other, ignore); // シミュ中に破棄済みのことがある
 		}
 
 		private static Mesh SphereMesh()
 		{
 			if (_sphereMesh != null) return _sphereMesh;
-			var tmp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-			_sphereMesh = tmp.GetComponent<MeshFilter>().sharedMesh;
-			Destroy(tmp);
+			var primitive = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+			_sphereMesh = primitive.GetComponent<MeshFilter>().sharedMesh;
+			Destroy(primitive);
 			return _sphereMesh;
 		}
 
 		private void Update()
 		{
+			if (_simulationScope == null) { Despawn(); return; } // シミュ終了(武装ブロックが壊れても弾は飛び続ける)
 			_age += Time.deltaTime;
 			if (!_collidersOn && _age >= ColliderEnableDelay)
 			{
 				_collidersOn = true;
-				foreach (var c in _colliders) c.enabled = true;
+				foreach (var collider in _colliders) collider.enabled = true;
 			}
 			var projectileSpec = _spec.Projectile;
 			if (!_detonating && projectileSpec.TimeFuse > 0f && _age >= projectileSpec.TimeFuse)
@@ -191,7 +236,8 @@ namespace EWL.Weapons
 			if (impact.ExplosionRadius > 0f)
 			{
 				Damage.Explode(pos, impact.ExplosionRadius, impact.ExplosionPower, impact.ExplosionUpPower);
-				EffectPlayer.PlayOnce(effects.Explosion, null, pos, effects.ExplosionFacesNormal ? effectRotation : Quaternion.identity, Vector3.one);
+				EffectPlayer.PlayOnce(effects.Explosion, null, pos, effects.ExplosionFacesNormal ? effectRotation : Quaternion.identity,
+					Vector3.one, _simulationScope, _spec.Projectile.PoolSize);
 				EffectPlayer.PlaySound(effects.ExplosionSounds, pos);
 				Despawn();
 			}
@@ -208,11 +254,26 @@ namespace EWL.Weapons
 			Despawn();
 		}
 
-		private void Despawn()
+		/// <summary>プールへ戻す。プールの上限で最古の弾を回収するときにも呼ばれる。</summary>
+		internal void Despawn()
 		{
+			if (!_active) return;
+			_active = false;
+			StopAllCoroutines();
 			EffectPlayer.Fade(_trail);
-			_trail = null;
-			Destroy(gameObject);
+			EffectPlayer.Return(_bullet);
+			_trail = _bullet = null;
+			SetIgnore(false);
+			_ignored = null;
+			_owner = null;
+			_spec = null;
+			_simulationScope = null;
+			ProjectilePool.Release(this);
+		}
+
+		private void OnDestroy()
+		{
+			ProjectilePool.Forget(this);
 		}
 	}
 }
