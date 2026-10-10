@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using EWL.Besiege;
 using UnityEngine;
 
 namespace EWL.Effects
@@ -45,11 +46,39 @@ namespace EWL.Effects
 			if (effect != null) effect.BeginFade();
 		}
 
-		internal static void PlaySound(List<AudioClip> clips, Vector3 pos)
+		/// <summary>ランダムに1つ鳴らす。3D 設定とミキサーは見本(Besiege.Sounds)に揃え、水中なら水中用ミキサーへ。</summary>
+		internal static void PlaySound(List<AudioClip> clips, Vector3 pos, AudioSource template)
 		{
 			if (clips == null || clips.Count == 0) return;
 			var clip = clips[Random.Range(0, clips.Count)];
-			if (clip != null) AudioSource.PlayClipAtPoint(clip, pos);
+			if (clip == null) return;
+			var source = IdleSoundSource(template);
+			if (source == null) return;
+			source.transform.position = pos;
+			source.outputAudioMixerGroup = Sounds.MixerAt(template.outputAudioMixerGroup, pos);
+			source.pitch = 1f + Random.Range(-0.05f, 0.05f); // 本体の大砲と同じ揺らぎ。スロー時のピッチはミキサー側が掛ける
+			source.clip = clip;
+			source.Play();
+		}
+
+		// ponytail: 見本ごとに線形探索、上限超過は鳴らさない。足りなければ上限を上げる
+		private const int MaxSoundsPerTemplate = 32;
+		private static readonly Dictionary<AudioSource, List<AudioSource>> SoundPools = new Dictionary<AudioSource, List<AudioSource>>();
+
+		private static AudioSource IdleSoundSource(AudioSource template)
+		{
+			List<AudioSource> sources;
+			if (!SoundPools.TryGetValue(template, out sources)) SoundPools[template] = sources = new List<AudioSource>();
+			sources.RemoveAll(source => source == null);
+			foreach (var source in sources) if (!source.isPlaying) return source;
+			if (sources.Count >= MaxSoundsPerTemplate) return null;
+
+			var created = new GameObject("[EWL] Sound").AddComponent<AudioSource>();
+			created.transform.SetParent(PoolRoot(), false);
+			created.playOnAwake = false;
+			Sounds.CopySpatialSettings(template, created);
+			sources.Add(created);
+			return created;
 		}
 
 		private static PooledEffect Rent(GameObject prefab, int maxCount)

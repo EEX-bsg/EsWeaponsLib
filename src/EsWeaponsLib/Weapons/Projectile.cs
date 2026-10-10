@@ -238,7 +238,7 @@ namespace EWL.Weapons
 				Damage.Explode(pos, impact.ExplosionRadius, impact.ExplosionPower, impact.ExplosionUpPower);
 				EffectPlayer.PlayOnce(effects.Explosion, null, pos, effects.ExplosionFacesNormal ? effectRotation : Quaternion.identity,
 					Vector3.one, _simulationScope, _spec.Projectile.PoolSize);
-				EffectPlayer.PlaySound(effects.ExplosionSounds, pos);
+				EffectPlayer.PlaySound(effects.ExplosionSounds, pos, Sounds.ExplosionTemplate);
 				Despawn();
 			}
 			else

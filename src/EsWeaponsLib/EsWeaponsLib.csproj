@@ -59,6 +59,7 @@
     <Compile Include="Api\WeaponSpec.cs" />
     <Compile Include="Besiege\Damage.cs" />
     <Compile Include="Besiege\Simulation.cs" />
+    <Compile Include="Besiege\Sounds.cs" />
     <Compile Include="Effects\EffectPlayer.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="Modules\EwlBlockPhysicsBehaviour.cs" />
