@@ -35,6 +35,9 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   (見つからなかった名前も覚える)。未読込・読込エラー・見つからないときは null。未読込時の待ち方は型の説明を参照。
 - `ProjectileSpec.ShowWhenLoaded`(既定 false)/ XML `EwlWeapon/Projectile/ShowWhenLoaded`。撃てる状態の間、次の弾の見た目を
   発射位置に表示する(発射の瞬間に消え、発射間隔の後に戻る。弾切れ・リロード中は表示しない)。
+- 弾の推進(ロケット)。`WeaponSpec.Booster`(`BoosterSpec`: `Thrust` [N]、`BurnTime` [s、0 = 消えるまで]、`LateralDrag`)/
+  XML `EwlWeapon/Booster/Thrust|BurnTime|LateralDrag`。推力は弾の前方へ毎物理フレーム、命中で止まる。
+  `FireSpec.EjectVelocity` / XML `Fire/EjectVelocity`(弾ローカル軸で足す初速。発射筒から押し出す等)。
 - MP 同期。MP ホストのグローバルシミュで撃った弾を、クライアントでは見た目だけの弾(当たり判定なし)として表示する。
   発射エフェクト・音、爆発エフェクト・音、`Weapon.Ammo` / `ReserveAmmo` / `IsReloading`、`Fired` / `ReloadStarted` もクライアントに届く。
   利用者は同期コードを書かない。条件: `Weapon` を**全ピアで、ブロックごとに同じ順で**生成する(シミュ開始時に作れば満たす)。
@@ -43,6 +46,7 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   チーム、当たったブロック・コライダー・位置、爆風か)。直撃は1回、爆風は剛体ごとに1回。実行権威側(SP・MP ホスト・ローカルシミュ)でだけ発火。
 
 ### Changed
+- 拡散(`Spread`)で曲げた方向に弾の向きも合わせるようにした(従来は向きは発射位置の向きのまま)。
 - `EwlWeapon` の押下判定(長押し OFF の連射切替・リロードキー)を `IsHeld` の変化で取るようにした(MP ホストでクライアントの
   `IsPressed` を取りこぼさないため)。
 - 発射音・爆発音を本体の作法で鳴らすようにした。本体のミキサー(発射音 Blocks・爆発音 Explosions)を通るので音量スライダー・水中のこもり・

@@ -222,12 +222,15 @@ namespace EWL.Weapons
             Quaternion rot = blockTransform.rotation * fire.MuzzleRotation;
             Vector3 dir = rot * Vector3.forward;
             if (fire.Spread > 0f)
+            {
                 dir = (dir + UnityEngine.Random.insideUnitSphere * Mathf.Tan(fire.Spread * Mathf.Deg2Rad)).normalized;
+                rot = Quaternion.LookRotation(dir, rot * Vector3.up); // 推進する弾は向きの方へ飛ぶ
+            }
 
             var rb = _block.Rigidbody;
             var physicMaterial = PhysicMaterialFor(projectile);
             var material = MaterialFor(projectile);
-            var velocity = rb.velocity + dir * fire.Velocity;
+            var velocity = rb.velocity + dir * fire.Velocity + rot * fire.EjectVelocity;
             var shot = ProjectilePool.Acquire(PoolKey, projectile);
             shot.Launch(this, Spec, pos, rot, velocity, _ownColliders, physicMaterial, material);
             rb.AddForce(-dir * (fire.Velocity * projectile.Mass * fire.Recoil), ForceMode.Impulse);

@@ -98,6 +98,12 @@ namespace EWL.Modules
             fire.MagazineCapacity = Module.Fire.MagazineCapacity;
             fire.ReloadTime = Module.Fire.ReloadTime;
             fire.AutoReload = _autoReloadToggle != null ? _autoReloadToggle.IsActive : Module.Fire.AutoReload;
+            fire.EjectVelocity = Module.Fire.EjectVelocity;
+
+            var boosterXml = Module.Booster;
+            spec.Booster.Thrust = boosterXml.Thrust;
+            spec.Booster.BurnTime = boosterXml.BurnTime;
+            spec.Booster.LateralDrag = boosterXml.LateralDrag;
 
             var projectileXml = Module.Projectile;
             var projectile = spec.Projectile;

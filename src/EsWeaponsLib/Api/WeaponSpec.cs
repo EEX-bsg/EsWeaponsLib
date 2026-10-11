@@ -13,6 +13,18 @@ namespace EWL.Api
         public ProjectileSpec Projectile = new ProjectileSpec();
         public ImpactSpec Impact = new ImpactSpec();
         public EffectSpec Effects = new EffectSpec();
+        public BoosterSpec Booster = new BoosterSpec();
+    }
+
+    /// <summary>弾の推進(ロケット)。Thrust が 0 なら推進しない。命中したら推力は止まる。</summary>
+    public sealed class BoosterSpec
+    {
+        /// <summary>推力 [N]。弾の前方へ毎物理フレーム加える(加速度 = Thrust / 弾の Mass)。</summary>
+        public float Thrust = 0f;
+        /// <summary>燃焼時間 [s]。0 なら弾が消えるまで燃え続ける。</summary>
+        public float BurnTime = 0f;
+        /// <summary>燃焼中、弾の向きに対する横滑り速度 × この値の力で横滑りを抑える(安定翼)[N/(m/s)]。</summary>
+        public float LateralDrag = 0f;
     }
 
     public sealed class FireSpec
@@ -23,9 +35,11 @@ namespace EWL.Api
         public Quaternion MuzzleRotation = Quaternion.identity;
         /// <summary>初速 [m/s]。ブロックの速度に加算される。</summary>
         public float Velocity = 100f;
+        /// <summary>発射時に弾のローカル軸で足す速度 [m/s](ロケットを発射筒から押し出す等)。反動には含めない。</summary>
+        public Vector3 EjectVelocity = Vector3.zero;
         /// <summary>最短発射間隔 [s]。</summary>
         public float Interval = 0.5f;
-        /// <summary>拡散 [度]。前方に tan(Spread) 半径の球内の乱数ベクトルを足して方向を決める。</summary>
+        /// <summary>拡散 [度]。前方に tan(Spread) 半径の球内の乱数ベクトルを足して方向を決める。弾の向きもこの方向に合わせる。</summary>
         public float Spread = 0f;
         /// <summary>発射要求から弾が出るまでの固定遅延 [s]。</summary>
         public float Delay = 0f;

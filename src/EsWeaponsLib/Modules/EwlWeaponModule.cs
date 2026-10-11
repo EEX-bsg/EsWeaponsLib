@@ -43,6 +43,8 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(null)] public ProjectileXml Projectile = new ProjectileXml();
         [XmlElement, DefaultValue(null)] public ImpactXml Impact = new ImpactXml();
         [XmlElement, DefaultValue(null)] public EffectsXml Effects = new EffectsXml();
+        /// <summary>弾の推進(ロケット)。Thrust [N] が 0 なら推進しない。</summary>
+        [XmlElement, DefaultValue(null)] public BoosterXml Booster = new BoosterXml();
     }
 
     [Serializable]
@@ -68,6 +70,16 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(null)] public int MagazineCapacity = 0;
         [XmlElement, DefaultValue(null)] public float ReloadTime = 1f;
         [XmlElement, DefaultValue(null)] public bool AutoReload = true;
+        /// <summary>発射時に弾のローカル軸で足す速度 [m/s]。</summary>
+        [XmlElement, DefaultValue(null)] public Vector3 EjectVelocity = UnityEngine.Vector3.zero;
+    }
+
+    [Serializable]
+    public class BoosterXml : Element
+    {
+        [XmlElement, DefaultValue(null)] public float Thrust = 0f;
+        [XmlElement, DefaultValue(null)] public float BurnTime = 0f;
+        [XmlElement, DefaultValue(null)] public float LateralDrag = 0f;
     }
 
     [Serializable]

@@ -167,6 +167,9 @@ namespace EWL.Weapons
             float travelTime = drag > 0.0001f ? (1f - Mathf.Exp(-drag * elapsed)) / drag : elapsed;
             var predicted = _networkPosition + _networkVelocity * travelTime;
             if (!_spec.Projectile.IgnoreGravity) predicted += Physics.gravity * (0.5f * elapsed * elapsed);
+            var booster = _spec.Booster;
+            if (booster.Thrust > 0f && (booster.BurnTime <= 0f || _age < booster.BurnTime) && _spec.Projectile.Mass > 0f)
+                predicted += transform.forward * (booster.Thrust / _spec.Projectile.Mass * 0.5f * elapsed * elapsed);
             _correction *= Mathf.Exp(-CorrectionRate * Time.deltaTime);
             transform.position = predicted + _correction;
             // 取りこぼし対策の上限(通常は Despawn か生存一覧で消える)
@@ -266,6 +269,20 @@ namespace EWL.Weapons
             if (!_detonating && _timeFuse > 0f && _age >= _timeFuse)
                 Detonate(Random.Range(0f, TimeFuseRandom), transform.rotation);
             if (_age >= projectileSpec.Lifetime) Despawn();
+        }
+
+        private void FixedUpdate()
+        {
+            if (!_active || _proxy || _hit || _detonating) return;
+            var booster = _spec.Booster;
+            if (booster.Thrust <= 0f || (booster.BurnTime > 0f && _age >= booster.BurnTime)) return;
+            var forward = transform.forward;
+            _rb.AddForce(forward * booster.Thrust);
+            if (booster.LateralDrag > 0f)
+            {
+                var velocity = _rb.velocity;
+                _rb.AddForce((Vector3.Project(velocity, forward) - velocity) * booster.LateralDrag);
+            }
         }
 
         private void OnCollisionEnter(Collision collision)
