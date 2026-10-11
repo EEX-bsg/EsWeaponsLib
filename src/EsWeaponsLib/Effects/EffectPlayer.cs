@@ -4,195 +4,195 @@ using UnityEngine;
 
 namespace EWL.Effects
 {
-	// エフェクトの再生とプール(ACMu と同じ設計)。プレハブごとに待機キューを持ち、生成数は上限まで。
-	// 上限に達したらそのエフェクトは出さない(負荷を増やさないことを優先)。
-	// 待機中のオブジェクトは DontDestroyOnLoad の置き場に置き、シミュやシーンをまたいで再利用する。
-	// 使用中のエフェクトは持ち主(シミュの目印)が消えたら即座に戻る。親ごと破棄された場合は数だけ減らす。
-	internal static class EffectPlayer
-	{
-		internal sealed class Pool
-		{
-			internal readonly Queue<PooledEffect> Idle = new Queue<PooledEffect>();
-			internal int Total;
-			internal int MaxCount;
-			internal Transform Root;
-		}
+    // エフェクトの再生とプール(ACMu と同じ設計)。プレハブごとに待機キューを持ち、生成数は上限まで。
+    // 上限に達したらそのエフェクトは出さない(負荷を増やさないことを優先)。
+    // 待機中のオブジェクトは DontDestroyOnLoad の置き場に置き、シミュやシーンをまたいで再利用する。
+    // 使用中のエフェクトは持ち主(シミュの目印)が消えたら即座に戻る。親ごと破棄された場合は数だけ減らす。
+    internal static class EffectPlayer
+    {
+        internal sealed class Pool
+        {
+            internal readonly Queue<PooledEffect> Idle = new Queue<PooledEffect>();
+            internal int Total;
+            internal int MaxCount;
+            internal Transform Root;
+        }
 
-		private static readonly Dictionary<GameObject, Pool> Pools = new Dictionary<GameObject, Pool>();
-		private static Transform _poolRoot;
+        private static readonly Dictionary<GameObject, Pool> Pools = new Dictionary<GameObject, Pool>();
+        private static Transform _poolRoot;
 
-		/// <summary>一回再生し、パーティクルが消えたらプールへ戻す。parent が null ならワールドに置く。</summary>
-		internal static void PlayOnce(GameObject prefab, Transform parent, Vector3 pos, Quaternion rot, Vector3 scale,
-			Object owner, int maxCount)
-		{
-			var effect = Rent(prefab, maxCount);
-			if (effect == null) return;
-			effect.Begin(parent, pos, rot, scale, owner);
-		}
+        /// <summary>一回再生し、パーティクルが消えたらプールへ戻す。parent が null ならワールドに置く。</summary>
+        internal static void PlayOnce(GameObject prefab, Transform parent, Vector3 pos, Quaternion rot, Vector3 scale,
+            Object owner, int maxCount)
+        {
+            var effect = Rent(prefab, maxCount);
+            if (effect == null) return;
+            effect.Begin(parent, pos, rot, scale, owner);
+        }
 
-		/// <summary>弾に追従させる(トレイル・弾頭)。終わらせるときは <see cref="Fade"/> か <see cref="Return"/>。</summary>
-		internal static PooledEffect Attach(GameObject prefab, Transform parent, Object owner, int maxCount)
-		{
-			var effect = Rent(prefab, maxCount);
-			if (effect == null) return null;
-			effect.Begin(parent, Vector3.zero, Quaternion.identity, Vector3.one, owner);
-			effect.KeepAlive = true;
-			return effect;
-		}
+        /// <summary>弾に追従させる(トレイル・弾頭)。終わらせるときは <see cref="Fade"/> か <see cref="Return"/>。</summary>
+        internal static PooledEffect Attach(GameObject prefab, Transform parent, Object owner, int maxCount)
+        {
+            var effect = Rent(prefab, maxCount);
+            if (effect == null) return null;
+            effect.Begin(parent, Vector3.zero, Quaternion.identity, Vector3.one, owner);
+            effect.KeepAlive = true;
+            return effect;
+        }
 
-		/// <summary>親から切り離して放出を止め、残りのパーティクルが消えたらプールへ戻す。</summary>
-		internal static void Fade(PooledEffect effect)
-		{
-			if (effect != null) effect.BeginFade();
-		}
+        /// <summary>親から切り離して放出を止め、残りのパーティクルが消えたらプールへ戻す。</summary>
+        internal static void Fade(PooledEffect effect)
+        {
+            if (effect != null) effect.BeginFade();
+        }
 
-		/// <summary>ランダムに1つ鳴らす。3D 設定とミキサーは見本(Besiege.Sounds)に揃え、水中なら水中用ミキサーへ。</summary>
-		internal static void PlaySound(List<AudioClip> clips, Vector3 pos, AudioSource template)
-		{
-			if (clips == null || clips.Count == 0) return;
-			var clip = clips[Random.Range(0, clips.Count)];
-			if (clip == null) return;
-			var source = IdleSoundSource(template);
-			if (source == null) return;
-			source.transform.position = pos;
-			source.outputAudioMixerGroup = Sounds.MixerAt(template.outputAudioMixerGroup, pos);
-			source.pitch = 1f + Random.Range(-0.05f, 0.05f); // 本体の大砲と同じ揺らぎ。スロー時のピッチはミキサー側が掛ける
-			source.clip = clip;
-			source.Play();
-		}
+        /// <summary>ランダムに1つ鳴らす。3D 設定とミキサーは見本(Besiege.Sounds)に揃え、水中なら水中用ミキサーへ。</summary>
+        internal static void PlaySound(List<AudioClip> clips, Vector3 pos, AudioSource template)
+        {
+            if (clips == null || clips.Count == 0) return;
+            var clip = clips[Random.Range(0, clips.Count)];
+            if (clip == null) return;
+            var source = IdleSoundSource(template);
+            if (source == null) return;
+            source.transform.position = pos;
+            source.outputAudioMixerGroup = Sounds.MixerAt(template.outputAudioMixerGroup, pos);
+            source.pitch = 1f + Random.Range(-0.05f, 0.05f); // 本体の大砲と同じ揺らぎ。スロー時のピッチはミキサー側が掛ける
+            source.clip = clip;
+            source.Play();
+        }
 
-		// ponytail: 見本ごとに線形探索、上限超過は鳴らさない。足りなければ上限を上げる
-		private const int MaxSoundsPerTemplate = 32;
-		private static readonly Dictionary<AudioSource, List<AudioSource>> SoundPools = new Dictionary<AudioSource, List<AudioSource>>();
+        // ponytail: 見本ごとに線形探索、上限超過は鳴らさない。足りなければ上限を上げる
+        private const int MaxSoundsPerTemplate = 32;
+        private static readonly Dictionary<AudioSource, List<AudioSource>> SoundPools = new Dictionary<AudioSource, List<AudioSource>>();
 
-		private static AudioSource IdleSoundSource(AudioSource template)
-		{
-			List<AudioSource> sources;
-			if (!SoundPools.TryGetValue(template, out sources)) SoundPools[template] = sources = new List<AudioSource>();
-			sources.RemoveAll(source => source == null);
-			foreach (var source in sources) if (!source.isPlaying) return source;
-			if (sources.Count >= MaxSoundsPerTemplate) return null;
+        private static AudioSource IdleSoundSource(AudioSource template)
+        {
+            List<AudioSource> sources;
+            if (!SoundPools.TryGetValue(template, out sources)) SoundPools[template] = sources = new List<AudioSource>();
+            sources.RemoveAll(source => source == null);
+            foreach (var source in sources) if (!source.isPlaying) return source;
+            if (sources.Count >= MaxSoundsPerTemplate) return null;
 
-			var created = new GameObject("[EWL] Sound").AddComponent<AudioSource>();
-			created.transform.SetParent(PoolRoot(), false);
-			created.playOnAwake = false;
-			Sounds.CopySpatialSettings(template, created);
-			sources.Add(created);
-			return created;
-		}
+            var created = new GameObject("[EWL] Sound").AddComponent<AudioSource>();
+            created.transform.SetParent(PoolRoot(), false);
+            created.playOnAwake = false;
+            Sounds.CopySpatialSettings(template, created);
+            sources.Add(created);
+            return created;
+        }
 
-		private static PooledEffect Rent(GameObject prefab, int maxCount)
-		{
-			if (prefab == null) return null;
-			Pool pool;
-			if (!Pools.TryGetValue(prefab, out pool))
-			{
-				pool = new Pool();
-				pool.Root = new GameObject("[EWL] " + prefab.name).transform;
-				pool.Root.SetParent(PoolRoot(), false);
-				Pools[prefab] = pool;
-			}
-			if (maxCount > pool.MaxCount) pool.MaxCount = maxCount;
+        private static PooledEffect Rent(GameObject prefab, int maxCount)
+        {
+            if (prefab == null) return null;
+            Pool pool;
+            if (!Pools.TryGetValue(prefab, out pool))
+            {
+                pool = new Pool();
+                pool.Root = new GameObject("[EWL] " + prefab.name).transform;
+                pool.Root.SetParent(PoolRoot(), false);
+                Pools[prefab] = pool;
+            }
+            if (maxCount > pool.MaxCount) pool.MaxCount = maxCount;
 
-			while (pool.Idle.Count > 0)
-			{
-				var idle = pool.Idle.Dequeue();
-				if (idle != null) return idle;
-				pool.Total--; // 外部から破棄されていた
-			}
-			if (pool.Total >= pool.MaxCount) return null;
+            while (pool.Idle.Count > 0)
+            {
+                var idle = pool.Idle.Dequeue();
+                if (idle != null) return idle;
+                pool.Total--; // 外部から破棄されていた
+            }
+            if (pool.Total >= pool.MaxCount) return null;
 
-			var instance = (GameObject)Object.Instantiate(prefab);
-			instance.SetActive(false);
-			instance.transform.SetParent(pool.Root, false);
-			var effect = instance.AddComponent<PooledEffect>();
-			effect.Home = pool;
-			pool.Total++;
-			return effect;
-		}
+            var instance = (GameObject)Object.Instantiate(prefab);
+            instance.SetActive(false);
+            instance.transform.SetParent(pool.Root, false);
+            var effect = instance.AddComponent<PooledEffect>();
+            effect.Home = pool;
+            pool.Total++;
+            return effect;
+        }
 
-		internal static void Return(PooledEffect effect)
-		{
-			if (effect == null || effect.IsIdle) return;
-			var pool = effect.Home;
-			effect.IsIdle = true;
-			effect.gameObject.SetActive(false);
-			effect.transform.SetParent(pool.Root, false);
-			pool.Idle.Enqueue(effect);
-		}
+        internal static void Return(PooledEffect effect)
+        {
+            if (effect == null || effect.IsIdle) return;
+            var pool = effect.Home;
+            effect.IsIdle = true;
+            effect.gameObject.SetActive(false);
+            effect.transform.SetParent(pool.Root, false);
+            pool.Idle.Enqueue(effect);
+        }
 
-		/// <summary>使用中に親ごと破棄されたとき。</summary>
-		internal static void Forget(PooledEffect effect)
-		{
-			if (!effect.IsIdle) effect.Home.Total--;
-		}
+        /// <summary>使用中に親ごと破棄されたとき。</summary>
+        internal static void Forget(PooledEffect effect)
+        {
+            if (!effect.IsIdle) effect.Home.Total--;
+        }
 
-		private static Transform PoolRoot()
-		{
-			if (_poolRoot != null) return _poolRoot;
-			var root = new GameObject("[EWL] EffectPool");
-			Object.DontDestroyOnLoad(root);
-			_poolRoot = root.transform;
-			return _poolRoot;
-		}
-	}
+        private static Transform PoolRoot()
+        {
+            if (_poolRoot != null) return _poolRoot;
+            var root = new GameObject("[EWL] EffectPool");
+            Object.DontDestroyOnLoad(root);
+            _poolRoot = root.transform;
+            return _poolRoot;
+        }
+    }
 
-	internal sealed class PooledEffect : MonoBehaviour
-	{
-		private const float NoParticleLifetime = 3f;
+    internal sealed class PooledEffect : MonoBehaviour
+    {
+        private const float NoParticleLifetime = 3f;
 
-		internal EffectPlayer.Pool Home;
-		internal bool IsIdle = true;
-		/// <summary>true の間はパーティクルが消えても戻さない(弾に付いている間)。</summary>
-		internal bool KeepAlive;
+        internal EffectPlayer.Pool Home;
+        internal bool IsIdle = true;
+        /// <summary>true の間はパーティクルが消えても戻さない(弾に付いている間)。</summary>
+        internal bool KeepAlive;
 
-		private ParticleSystem[] _systems;
-		private Object _owner;
-		private bool _hasOwner;
-		private float _deadline;
+        private ParticleSystem[] _systems;
+        private Object _owner;
+        private bool _hasOwner;
+        private float _deadline;
 
-		internal void Begin(Transform parent, Vector3 pos, Quaternion rot, Vector3 scale, Object owner)
-		{
-			if (_systems == null) _systems = GetComponentsInChildren<ParticleSystem>(true);
-			IsIdle = false;
-			KeepAlive = false;
-			_owner = owner;
-			_hasOwner = owner != null;
-			_deadline = Time.time + NoParticleLifetime;
+        internal void Begin(Transform parent, Vector3 pos, Quaternion rot, Vector3 scale, Object owner)
+        {
+            if (_systems == null) _systems = GetComponentsInChildren<ParticleSystem>(true);
+            IsIdle = false;
+            KeepAlive = false;
+            _owner = owner;
+            _hasOwner = owner != null;
+            _deadline = Time.time + NoParticleLifetime;
 
-			transform.SetParent(parent, false);
-			transform.localPosition = pos;
-			transform.localRotation = rot;
-			transform.localScale = scale;
-			gameObject.SetActive(true);
-			foreach (var particles in _systems)
-			{
-				particles.Clear();
-				particles.Play();
-			}
-		}
+            transform.SetParent(parent, false);
+            transform.localPosition = pos;
+            transform.localRotation = rot;
+            transform.localScale = scale;
+            gameObject.SetActive(true);
+            foreach (var particles in _systems)
+            {
+                particles.Clear();
+                particles.Play();
+            }
+        }
 
-		internal void BeginFade()
-		{
-			if (IsIdle) return;
-			KeepAlive = false;
-			transform.SetParent(null, true);
-			foreach (var particles in _systems) particles.Stop();
-			_deadline = Time.time + NoParticleLifetime;
-		}
+        internal void BeginFade()
+        {
+            if (IsIdle) return;
+            KeepAlive = false;
+            transform.SetParent(null, true);
+            foreach (var particles in _systems) particles.Stop();
+            _deadline = Time.time + NoParticleLifetime;
+        }
 
-		private void Update()
-		{
-			if (_hasOwner && _owner == null) { EffectPlayer.Return(this); return; } // シミュ終了
-			if (KeepAlive) return;
-			if (_systems.Length == 0) { if (Time.time >= _deadline) EffectPlayer.Return(this); return; }
-			foreach (var particles in _systems) if (particles.IsAlive(true)) return;
-			EffectPlayer.Return(this);
-		}
+        private void Update()
+        {
+            if (_hasOwner && _owner == null) { EffectPlayer.Return(this); return; } // シミュ終了
+            if (KeepAlive) return;
+            if (_systems.Length == 0) { if (Time.time >= _deadline) EffectPlayer.Return(this); return; }
+            foreach (var particles in _systems) if (particles.IsAlive(true)) return;
+            EffectPlayer.Return(this);
+        }
 
-		private void OnDestroy()
-		{
-			EffectPlayer.Forget(this);
-		}
-	}
+        private void OnDestroy()
+        {
+            EffectPlayer.Forget(this);
+        }
+    }
 }

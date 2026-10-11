@@ -3,72 +3,72 @@ using UnityEngine;
 
 namespace EWL.Modules
 {
-	// EwlBlockPhysics モジュール。ブロック自身の接合・物理マテリアルを XML の値にする。
-	// SafeAwake で書く: 本体が接合の破断力を記録する(ダメージ計算の基準)のはこれより後なので、ここで書いた値が基準になる。
-	// ponytail: 衝突検出モード・並進軸・アンカー移動・スライダー連動は未対応。E砲で必要になったら足す。
-	public class EwlBlockPhysicsBehaviour : BlockModuleBehaviour<EwlBlockPhysicsModule>
-	{
-		private PhysicMaterial _material;
+    // EwlBlockPhysics モジュール。ブロック自身の接合・物理マテリアルを XML の値にする。
+    // SafeAwake で書く: 本体が接合の破断力を記録する(ダメージ計算の基準)のはこれより後なので、ここで書いた値が基準になる。
+    // ponytail: 衝突検出モード・並進軸・アンカー移動・スライダー連動は未対応。E砲で必要になったら足す。
+    public class EwlBlockPhysicsBehaviour : BlockModuleBehaviour<EwlBlockPhysicsModule>
+    {
+        private PhysicMaterial _material;
 
-		public override void SafeAwake()
-		{
-			// 親ブロックとの接合。他モジュールが足した分も含めて全部に適用する
-			foreach (var joint in GetComponents<ConfigurableJoint>())
-			{
-				if (Module.JointStrength > 0f)
-				{
-					joint.breakForce = Module.JointStrength;
-					joint.breakTorque = Module.JointStrength;
-				}
-				if (Module.Rotation != null) ApplyRotation(joint, Module.Rotation);
-			}
-			if (Module.Material != null) ApplyMaterial(Module.Material);
-		}
+        public override void SafeAwake()
+        {
+            // 親ブロックとの接合。他モジュールが足した分も含めて全部に適用する
+            foreach (var joint in GetComponents<ConfigurableJoint>())
+            {
+                if (Module.JointStrength > 0f)
+                {
+                    joint.breakForce = Module.JointStrength;
+                    joint.breakTorque = Module.JointStrength;
+                }
+                if (Module.Rotation != null) ApplyRotation(joint, Module.Rotation);
+            }
+            if (Module.Material != null) ApplyMaterial(Module.Material);
+        }
 
-		private void OnDestroy()
-		{
-			if (_material != null) Destroy(_material);
-		}
+        private void OnDestroy()
+        {
+            if (_material != null) Destroy(_material);
+        }
 
-		private static void ApplyRotation(ConfigurableJoint joint, JointRotationXml rotation)
-		{
-			joint.angularXMotion = rotation.AxisX;
-			joint.angularYMotion = rotation.AxisY;
-			joint.angularZMotion = rotation.AxisZ;
+        private static void ApplyRotation(ConfigurableJoint joint, JointRotationXml rotation)
+        {
+            joint.angularXMotion = rotation.AxisX;
+            joint.angularYMotion = rotation.AxisY;
+            joint.angularZMotion = rotation.AxisZ;
 
-			var limit = new SoftJointLimit { limit = rotation.Limit };
-			joint.lowAngularXLimit = new SoftJointLimit { limit = -rotation.Limit };
-			joint.highAngularXLimit = limit;
-			joint.angularYLimit = limit;
-			joint.angularZLimit = limit;
+            var limit = new SoftJointLimit { limit = rotation.Limit };
+            joint.lowAngularXLimit = new SoftJointLimit { limit = -rotation.Limit };
+            joint.highAngularXLimit = limit;
+            joint.angularYLimit = limit;
+            joint.angularZLimit = limit;
 
-			var twistDrive = joint.angularXDrive;
-			twistDrive.positionSpring = rotation.Spring;
-			twistDrive.positionDamper = rotation.Damper;
-			joint.angularXDrive = twistDrive;
-			var swingDrive = joint.angularYZDrive;
-			swingDrive.positionSpring = rotation.Spring;
-			swingDrive.positionDamper = rotation.Damper;
-			joint.angularYZDrive = swingDrive;
-		}
+            var twistDrive = joint.angularXDrive;
+            twistDrive.positionSpring = rotation.Spring;
+            twistDrive.positionDamper = rotation.Damper;
+            joint.angularXDrive = twistDrive;
+            var swingDrive = joint.angularYZDrive;
+            swingDrive.positionSpring = rotation.Spring;
+            swingDrive.positionDamper = rotation.Damper;
+            joint.angularYZDrive = swingDrive;
+        }
 
-		private void ApplyMaterial(BlockMaterialXml material)
-		{
-			var colliders = transform.Find("Colliders");
-			if (colliders == null)
-			{
-				Debug.LogWarning("[EWL] " + name + " EwlBlockPhysics/Material: block has no 'Colliders' child.");
-				return;
-			}
-			_material = new PhysicMaterial("EwlBlock")
-			{
-				staticFriction = material.Friction,
-				dynamicFriction = material.Friction,
-				frictionCombine = material.FrictionCombine,
-				bounciness = material.Bounciness,
-				bounceCombine = material.BounceCombine,
-			};
-			foreach (var collider in colliders.GetComponentsInChildren<Collider>()) collider.sharedMaterial = _material;
-		}
-	}
+        private void ApplyMaterial(BlockMaterialXml material)
+        {
+            var colliders = transform.Find("Colliders");
+            if (colliders == null)
+            {
+                Debug.LogWarning("[EWL] " + name + " EwlBlockPhysics/Material: block has no 'Colliders' child.");
+                return;
+            }
+            _material = new PhysicMaterial("EwlBlock")
+            {
+                staticFriction = material.Friction,
+                dynamicFriction = material.Friction,
+                frictionCombine = material.FrictionCombine,
+                bounciness = material.Bounciness,
+                bounceCombine = material.BounceCombine,
+            };
+            foreach (var collider in colliders.GetComponentsInChildren<Collider>()) collider.sharedMaterial = _material;
+        }
+    }
 }

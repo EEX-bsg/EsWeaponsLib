@@ -68,6 +68,7 @@ XML カスタムモジュールと C# API を提供します。E'sTankCannonsMod
 - C# 6、.NET 3.5 サブセット、Unity 5.4 を前提にする。`Task`・`async`/`await`・C# 7 以降の構文を使わない。
 - `System.Reflection`、禁止された `System.IO` / `System.Net` / `System.Xml` を使わない。`InternalModding.*` を参照しない。ファイル I/O は `Modding.ModIO`。
 - Unity API はメインスレッドだけで呼ぶ。`Update` / `FixedUpdate` での不要な割り当てと毎フレームログを避ける。
+- `.cs` と `.xml`(E砲のブロック XML を含む)のインデントはスペース4つ。タブを使わない(`.editorconfig`)。
 - イベント購読と解除、生成と破棄、開始と停止を対にする。
 - SP、MP Host、MP Client、MP ローカルシミュレーションを区別する。武装・物理の実行権威は `IsSimulating` 系で判定し、`IsHost` で代用しない。
 - 例外を `catch` したら必ずログを出す。握りつぶさない。EWL のログは `[EWL]` で始める。

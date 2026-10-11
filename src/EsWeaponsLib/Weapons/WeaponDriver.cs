@@ -8,195 +8,195 @@ using UnityEngine;
 
 namespace EWL.Weapons
 {
-	// 武装1基の実体。ブロックの GameObject に付く。公開面は Api.Weapon が包む。
-	internal sealed class WeaponDriver : MonoBehaviour
-	{
-		internal Weapon Owner;
-		internal WeaponSpec Spec;
-		internal Action Fired;
-		internal Action ReloadStarted;
-		internal int Ammo;
-		internal int ReserveAmmo;
-		internal bool IsReloading;
+    // 武装1基の実体。ブロックの GameObject に付く。公開面は Api.Weapon が包む。
+    internal sealed class WeaponDriver : MonoBehaviour
+    {
+        internal Weapon Owner;
+        internal WeaponSpec Spec;
+        internal Action Fired;
+        internal Action ReloadStarted;
+        internal int Ammo;
+        internal int ReserveAmmo;
+        internal bool IsReloading;
 
-		private BlockBehaviour _block;
-		private Collider[] _ownColliders;
-		private float _nextFireTime;
-		private bool _bursting;
-		private PhysicMaterial _physicMaterial;
-		private Material _material;
-		private Texture _materialTexture;
-		private string _privatePoolKey;
-		private readonly List<UnityEngine.Object> _owned = new List<UnityEngine.Object>();
+        private BlockBehaviour _block;
+        private Collider[] _ownColliders;
+        private float _nextFireTime;
+        private bool _bursting;
+        private PhysicMaterial _physicMaterial;
+        private Material _material;
+        private Texture _materialTexture;
+        private string _privatePoolKey;
+        private readonly List<UnityEngine.Object> _owned = new List<UnityEngine.Object>();
 
-		internal void Init(BlockBehaviour block, WeaponSpec spec)
-		{
-			_block = block;
-			Spec = spec;
-			int capacity = spec.Fire.MagazineCapacity;
-			Ammo = spec.Fire.Ammo;
-			if (capacity > 0)
-			{
-				Ammo = Ammo < 0 ? capacity : Mathf.Min(capacity, spec.Fire.Ammo);
-				ReserveAmmo = spec.Fire.Ammo < 0 ? -1 : spec.Fire.Ammo - Ammo;
-			}
-			_ownColliders = block.GetComponentsInChildren<Collider>();
-			_privatePoolKey = "weapon#" + GetInstanceID();
-			ProjectilePool.Prewarm(PoolKey, spec.Projectile);
-		}
+        internal void Init(BlockBehaviour block, WeaponSpec spec)
+        {
+            _block = block;
+            Spec = spec;
+            int capacity = spec.Fire.MagazineCapacity;
+            Ammo = spec.Fire.Ammo;
+            if (capacity > 0)
+            {
+                Ammo = Ammo < 0 ? capacity : Mathf.Min(capacity, spec.Fire.Ammo);
+                ReserveAmmo = spec.Fire.Ammo < 0 ? -1 : spec.Fire.Ammo - Ammo;
+            }
+            _ownColliders = block.GetComponentsInChildren<Collider>();
+            _privatePoolKey = "weapon#" + GetInstanceID();
+            ProjectilePool.Prewarm(PoolKey, spec.Projectile);
+        }
 
-		// 無効化でコルーチンが止まるので、途中のバースト・リロードを取り消す(フラグが残ると撃てなくなる)
-		private void OnDisable()
-		{
-			_bursting = false;
-			IsReloading = false;
-		}
+        // 無効化でコルーチンが止まるので、途中のバースト・リロードを取り消す(フラグが残ると撃てなくなる)
+        private void OnDisable()
+        {
+            _bursting = false;
+            IsReloading = false;
+        }
 
-		private void OnDestroy()
-		{
-			if (_privatePoolKey != null) ProjectilePool.Discard(_privatePoolKey);
-			foreach (var obj in _owned) Destroy(obj);
-			_owned.Clear();
-		}
+        private void OnDestroy()
+        {
+            if (_privatePoolKey != null) ProjectilePool.Discard(_privatePoolKey);
+            foreach (var obj in _owned) Destroy(obj);
+            _owned.Clear();
+        }
 
-		/// <summary>PoolKey 未指定ならこの武装専用のプール。</summary>
-		private string PoolKey
-		{
-			get
-			{
-				var key = Spec.Projectile.PoolKey;
-				return string.IsNullOrEmpty(key) ? _privatePoolKey : key;
-			}
-		}
+        /// <summary>PoolKey 未指定ならこの武装専用のプール。</summary>
+        private string PoolKey
+        {
+            get
+            {
+                var key = Spec.Projectile.PoolKey;
+                return string.IsNullOrEmpty(key) ? _privatePoolKey : key;
+            }
+        }
 
-		private bool UsesMagazine { get { return Spec.Fire.MagazineCapacity > 0; } }
+        private bool UsesMagazine { get { return Spec.Fire.MagazineCapacity > 0; } }
 
-		internal bool TryFire()
-		{
-			if (!Simulation.HasAuthority(_block) || Time.time < _nextFireTime || _bursting || IsReloading) return false;
-			if (!HasAmmo())
-			{
-				if (UsesMagazine && Spec.Fire.AutoReload) TryReload();
-				return false;
-			}
-			StartCoroutine(Burst());
-			return true;
-		}
+        internal bool TryFire()
+        {
+            if (!Simulation.HasAuthority(_block) || Time.time < _nextFireTime || _bursting || IsReloading) return false;
+            if (!HasAmmo())
+            {
+                if (UsesMagazine && Spec.Fire.AutoReload) TryReload();
+                return false;
+            }
+            StartCoroutine(Burst());
+            return true;
+        }
 
-		// 無限弾薬でも弾倉は減る(リロードの手間は残す)。
-		private bool HasAmmo()
-		{
-			return Ammo != 0 || (!UsesMagazine && Simulation.IsInfiniteAmmo(_block));
-		}
+        // 無限弾薬でも弾倉は減る(リロードの手間は残す)。
+        private bool HasAmmo()
+        {
+            return Ammo != 0 || (!UsesMagazine && Simulation.IsInfiniteAmmo(_block));
+        }
 
-		private IEnumerator Burst()
-		{
-			_bursting = true;
-			int count = Mathf.Max(1, Spec.Fire.BurstCount);
-			for (int i = 0; i < count && HasAmmo() && !IsReloading; i++)
-			{
-				if (i > 0) yield return new WaitForSeconds(Spec.Fire.BurstInterval);
-				if (_block == null || !HasAmmo()) break;
-				ConsumeOne();
-				var fire = Spec.Fire;
-				StartCoroutine(Shoot(fire.Delay + UnityEngine.Random.Range(0f, fire.RandomDelay)));
-			}
-			_nextFireTime = Time.time + Spec.Fire.Interval;
-			_bursting = false;
-			if (Ammo == 0 && UsesMagazine && Spec.Fire.AutoReload) TryReload();
-		}
+        private IEnumerator Burst()
+        {
+            _bursting = true;
+            int count = Mathf.Max(1, Spec.Fire.BurstCount);
+            for (int i = 0; i < count && HasAmmo() && !IsReloading; i++)
+            {
+                if (i > 0) yield return new WaitForSeconds(Spec.Fire.BurstInterval);
+                if (_block == null || !HasAmmo()) break;
+                ConsumeOne();
+                var fire = Spec.Fire;
+                StartCoroutine(Shoot(fire.Delay + UnityEngine.Random.Range(0f, fire.RandomDelay)));
+            }
+            _nextFireTime = Time.time + Spec.Fire.Interval;
+            _bursting = false;
+            if (Ammo == 0 && UsesMagazine && Spec.Fire.AutoReload) TryReload();
+        }
 
-		private void ConsumeOne()
-		{
-			bool infinite = Simulation.IsInfiniteAmmo(_block);
-			if (Ammo > 0 && (UsesMagazine || !infinite)) Ammo--;
-			if (Fired != null) Fired();
-		}
+        private void ConsumeOne()
+        {
+            bool infinite = Simulation.IsInfiniteAmmo(_block);
+            if (Ammo > 0 && (UsesMagazine || !infinite)) Ammo--;
+            if (Fired != null) Fired();
+        }
 
-		internal bool TryReload()
-		{
-			if (!Simulation.HasAuthority(_block) || !UsesMagazine || IsReloading || _bursting) return false;
-			if (Ammo >= Spec.Fire.MagazineCapacity || (ReserveAmmo == 0 && !Simulation.IsInfiniteAmmo(_block))) return false;
-			StartCoroutine(Reload());
-			return true;
-		}
+        internal bool TryReload()
+        {
+            if (!Simulation.HasAuthority(_block) || !UsesMagazine || IsReloading || _bursting) return false;
+            if (Ammo >= Spec.Fire.MagazineCapacity || (ReserveAmmo == 0 && !Simulation.IsInfiniteAmmo(_block))) return false;
+            StartCoroutine(Reload());
+            return true;
+        }
 
-		private IEnumerator Reload()
-		{
-			IsReloading = true;
-			if (ReloadStarted != null) ReloadStarted();
-			EffectPlayer.PlaySound(Spec.Effects.ReloadSounds, transform.position, Sounds.FireTemplate);
-			yield return new WaitForSeconds(Spec.Fire.ReloadTime);
-			int load = Mathf.Max(0, Spec.Fire.MagazineCapacity - Ammo);
-			if (ReserveAmmo >= 0 && !Simulation.IsInfiniteAmmo(_block))
-			{
-				load = Mathf.Min(load, ReserveAmmo);
-				ReserveAmmo -= load;
-			}
-			Ammo += load;
-			IsReloading = false;
-		}
+        private IEnumerator Reload()
+        {
+            IsReloading = true;
+            if (ReloadStarted != null) ReloadStarted();
+            EffectPlayer.PlaySound(Spec.Effects.ReloadSounds, transform.position, Sounds.FireTemplate);
+            yield return new WaitForSeconds(Spec.Fire.ReloadTime);
+            int load = Mathf.Max(0, Spec.Fire.MagazineCapacity - Ammo);
+            if (ReserveAmmo >= 0 && !Simulation.IsInfiniteAmmo(_block))
+            {
+                load = Mathf.Min(load, ReserveAmmo);
+                ReserveAmmo -= load;
+            }
+            Ammo += load;
+            IsReloading = false;
+        }
 
-		private IEnumerator Shoot(float delay)
-		{
-			if (delay > 0f) yield return new WaitForSeconds(delay);
-			yield return new WaitForFixedUpdate();
-			if (_block == null || !Simulation.HasAuthority(_block) || _block.Rigidbody == null) yield break;
+        private IEnumerator Shoot(float delay)
+        {
+            if (delay > 0f) yield return new WaitForSeconds(delay);
+            yield return new WaitForFixedUpdate();
+            if (_block == null || !Simulation.HasAuthority(_block) || _block.Rigidbody == null) yield break;
 
-			var fire = Spec.Fire;
-			var projectile = Spec.Projectile;
-			var blockTransform = transform;
-			Vector3 pos = blockTransform.TransformPoint(fire.MuzzlePosition);
-			Quaternion rot = blockTransform.rotation * fire.MuzzleRotation;
-			Vector3 dir = rot * Vector3.forward;
-			if (fire.Spread > 0f)
-				dir = (dir + UnityEngine.Random.insideUnitSphere * Mathf.Tan(fire.Spread * Mathf.Deg2Rad)).normalized;
+            var fire = Spec.Fire;
+            var projectile = Spec.Projectile;
+            var blockTransform = transform;
+            Vector3 pos = blockTransform.TransformPoint(fire.MuzzlePosition);
+            Quaternion rot = blockTransform.rotation * fire.MuzzleRotation;
+            Vector3 dir = rot * Vector3.forward;
+            if (fire.Spread > 0f)
+                dir = (dir + UnityEngine.Random.insideUnitSphere * Mathf.Tan(fire.Spread * Mathf.Deg2Rad)).normalized;
 
-			var rb = _block.Rigidbody;
-			var physicMaterial = PhysicMaterialFor(projectile);
-			var material = MaterialFor(projectile);
-			ProjectilePool.Acquire(PoolKey, projectile).Launch(this, Spec, pos, rot, rb.velocity + dir * fire.Velocity, _ownColliders,
-				physicMaterial, material);
-			rb.AddForce(-dir * (fire.Velocity * projectile.Mass * fire.Recoil), ForceMode.Impulse);
+            var rb = _block.Rigidbody;
+            var physicMaterial = PhysicMaterialFor(projectile);
+            var material = MaterialFor(projectile);
+            ProjectilePool.Acquire(PoolKey, projectile).Launch(this, Spec, pos, rot, rb.velocity + dir * fire.Velocity, _ownColliders,
+                physicMaterial, material);
+            rb.AddForce(-dir * (fire.Velocity * projectile.Mass * fire.Recoil), ForceMode.Impulse);
 
-			var effects = Spec.Effects;
-			EffectPlayer.PlayOnce(effects.ShotFlash, blockTransform, effects.ShotFlashPosition, Quaternion.Euler(effects.ShotFlashRotation),
-				effects.ShotFlashScale, Simulation.Scope, projectile.PoolSize);
-			EffectPlayer.PlaySound(effects.FireSounds, blockTransform.TransformPoint(effects.ShotFlashPosition), Sounds.FireTemplate);
-		}
+            var effects = Spec.Effects;
+            EffectPlayer.PlayOnce(effects.ShotFlash, blockTransform, effects.ShotFlashPosition, Quaternion.Euler(effects.ShotFlashRotation),
+                effects.ShotFlashScale, Simulation.Scope, projectile.PoolSize);
+            EffectPlayer.PlaySound(effects.FireSounds, blockTransform.TransformPoint(effects.ShotFlashPosition), Sounds.FireTemplate);
+        }
 
-		// 発射ごとに Spec を読む。値が変わったら新しく作り、古いもの(飛行中の弾が使用中)は武装の破棄時にまとめて破棄する。
-		private PhysicMaterial PhysicMaterialFor(ProjectileSpec projectile)
-		{
-			var cached = _physicMaterial;
-			if (cached != null && cached.dynamicFriction == projectile.Friction && cached.frictionCombine == projectile.FrictionCombine
-				&& cached.bounciness == projectile.Bounciness && cached.bounceCombine == projectile.BounceCombine) return cached;
-			cached = _physicMaterial = new PhysicMaterial("EwlProjectile")
-			{
-				staticFriction = projectile.Friction,
-				dynamicFriction = projectile.Friction,
-				frictionCombine = projectile.FrictionCombine,
-				bounciness = projectile.Bounciness,
-				bounceCombine = projectile.BounceCombine,
-			};
-			_owned.Add(cached);
-			return cached;
-		}
+        // 発射ごとに Spec を読む。値が変わったら新しく作り、古いもの(飛行中の弾が使用中)は武装の破棄時にまとめて破棄する。
+        private PhysicMaterial PhysicMaterialFor(ProjectileSpec projectile)
+        {
+            var cached = _physicMaterial;
+            if (cached != null && cached.dynamicFriction == projectile.Friction && cached.frictionCombine == projectile.FrictionCombine
+                && cached.bounciness == projectile.Bounciness && cached.bounceCombine == projectile.BounceCombine) return cached;
+            cached = _physicMaterial = new PhysicMaterial("EwlProjectile")
+            {
+                staticFriction = projectile.Friction,
+                dynamicFriction = projectile.Friction,
+                frictionCombine = projectile.FrictionCombine,
+                bounciness = projectile.Bounciness,
+                bounceCombine = projectile.BounceCombine,
+            };
+            _owned.Add(cached);
+            return cached;
+        }
 
-		private Material MaterialFor(ProjectileSpec projectile)
-		{
-			if (_material != null && _materialTexture == projectile.Texture) return _material;
-			// Standard は Besiege のビルドで紫になることがあるので Legacy Diffuse を優先
-			var shader = Shader.Find("Legacy Shaders/Diffuse") ?? Shader.Find("Diffuse") ?? Shader.Find("Standard");
-			if (shader == null)
-			{
-				Debug.LogWarning("[EWL] No usable shader for projectile material.");
-				return null;
-			}
-			_material = new Material(shader) { mainTexture = projectile.Texture };
-			_materialTexture = projectile.Texture;
-			_owned.Add(_material);
-			return _material;
-		}
-	}
+        private Material MaterialFor(ProjectileSpec projectile)
+        {
+            if (_material != null && _materialTexture == projectile.Texture) return _material;
+            // Standard は Besiege のビルドで紫になることがあるので Legacy Diffuse を優先
+            var shader = Shader.Find("Legacy Shaders/Diffuse") ?? Shader.Find("Diffuse") ?? Shader.Find("Standard");
+            if (shader == null)
+            {
+                Debug.LogWarning("[EWL] No usable shader for projectile material.");
+                return null;
+            }
+            _material = new Material(shader) { mainTexture = projectile.Texture };
+            _materialTexture = projectile.Texture;
+            _owned.Add(_material);
+            return _material;
+        }
+    }
 }
