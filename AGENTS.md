@@ -119,7 +119,7 @@ XML カスタムモジュールと C# API を提供します。E'sTankCannonsMod
 
 ### E砲との連携
 
-- E砲は `../EsTankCannonMod Project/`(別リポジトリ)。E砲側の変更はそのリポジトリの規約に従い、依頼された場合だけ行う。
+- E砲は `../EsTankCannonMod Project/`(別リポジトリ)。E砲側の変更は `ewl-*`(現在は `feature/ewl-backend`)ブランチの中なら依頼なしで自由に行ってよい。そのブランチから出る操作は一切しない。
 - E砲は EWL の**公開面だけ**を使う。E砲のために `internal` を開けない。足りなければ公開面の追加として扱う。
 - E砲の EWL 対応は `feature/ewl-backend`(または既存と分けた作業ブランチ)で行い、そこへのコミットは自由。
   **main・develop へのマージ・混入は絶対禁止**(オーナーが行う)。push は依頼時のみ。
