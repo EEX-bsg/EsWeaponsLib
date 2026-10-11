@@ -63,6 +63,15 @@ namespace EWL.Api
         /// <summary>リロードを始めたとき。弾倉はリロード時間の後に満たされる。</summary>
         public event Action ReloadStarted;
 
+        /// <summary>この武装の弾が何かに当たった(直撃・爆風)。実行権威側(SP・MP ホスト・ローカルシミュ)でだけ発火する。</summary>
+        public event Action<ProjectileHit> Hit;
+
+        /// <summary>
+        /// どの武装の弾が当たっても発火する(他 Mod の武装を含む)。被弾した側が撃った相手を知るために使う。
+        /// 実行権威側でだけ発火する。静的イベントなので、購読したら必ず解除する。
+        /// </summary>
+        public static event Action<ProjectileHit> AnyHit;
+
         /// <summary>
         /// 発射を要求する。実行権威側(SP・MP Host・MP Client ローカルシミュ)で、間隔・弾数・リロード中でないことが許すときだけ受け付けて true。
         /// BurstCount が 2 以上なら、この1回でバーストを撃つ。
@@ -90,11 +99,29 @@ namespace EWL.Api
 
         private void RaiseReloadStarted() { Raise(ReloadStarted, "ReloadStarted"); }
 
+        internal static bool HasHitListeners(Weapon weapon)
+        {
+            return AnyHit != null || (weapon != null && weapon.Hit != null);
+        }
+
+        internal static void RaiseHit(ProjectileHit hit)
+        {
+            if (hit.Weapon != null) Raise(hit.Weapon.Hit, hit, "Hit");
+            Raise(AnyHit, hit, "AnyHit");
+        }
+
         private static void Raise(Action handler, string eventName)
         {
             if (handler == null) return;
             // 利用側ハンドラの例外で発射・リロード処理を止めない
             try { handler(); }
+            catch (Exception ex) { Debug.LogError("[EWL] Weapon." + eventName + " handler threw: " + ex); }
+        }
+
+        private static void Raise(Action<ProjectileHit> handler, ProjectileHit hit, string eventName)
+        {
+            if (handler == null) return;
+            try { handler(hit); }
             catch (Exception ex) { Debug.LogError("[EWL] Weapon." + eventName + " handler threw: " + ex); }
         }
     }

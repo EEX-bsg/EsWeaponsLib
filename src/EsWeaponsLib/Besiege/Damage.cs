@@ -80,8 +80,19 @@ namespace EWL.Besiege
             return attachTo;
         }
 
+        /// <summary>コライダーのブロック。子ブロックを持つブロックでは当たった子(ダメージを受けるのと同じブロック)。</summary>
+        internal static BlockBehaviour BlockOf(Collider collider)
+        {
+            var rb = collider != null ? collider.attachedRigidbody : null;
+            var block = rb != null ? rb.GetComponent<BlockBehaviour>() : null;
+            if (block == null || !block.gotChildBlocks) return block;
+            var child = block.GetChildBlockFromCollider(collider);
+            return child != null ? child : block;
+        }
+
         // 本体の爆弾(ExplodeOnCollide)と同じく、剛体ごとに1回だけ力と OnExplode を与える。
-        internal static void Explode(Vector3 pos, float radius, float power, float upPower)
+        /// <param name="affected">null でなければ、力を与えた剛体を足す(命中イベント用)。</param>
+        internal static void Explode(Vector3 pos, float radius, float power, float upPower, List<Rigidbody> affected)
         {
             var pushed = new HashSet<Rigidbody>(); // OnExplode から再入しうるのでローカル
             foreach (var collider in Physics.OverlapSphere(pos, radius))
@@ -89,6 +100,7 @@ namespace EWL.Besiege
                 var rb = collider.attachedRigidbody;
                 if (rb == null || rb.gameObject.layer == IgnoreLayerA || rb.gameObject.layer == IgnoreLayerB
                     || rb.CompareTag("KeepConstraintsAlways") || !pushed.Add(rb)) continue;
+                if (affected != null) affected.Add(rb);
                 rb.WakeUp();
                 rb.constraints = RigidbodyConstraints.None;
                 rb.AddExplosionForce(power, pos, radius, upPower);

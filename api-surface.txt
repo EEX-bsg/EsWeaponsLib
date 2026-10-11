@@ -4,6 +4,7 @@ class EWL.Api.ColliderShape : System.Object
 class EWL.Api.EffectSpec : System.Object
 class EWL.Api.FireSpec : System.Object
 class EWL.Api.ImpactSpec : System.Object
+class EWL.Api.ProjectileHit : System.Object
 class EWL.Api.ProjectileSpec : System.Object
 class EWL.Api.Weapon : System.Object
 class EWL.Api.WeaponSpec : System.Object
@@ -70,6 +71,14 @@ EWL.Api.ImpactSpec::FuseDelay : System.Single
 EWL.Api.ImpactSpec::FuseRandom : System.Single
 EWL.Api.ImpactSpec::ImpactForce : System.Single
 EWL.Api.ImpactSpec::System.Void .ctor()
+EWL.Api.ProjectileHit::Block : BlockBehaviour {get}
+EWL.Api.ProjectileHit::Collider : UnityEngine.Collider {get}
+EWL.Api.ProjectileHit::IsExplosion : System.Boolean {get}
+EWL.Api.ProjectileHit::Point : UnityEngine.Vector3 {get}
+EWL.Api.ProjectileHit::ShooterBlock : BlockBehaviour {get}
+EWL.Api.ProjectileHit::ShooterPlayerId : System.UInt16 {get}
+EWL.Api.ProjectileHit::ShooterTeam : MPTeam {get}
+EWL.Api.ProjectileHit::Weapon : EWL.Api.Weapon {get}
 EWL.Api.ProjectileSpec::AngularDrag : System.Single
 EWL.Api.ProjectileSpec::BounceCombine : UnityEngine.PhysicMaterialCombine
 EWL.Api.ProjectileSpec::Bounciness : System.Single
@@ -94,6 +103,8 @@ EWL.Api.ProjectileSpec::TimeFuse : System.Single
 EWL.Api.Weapon::Ammo : System.Int32 {get}
 EWL.Api.Weapon::event System.Action Fired
 EWL.Api.Weapon::event System.Action ReloadStarted
+EWL.Api.Weapon::event System.Action`1<EWL.Api.ProjectileHit> AnyHit
+EWL.Api.Weapon::event System.Action`1<EWL.Api.ProjectileHit> Hit
 EWL.Api.Weapon::IsAlive : System.Boolean {get}
 EWL.Api.Weapon::IsReloading : System.Boolean {get}
 EWL.Api.Weapon::ReserveAmmo : System.Int32 {get}

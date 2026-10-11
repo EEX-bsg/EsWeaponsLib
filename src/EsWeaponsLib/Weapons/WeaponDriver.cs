@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using EWL.Api;
 using EWL.Besiege;
 using EWL.Effects;
+using EWL.Net;
 using UnityEngine;
 
 namespace EWL.Weapons
@@ -33,10 +34,28 @@ namespace EWL.Weapons
         private string _privatePoolKey;
         private readonly List<UnityEngine.Object> _owned = new List<UnityEngine.Object>();
 
+        internal BlockBehaviour Block { get { return _block; } }
+
+        /// <summary>ブロック上で何番目に作られた武装か。MP で全ピアの武装を対応付ける(全ピアで同じ順に生成される契約)。</summary>
+        internal int NetworkIndex { get; private set; }
+
+        internal static WeaponDriver Find(BlockBehaviour block, int networkIndex)
+        {
+            if (block == null) return null;
+            foreach (var driver in block.GetComponents<WeaponDriver>())
+                if (driver.NetworkIndex == networkIndex) return driver;
+            return null;
+        }
+
         internal void Init(BlockBehaviour block, WeaponSpec spec)
         {
             _block = block;
             Spec = spec;
+            // 途中で破棄された武装があっても重複しないよう、既存の最大 + 1
+            int index = 0;
+            foreach (var other in GetComponents<WeaponDriver>())
+                if (other != this) index = Mathf.Max(index, other.NetworkIndex + 1);
+            NetworkIndex = index;
             int capacity = spec.Fire.MagazineCapacity;
             Ammo = spec.Fire.Ammo;
             if (capacity > 0)
@@ -159,6 +178,7 @@ namespace EWL.Weapons
             bool infinite = Simulation.IsInfiniteAmmo(_block);
             if (Ammo > 0 && (UsesMagazine || !infinite)) Ammo--;
             if (Fired != null) Fired();
+            ProjectileSync.WeaponStateChanged(this, WeaponStateFlags.Fired);
         }
 
         internal bool TryReload()
@@ -174,6 +194,7 @@ namespace EWL.Weapons
             IsReloading = true;
             if (ReloadStarted != null) ReloadStarted();
             EffectPlayer.PlaySound(Spec.Effects.ReloadSounds, transform.position, Sounds.FireTemplate);
+            ProjectileSync.WeaponStateChanged(this, WeaponStateFlags.ReloadStarted);
             yield return new WaitForSeconds(Spec.Fire.ReloadTime);
             int load = Mathf.Max(0, Spec.Fire.MagazineCapacity - Ammo);
             if (ReserveAmmo >= 0 && !Simulation.IsInfiniteAmmo(_block))
@@ -183,6 +204,7 @@ namespace EWL.Weapons
             }
             Ammo += load;
             IsReloading = false;
+            ProjectileSync.WeaponStateChanged(this, WeaponStateFlags.None);
         }
 
         private IEnumerator Shoot(float delay)
@@ -205,14 +227,56 @@ namespace EWL.Weapons
             var rb = _block.Rigidbody;
             var physicMaterial = PhysicMaterialFor(projectile);
             var material = MaterialFor(projectile);
-            ProjectilePool.Acquire(PoolKey, projectile).Launch(this, Spec, pos, rot, rb.velocity + dir * fire.Velocity, _ownColliders,
-                physicMaterial, material);
+            var velocity = rb.velocity + dir * fire.Velocity;
+            var shot = ProjectilePool.Acquire(PoolKey, projectile);
+            shot.Launch(this, Spec, pos, rot, velocity, _ownColliders, physicMaterial, material);
             rb.AddForce(-dir * (fire.Velocity * projectile.Mass * fire.Recoil), ForceMode.Impulse);
+            PlayShotEffects();
+            ProjectileSync.Spawned(this, shot, pos, rot, velocity);
+        }
 
+        private void PlayShotEffects()
+        {
             var effects = Spec.Effects;
+            var blockTransform = transform;
             EffectPlayer.PlayOnce(effects.ShotFlash, blockTransform, effects.ShotFlashPosition, Quaternion.Euler(effects.ShotFlashRotation),
-                effects.ShotFlashScale, Simulation.Scope, projectile.PoolSize);
+                effects.ShotFlashScale, Scope, Spec.Projectile.PoolSize);
             EffectPlayer.PlaySound(effects.FireSounds, blockTransform.TransformPoint(effects.ShotFlashPosition), Sounds.FireTemplate);
+        }
+
+        /// <summary>エフェクト・弾の持ち主(これが消えたら回収)。シミュの目印が無いピアではこのブロック。</summary>
+        internal UnityEngine.Object Scope
+        {
+            get
+            {
+                var scope = Simulation.Scope;
+                return scope != null ? scope : gameObject;
+            }
+        }
+
+        // ---- MP クライアント(ホストの弾の見た目だけを出す) ----
+
+        internal Projectile SpawnProxy(Vector3 position, Quaternion rotation, Vector3 velocity)
+        {
+            var projectile = Spec.Projectile;
+            var proxy = ProjectilePool.Acquire(PoolKey, projectile);
+            proxy.LaunchProxy(this, Spec, position, rotation, velocity, MaterialFor(projectile));
+            _nextFireTime = Time.time + Spec.Fire.Interval; // 待機弾の表示を発射間隔だけ消す
+            PlayShotEffects();
+            return proxy;
+        }
+
+        internal void ReceiveState(int ammo, int reserveAmmo, WeaponStateFlags flags)
+        {
+            Ammo = ammo;
+            ReserveAmmo = reserveAmmo;
+            IsReloading = (flags & WeaponStateFlags.Reloading) != 0;
+            if ((flags & WeaponStateFlags.Fired) != 0 && Fired != null) Fired();
+            if ((flags & WeaponStateFlags.ReloadStarted) != 0)
+            {
+                if (ReloadStarted != null) ReloadStarted();
+                EffectPlayer.PlaySound(Spec.Effects.ReloadSounds, transform.position, Sounds.FireTemplate);
+            }
         }
 
         // 発射ごとに Spec を読む。値が変わったら新しく作り、古いもの(飛行中の弾が使用中)は武装の破棄時にまとめて破棄する。

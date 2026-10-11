@@ -1,23 +1,31 @@
 using System.Collections;
+using System.Collections.Generic;
 using EWL.Api;
 using EWL.Besiege;
 using EWL.Effects;
+using EWL.Net;
 using UnityEngine;
 
 namespace EWL.Weapons
 {
-    // 弾1発。シミュ権威側にだけ存在する(MP 同期は未実装)。ProjectilePool が組み立て・貸し出し・回収を行う。
-    // シミュが終わったら次のフレームで回収される。
+    // 弾1発。ProjectilePool が組み立て・貸し出し・回収を行う。シミュが終わったら次のフレームで回収される。
+    // 実弾はシミュ権威側にだけ存在する。MP クライアントではホストの弾の見た目だけを出すプロキシとして使う(当たり判定なし)。
     internal sealed class Projectile : MonoBehaviour
     {
         private const float ColliderEnableDelay = 0.02f; // 発射直後の自機誤爆防止(ACM と同じ)
         private const float RemoveAfterHit = 1f;         // 爆発も即消滅もしない弾が命中後に消えるまで(ACM と同じ)
         private const float TimeFuseRandom = 0.05f;      // 時限信管起爆の乱数幅(ACM と同じ)
+        private const float MaxExtrapolation = 0.5f;     // プロキシ: スナップショットが途絶えたら外挿を止める
+        private const float CorrectionRate = 10f;        // プロキシ: スナップショットとのずれを詰める速さ [1/s]
         internal const float DefaultRadius = 0.1f;
 
         private static Mesh _sphereMesh;
 
         internal ProjectilePool.Pool Home;
+        /// <summary>MP の弾 ID。0 なら配信していない(ホスト)/登録されていない(クライアント)。</summary>
+        internal int NetworkId;
+        /// <summary>プロキシ: 生成されたときのホストのスナップショット番号。</summary>
+        internal int SpawnFrame;
 
         private Rigidbody _rb;
         private Collider[] _colliders;
@@ -33,6 +41,17 @@ namespace EWL.Weapons
         private float _age;
         private float _timeFuse; // 発射時の値(スライダーで変わっても飛行中の弾は変えない)
         private bool _active, _collidersOn, _hit, _detonating;
+        // 撃った側(命中イベント用。発射時点の値)
+        private Weapon _weapon;
+        private BlockBehaviour _shooterBlock;
+        private ushort _shooterPlayerId;
+        private MPTeam _shooterTeam;
+        // プロキシ
+        private bool _proxy;
+        private Vector3 _networkPosition, _networkVelocity, _correction;
+        private float _networkTime;
+
+        internal Vector3 Velocity { get { return _rb.velocity; } }
 
         /// <summary>弾のオブジェクトを組み立てる(非アクティブ)。形はここで固定。</summary>
         internal static Projectile Build(Transform parent, ProjectileSpec spec)
@@ -56,25 +75,12 @@ namespace EWL.Weapons
             Collider[] ignore, PhysicMaterial physicMaterial, Material material)
         {
             var projectileSpec = spec.Projectile;
-            _owner = owner;
-            _spec = spec;
-            _simulationScope = Simulation.Scope;
-            _age = 0f;
-            _timeFuse = projectileSpec.TimeFuse;
-            _active = true;
-            _collidersOn = _hit = _detonating = false;
-
-            transform.SetParent(null, false);
-            transform.position = pos;
-            transform.rotation = rot;
-            transform.localScale = Vector3.one;
-
-            foreach (var collider in _colliders)
-            {
-                collider.enabled = false;
-                collider.sharedMaterial = physicMaterial;
-            }
-            ApplyVisual(projectileSpec, material);
+            Begin(owner, spec, pos, rot, material);
+            _weapon = owner.Owner;
+            _shooterBlock = owner.Block;
+            _shooterPlayerId = Simulation.PlayerIdOf(owner.Block);
+            _shooterTeam = owner.Block.Team;
+            foreach (var collider in _colliders) collider.sharedMaterial = physicMaterial;
 
             gameObject.SetActive(true);
             _ignored = ignore;
@@ -87,10 +93,81 @@ namespace EWL.Weapons
             _rb.collisionDetectionMode = projectileSpec.CollisionMode;
             _rb.velocity = velocity;
             _rb.angularVelocity = Vector3.zero;
+            AttachEffects();
+        }
 
-            int effectLimit = projectileSpec.PoolSize;
-            _trail = EffectPlayer.Attach(spec.Effects.Trail, transform, _simulationScope, effectLimit);
-            _bullet = EffectPlayer.Attach(spec.Effects.Bullet, transform, _simulationScope, effectLimit);
+        /// <summary>MP クライアント: ホストの弾の見た目だけを出す。当たり判定・物理なし、位置はスナップショットで外挿する。</summary>
+        internal void LaunchProxy(WeaponDriver owner, WeaponSpec spec, Vector3 pos, Quaternion rot, Vector3 velocity, Material material)
+        {
+            Begin(owner, spec, pos, rot, material);
+            _proxy = true;
+            _collidersOn = true; // 有効化しない
+            _networkPosition = pos;
+            _networkVelocity = velocity;
+            _correction = Vector3.zero;
+            _networkTime = Time.time;
+            gameObject.SetActive(true);
+            _rb.collisionDetectionMode = CollisionDetectionMode.Discrete; // キネマティックに連続判定は使えない
+            _rb.isKinematic = true;
+            AttachEffects();
+        }
+
+        private void Begin(WeaponDriver owner, WeaponSpec spec, Vector3 pos, Quaternion rot, Material material)
+        {
+            _owner = owner;
+            _spec = spec;
+            _simulationScope = owner.Scope;
+            _age = 0f;
+            _timeFuse = spec.Projectile.TimeFuse;
+            _active = true;
+            _proxy = _collidersOn = _hit = _detonating = false;
+
+            transform.SetParent(null, false);
+            transform.position = pos;
+            transform.rotation = rot;
+            transform.localScale = Vector3.one;
+            foreach (var collider in _colliders) collider.enabled = false;
+            ApplyVisual(spec.Projectile, material);
+        }
+
+        private void AttachEffects()
+        {
+            int effectLimit = _spec.Projectile.PoolSize;
+            _trail = EffectPlayer.Attach(_spec.Effects.Trail, transform, _simulationScope, effectLimit);
+            _bullet = EffectPlayer.Attach(_spec.Effects.Bullet, transform, _simulationScope, effectLimit);
+        }
+
+        internal void ReceiveSnapshot(Vector3 position, Vector3 velocity)
+        {
+            var shown = transform.position;
+            _networkPosition = position;
+            _networkVelocity = velocity;
+            _networkTime = Time.time;
+            _correction = shown - position; // 見た目を飛ばさず、ずれを徐々に詰める
+        }
+
+        /// <summary>ホストで弾が消えた。爆発していれば同じ位置・向きでエフェクトと音を出す。</summary>
+        internal void EndProxy(bool exploded, Vector3 position, Quaternion effectRotation)
+        {
+            if (exploded)
+            {
+                var effects = _spec.Effects;
+                EffectPlayer.PlayOnce(effects.Explosion, null, position, effectRotation, Vector3.one, _simulationScope, _spec.Projectile.PoolSize);
+                EffectPlayer.PlaySound(effects.ExplosionSounds, position, Sounds.ExplosionTemplate);
+            }
+            Despawn();
+        }
+
+        private void UpdateProxy()
+        {
+            _age += Time.deltaTime;
+            float elapsed = Mathf.Min(Time.time - _networkTime, MaxExtrapolation);
+            var predicted = _networkPosition + _networkVelocity * elapsed;
+            if (!_spec.Projectile.IgnoreGravity) predicted += Physics.gravity * (0.5f * elapsed * elapsed);
+            _correction *= Mathf.Exp(-CorrectionRate * Time.deltaTime);
+            transform.position = predicted + _correction;
+            // 取りこぼし対策の上限(通常は Despawn か生存一覧で消える)
+            if (_age >= _spec.Projectile.Lifetime + 2f) Despawn();
         }
 
         private static Collider[] BuildColliders(Transform root, ProjectileSpec spec)
@@ -175,6 +252,7 @@ namespace EWL.Weapons
         private void Update()
         {
             if (_simulationScope == null) { Despawn(); return; } // シミュ終了(武装ブロックが壊れても弾は飛び続ける)
+            if (_proxy) { UpdateProxy(); return; }
             _age += Time.deltaTime;
             if (!_collidersOn && _age >= ColliderEnableDelay)
             {
@@ -196,6 +274,11 @@ namespace EWL.Weapons
 
             var impact = _spec.Impact;
             var attachTo = Damage.ApplyHit(collision.collider, _rb.velocity, impact.ImpactForce, impact.BlockDamage, impact.EntityDamage, impact.Attach);
+            if (Weapon.HasHitListeners(_weapon))
+            {
+                var point = collision.contacts.Length > 0 ? collision.contacts[0].point : transform.position;
+                RaiseHit(Damage.BlockOf(collision.collider), collision.collider, point, false);
+            }
             if (impact.Attach) Stick(attachTo);
             EffectPlayer.Fade(_trail);
             _trail = null;
@@ -237,10 +320,14 @@ namespace EWL.Weapons
             var pos = transform.position;
             if (impact.ExplosionRadius > 0f)
             {
-                Damage.Explode(pos, impact.ExplosionRadius, impact.ExplosionPower, impact.ExplosionUpPower);
-                EffectPlayer.PlayOnce(effects.Explosion, null, pos, effects.ExplosionFacesNormal ? effectRotation : Quaternion.identity,
-                    Vector3.one, _simulationScope, _spec.Projectile.PoolSize);
+                var affected = Weapon.HasHitListeners(_weapon) ? new List<Rigidbody>() : null;
+                Damage.Explode(pos, impact.ExplosionRadius, impact.ExplosionPower, impact.ExplosionUpPower, affected);
+                if (affected != null)
+                    foreach (var body in affected) RaiseHit(body.GetComponent<BlockBehaviour>(), null, pos, true);
+                var rotation = effects.ExplosionFacesNormal ? effectRotation : Quaternion.identity;
+                EffectPlayer.PlayOnce(effects.Explosion, null, pos, rotation, Vector3.one, _simulationScope, _spec.Projectile.PoolSize);
                 EffectPlayer.PlaySound(effects.ExplosionSounds, pos, Sounds.ExplosionTemplate);
+                if (NetworkId != 0) ProjectileSync.Despawned(this, true, pos, rotation);
                 Despawn();
             }
             else
@@ -256,11 +343,27 @@ namespace EWL.Weapons
             Despawn();
         }
 
+        private void RaiseHit(BlockBehaviour block, Collider collider, Vector3 point, bool isExplosion)
+        {
+            Weapon.RaiseHit(new ProjectileHit
+            {
+                Weapon = _weapon,
+                ShooterBlock = _shooterBlock,
+                ShooterPlayerId = _shooterPlayerId,
+                ShooterTeam = _shooterTeam,
+                Block = block,
+                Collider = collider,
+                Point = point,
+                IsExplosion = isExplosion,
+            });
+        }
+
         /// <summary>プールへ戻す。プールの上限で最古の弾を回収するときにも呼ばれる。</summary>
         internal void Despawn()
         {
             if (!_active) return;
             _active = false;
+            NotifyNetworkRemoved();
             StopAllCoroutines();
             EffectPlayer.Fade(_trail);
             EffectPlayer.Return(_bullet);
@@ -270,11 +373,21 @@ namespace EWL.Weapons
             _owner = null;
             _spec = null;
             _simulationScope = null;
+            _weapon = null;
+            _shooterBlock = null;
             ProjectilePool.Release(this);
+        }
+
+        private void NotifyNetworkRemoved()
+        {
+            if (NetworkId == 0) return;
+            if (_proxy) ProjectileSync.ProxyRemoved(this);
+            else ProjectileSync.Despawned(this, false, transform.position, transform.rotation);
         }
 
         private void OnDestroy()
         {
+            if (_active) NotifyNetworkRemoved(); // 刺さった先ごと破棄された
             ProjectilePool.Forget(this);
         }
     }

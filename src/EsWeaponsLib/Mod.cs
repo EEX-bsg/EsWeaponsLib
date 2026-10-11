@@ -1,6 +1,7 @@
 using Modding;
 using Modding.Modules;
 using EWL.Modules;
+using EWL.Net;
 
 namespace EWL
 {
@@ -10,6 +11,7 @@ namespace EWL
         {
             CustomModules.AddBlockModule<EwlWeaponModule, EwlWeaponBehaviour>("EwlWeapon", false);
             CustomModules.AddBlockModule<EwlBlockPhysicsModule, EwlBlockPhysicsBehaviour>("EwlBlockPhysics", false);
+            ProjectileSync.Initialize();
         }
     }
 }
