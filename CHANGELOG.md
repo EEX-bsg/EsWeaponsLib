@@ -19,6 +19,12 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   Colliders/Mesh/Texture)、`Impact`(BlockDamage/EntityDamage/ImpactForce/Attach/ExplosionRadius/ExplosionPower/ExplosionUpPower/
   FuseDelay/FuseRandom/DespawnOnHit)、`Effects`(AssetBundle/ShotFlash+Position/Rotation/Scale/Trail/Bullet/Explosion/
   ExplosionFacesNormal/FireSounds/ExplosionSounds)。
+- バースト・弾倉・リロード。`FireSpec.BurstCount`(既定 1)/`BurstInterval`(既定 0.1 秒)/`MagazineCapacity`(既定 0 = 弾倉なし)/
+  `ReloadTime`(既定 1 秒)/`AutoReload`(既定 true)、`EffectSpec.ReloadSounds`、`Weapon.ReserveAmmo` / `IsReloading` / `TryReload()` /
+  `ReloadStarted`。弾倉を使う武装では `Weapon.Ammo` は弾倉内の弾、`FireSpec.Ammo` は弾倉を含む総弾数。`Fired` はバーストの1発ごと。
+  無限弾薬では弾倉は減り(リロードは要る)、予備弾は減らない。
+  `EwlWeapon` に `ReloadKey` / `AutoReloadToggle` / `DelaySlider`(値を Fire/Delay に加算)/ `TimeFuseSlider`(値を Projectile/TimeFuse に使う)、
+  `Fire` に BurstCount/BurstInterval/MagazineCapacity/ReloadTime/AutoReload、`Effects` に ReloadSounds を追加。
 - XML モジュール `EwlBlockPhysics`(仮称)。全要素省略可で、省略した項目は本体の値のまま。
   `JointStrength`(接合の破断力・破断トルク。0 = 変えない)、`Material`(Friction/Bounciness/FrictionCombine/BounceCombine。
   書けばブロックの全コライダーに適用)、`Rotation`(AxisX/AxisY/AxisZ = Locked/Limited/Free、Spring/Damper/Limit[度])。

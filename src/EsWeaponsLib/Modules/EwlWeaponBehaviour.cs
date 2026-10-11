@@ -13,6 +13,10 @@ namespace EWL.Modules
 	{
 		private MKey _fireKey;
 		private MToggle _holdToggle;
+		private MKey _reloadKey;
+		private MToggle _autoReloadToggle;
+		private MSlider _delaySlider;
+		private MSlider _timeFuseSlider;
 		private Weapon _weapon;
 		private bool _autoFire;
 		private ModAssetBundle _effectBundle;
@@ -21,6 +25,10 @@ namespace EWL.Modules
 		{
 			_fireKey = GetKey(Module.FireKey);
 			if (Module.HoldToFireToggle != null) _holdToggle = GetToggle(Module.HoldToFireToggle);
+			if (Module.ReloadKey != null) _reloadKey = GetKey(Module.ReloadKey);
+			if (Module.AutoReloadToggle != null) _autoReloadToggle = GetToggle(Module.AutoReloadToggle);
+			if (Module.DelaySlider != null) _delaySlider = GetSlider(Module.DelaySlider);
+			if (Module.TimeFuseSlider != null) _timeFuseSlider = GetSlider(Module.TimeFuseSlider);
 		}
 
 		public override void OnSimulateStart()
@@ -49,6 +57,7 @@ namespace EWL.Modules
 			if (!hold && (_fireKey.IsPressed || _fireKey.EmulationPressed())) _autoFire = !_autoFire;
 			bool trigger = hold ? _fireKey.IsHeld || _fireKey.EmulationHeld(true) : _autoFire;
 			if (trigger) _weapon.TryFire();
+			if (_reloadKey != null && (_reloadKey.IsPressed || _reloadKey.EmulationPressed())) _weapon.TryReload();
 		}
 
 		private WeaponSpec BuildSpec()
@@ -64,7 +73,13 @@ namespace EWL.Modules
 			fire.Delay = Module.Fire.Delay;
 			fire.RandomDelay = Module.Fire.RandomDelay;
 			fire.Recoil = Module.Fire.Recoil;
+			if (_delaySlider != null) fire.Delay += _delaySlider.Value;
 			fire.Ammo = Module.Fire.Ammo;
+			fire.BurstCount = Module.Fire.BurstCount;
+			fire.BurstInterval = Module.Fire.BurstInterval;
+			fire.MagazineCapacity = Module.Fire.MagazineCapacity;
+			fire.ReloadTime = Module.Fire.ReloadTime;
+			fire.AutoReload = _autoReloadToggle != null ? _autoReloadToggle.IsActive : Module.Fire.AutoReload;
 
 			var projectileXml = Module.Projectile;
 			var projectile = spec.Projectile;
@@ -74,7 +89,7 @@ namespace EWL.Modules
 			projectile.IgnoreGravity = projectileXml.IgnoreGravity;
 			projectile.CollisionMode = projectileXml.CollisionMode;
 			projectile.Lifetime = projectileXml.Lifetime;
-			projectile.TimeFuse = projectileXml.TimeFuse;
+			projectile.TimeFuse = _timeFuseSlider != null ? _timeFuseSlider.Value : projectileXml.TimeFuse;
 			projectile.PoolSize = projectileXml.PoolSize;
 			projectile.PoolKey = PoolKeyFor(Module);
 			projectile.Friction = projectileXml.Friction;
@@ -115,6 +130,7 @@ namespace EWL.Modules
 			effects.ExplosionFacesNormal = effectsXml.ExplosionFacesNormal;
 			AddClips(effectsXml.FireSounds, effects.FireSounds, "Effects/FireSounds");
 			AddClips(effectsXml.ExplosionSounds, effects.ExplosionSounds, "Effects/ExplosionSounds");
+			AddClips(effectsXml.ReloadSounds, effects.ReloadSounds, "Effects/ReloadSounds");
 			return spec;
 		}
 

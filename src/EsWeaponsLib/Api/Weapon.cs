@@ -23,6 +23,7 @@ namespace EWL.Api
 			var weapon = new Weapon(driver);
 			driver.Owner = weapon;
 			driver.Fired = weapon.RaiseFired;
+			driver.ReloadStarted = weapon.RaiseReloadStarted;
 			driver.Init(block, spec);
 			return weapon;
 		}
@@ -36,28 +37,47 @@ namespace EWL.Api
 			return result;
 		}
 
-		/// <summary>定義。発射のたびに読まれるので、書き換えると次の弾から反映される。</summary>
+		/// <summary>定義。発射のたびに読まれるので、書き換えると次の弾から反映される。
+		/// ただし弾数(Fire.Ammo)と弾倉の初期の詰め方は <see cref="Create"/> の時だけ使う。</summary>
 		public WeaponSpec Spec
 		{
 			get { return _driver.Spec; }
 			set { if (value == null) throw new ArgumentNullException("value"); _driver.Spec = value; }
 		}
 
-		/// <summary>残弾。負値は無制限。</summary>
+		/// <summary>すぐ撃てる残弾(弾倉を使う武装は弾倉内の弾)。負値は無制限。</summary>
 		public int Ammo { get { return _driver.Ammo; } }
+
+		/// <summary>弾倉の外の予備弾。負値は無制限。弾倉を使わない武装は 0。</summary>
+		public int ReserveAmmo { get { return _driver.ReserveAmmo; } }
+
+		/// <summary>リロード中なら true(撃てない)。</summary>
+		public bool IsReloading { get { return _driver.IsReloading; } }
 
 		/// <summary>破棄済みなら false。</summary>
 		public bool IsAlive { get { return _driver != null; } }
 
-		/// <summary>発射を受け付けた(弾数を消費した)とき。弾の生成は遅延の後。</summary>
+		/// <summary>1発撃つ(弾数を消費する)たび。バーストでは弾ごと。弾の生成は遅延の後。</summary>
 		public event Action Fired;
 
+		/// <summary>リロードを始めたとき。弾倉はリロード時間の後に満たされる。</summary>
+		public event Action ReloadStarted;
+
 		/// <summary>
-		/// 発射を要求する。実行権威側(SP・MP Host・MP Client ローカルシミュ)で、間隔と弾数が許すときだけ受け付けて true。
+		/// 発射を要求する。実行権威側(SP・MP Host・MP Client ローカルシミュ)で、間隔・弾数・リロード中でないことが許すときだけ受け付けて true。
+		/// BurstCount が 2 以上なら、この1回でバーストを撃つ。
 		/// </summary>
 		public bool TryFire()
 		{
 			return _driver != null && _driver.TryFire();
+		}
+
+		/// <summary>
+		/// リロードを要求する。実行権威側で、弾倉を使い、弾倉に空きがあり、予備弾があり、リロード中でないときだけ受け付けて true。
+		/// </summary>
+		public bool TryReload()
+		{
+			return _driver != null && _driver.TryReload();
 		}
 
 		/// <summary>武装を外す。飛んでいる弾はシミュ終了まで残る。</summary>
@@ -66,13 +86,16 @@ namespace EWL.Api
 			if (_driver != null) UnityEngine.Object.Destroy(_driver);
 		}
 
-		private void RaiseFired()
+		private void RaiseFired() { Raise(Fired, "Fired"); }
+
+		private void RaiseReloadStarted() { Raise(ReloadStarted, "ReloadStarted"); }
+
+		private static void Raise(Action handler, string eventName)
 		{
-			var handler = Fired;
 			if (handler == null) return;
-			// 利用側ハンドラの例外で発射処理を止めない
+			// 利用側ハンドラの例外で発射・リロード処理を止めない
 			try { handler(); }
-			catch (Exception ex) { Debug.LogError("[EWL] Weapon.Fired handler threw: " + ex); }
+			catch (Exception ex) { Debug.LogError("[EWL] Weapon." + eventName + " handler threw: " + ex); }
 		}
 	}
 }

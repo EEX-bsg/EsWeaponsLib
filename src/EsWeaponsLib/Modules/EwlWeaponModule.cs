@@ -22,6 +22,22 @@ namespace EWL.Modules
 		[XmlElement, DefaultValue(null)]
 		public MToggleReference HoldToFireToggle;
 
+		/// <summary>押すとリロード(Fire/MagazineCapacity が 1 以上のとき)。</summary>
+		[XmlElement, DefaultValue(null)]
+		public MKeyReference ReloadKey;
+
+		/// <summary>ON で弾倉が空になったら自動リロード。省略時は Fire/AutoReload。</summary>
+		[XmlElement, DefaultValue(null)]
+		public MToggleReference AutoReloadToggle;
+
+		/// <summary>値 [s] を Fire/Delay に加える。</summary>
+		[XmlElement, DefaultValue(null)]
+		public MSliderReference DelaySlider;
+
+		/// <summary>値 [s] を Projectile/TimeFuse に使う(XML の値より優先)。</summary>
+		[XmlElement, DefaultValue(null)]
+		public MSliderReference TimeFuseSlider;
+
 		[XmlElement, DefaultValue(null)] public MuzzleXml Muzzle = new MuzzleXml();
 		[XmlElement, DefaultValue(null)] public FireXml Fire = new FireXml();
 		[XmlElement, DefaultValue(null)] public ProjectileXml Projectile = new ProjectileXml();
@@ -47,6 +63,11 @@ namespace EWL.Modules
 		[XmlElement, DefaultValue(null)] public float RandomDelay = 0f;
 		[XmlElement, DefaultValue(null)] public float Recoil = 1f;
 		[XmlElement, DefaultValue(null)] public int Ammo = -1;
+		[XmlElement, DefaultValue(null)] public int BurstCount = 1;
+		[XmlElement, DefaultValue(null)] public float BurstInterval = 0.1f;
+		[XmlElement, DefaultValue(null)] public int MagazineCapacity = 0;
+		[XmlElement, DefaultValue(null)] public float ReloadTime = 1f;
+		[XmlElement, DefaultValue(null)] public bool AutoReload = true;
 	}
 
 	[Serializable]
@@ -111,5 +132,8 @@ namespace EWL.Modules
 
 		[XmlArray("ExplosionSounds"), XmlArrayItem("AudioClip"), DefaultValue(null), CanBeEmpty]
 		public List<ResourceReference> ExplosionSounds = new List<ResourceReference>();
+
+		[XmlArray("ReloadSounds"), XmlArrayItem("AudioClip"), DefaultValue(null), CanBeEmpty]
+		public List<ResourceReference> ReloadSounds = new List<ResourceReference>();
 	}
 }

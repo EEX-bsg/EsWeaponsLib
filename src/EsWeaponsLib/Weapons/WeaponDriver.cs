@@ -14,11 +14,15 @@ namespace EWL.Weapons
 		internal Weapon Owner;
 		internal WeaponSpec Spec;
 		internal Action Fired;
+		internal Action ReloadStarted;
 		internal int Ammo;
+		internal int ReserveAmmo;
+		internal bool IsReloading;
 
 		private BlockBehaviour _block;
 		private Collider[] _ownColliders;
 		private float _nextFireTime;
+		private bool _bursting;
 		private PhysicMaterial _physicMaterial;
 		private Material _material;
 		private Texture _materialTexture;
@@ -29,10 +33,23 @@ namespace EWL.Weapons
 		{
 			_block = block;
 			Spec = spec;
+			int capacity = spec.Fire.MagazineCapacity;
 			Ammo = spec.Fire.Ammo;
+			if (capacity > 0)
+			{
+				Ammo = Ammo < 0 ? capacity : Mathf.Min(capacity, spec.Fire.Ammo);
+				ReserveAmmo = spec.Fire.Ammo < 0 ? -1 : spec.Fire.Ammo - Ammo;
+			}
 			_ownColliders = block.GetComponentsInChildren<Collider>();
 			_privatePoolKey = "weapon#" + GetInstanceID();
 			ProjectilePool.Prewarm(PoolKey, spec.Projectile);
+		}
+
+		// 無効化でコルーチンが止まるので、途中のバースト・リロードを取り消す(フラグが残ると撃てなくなる)
+		private void OnDisable()
+		{
+			_bursting = false;
+			IsReloading = false;
 		}
 
 		private void OnDestroy()
@@ -52,18 +69,72 @@ namespace EWL.Weapons
 			}
 		}
 
+		private bool UsesMagazine { get { return Spec.Fire.MagazineCapacity > 0; } }
+
 		internal bool TryFire()
 		{
-			if (!Simulation.HasAuthority(_block) || Time.time < _nextFireTime) return false;
-			bool infinite = Simulation.IsInfiniteAmmo(_block);
-			if (Ammo == 0 && !infinite) return false;
-
-			var fire = Spec.Fire;
-			_nextFireTime = Time.time + fire.Interval;
-			if (Ammo > 0 && !infinite) Ammo--;
-			if (Fired != null) Fired();
-			StartCoroutine(Shoot(fire.Delay + UnityEngine.Random.Range(0f, fire.RandomDelay)));
+			if (!Simulation.HasAuthority(_block) || Time.time < _nextFireTime || _bursting || IsReloading) return false;
+			if (!HasAmmo())
+			{
+				if (UsesMagazine && Spec.Fire.AutoReload) TryReload();
+				return false;
+			}
+			StartCoroutine(Burst());
 			return true;
+		}
+
+		// 無限弾薬でも弾倉は減る(リロードの手間は残す)。
+		private bool HasAmmo()
+		{
+			return Ammo != 0 || (!UsesMagazine && Simulation.IsInfiniteAmmo(_block));
+		}
+
+		private IEnumerator Burst()
+		{
+			_bursting = true;
+			int count = Mathf.Max(1, Spec.Fire.BurstCount);
+			for (int i = 0; i < count && HasAmmo() && !IsReloading; i++)
+			{
+				if (i > 0) yield return new WaitForSeconds(Spec.Fire.BurstInterval);
+				if (_block == null || !HasAmmo()) break;
+				ConsumeOne();
+				var fire = Spec.Fire;
+				StartCoroutine(Shoot(fire.Delay + UnityEngine.Random.Range(0f, fire.RandomDelay)));
+			}
+			_nextFireTime = Time.time + Spec.Fire.Interval;
+			_bursting = false;
+			if (Ammo == 0 && UsesMagazine && Spec.Fire.AutoReload) TryReload();
+		}
+
+		private void ConsumeOne()
+		{
+			bool infinite = Simulation.IsInfiniteAmmo(_block);
+			if (Ammo > 0 && (UsesMagazine || !infinite)) Ammo--;
+			if (Fired != null) Fired();
+		}
+
+		internal bool TryReload()
+		{
+			if (!Simulation.HasAuthority(_block) || !UsesMagazine || IsReloading || _bursting) return false;
+			if (Ammo >= Spec.Fire.MagazineCapacity || (ReserveAmmo == 0 && !Simulation.IsInfiniteAmmo(_block))) return false;
+			StartCoroutine(Reload());
+			return true;
+		}
+
+		private IEnumerator Reload()
+		{
+			IsReloading = true;
+			if (ReloadStarted != null) ReloadStarted();
+			EffectPlayer.PlaySound(Spec.Effects.ReloadSounds, transform.position, Sounds.FireTemplate);
+			yield return new WaitForSeconds(Spec.Fire.ReloadTime);
+			int load = Mathf.Max(0, Spec.Fire.MagazineCapacity - Ammo);
+			if (ReserveAmmo >= 0 && !Simulation.IsInfiniteAmmo(_block))
+			{
+				load = Mathf.Min(load, ReserveAmmo);
+				ReserveAmmo -= load;
+			}
+			Ammo += load;
+			IsReloading = false;
 		}
 
 		private IEnumerator Shoot(float delay)

@@ -33,8 +33,19 @@ namespace EWL.Api
 		public float RandomDelay = 0f;
 		/// <summary>反動。弾の運動量 × この値の撃力をブロックへ逆向きに与える。</summary>
 		public float Recoil = 1f;
-		/// <summary>弾数。負値で無制限。マシンの無限弾薬設定時は消費しない。</summary>
+		/// <summary>総弾数(弾倉内を含む)。負値で無制限。マシンの無限弾薬設定時は消費しない
+		/// (弾倉を使う武装は弾倉の弾だけ減り、予備弾は減らない)。</summary>
 		public int Ammo = -1;
+		/// <summary>1回の発射要求で撃つ弾数。1発ごとに弾数を消費し、弾切れで止まる。</summary>
+		public int BurstCount = 1;
+		/// <summary>バースト内の弾の間隔 [s]。次の発射要求は最後の弾から Interval 後に受け付ける。</summary>
+		public float BurstInterval = 0.1f;
+		/// <summary>弾倉の容量。0 以下なら弾倉なし。武装の生成時に Ammo から弾倉を満たし、残りを予備弾にする。</summary>
+		public int MagazineCapacity = 0;
+		/// <summary>リロード時間 [s]。リロード中は撃てない。</summary>
+		public float ReloadTime = 1f;
+		/// <summary>弾倉が空になったら自動でリロードする。</summary>
+		public bool AutoReload = true;
 	}
 
 	public sealed class ProjectileSpec
@@ -110,6 +121,8 @@ namespace EWL.Api
 		public List<AudioClip> FireSounds = new List<AudioClip>();
 		/// <summary>爆発音(ランダムに1つ)。</summary>
 		public List<AudioClip> ExplosionSounds = new List<AudioClip>();
+		/// <summary>リロード開始時の音(ランダムに1つ)。</summary>
+		public List<AudioClip> ReloadSounds = new List<AudioClip>();
 	}
 
 	public enum ColliderKind { Sphere, Capsule, Box }
