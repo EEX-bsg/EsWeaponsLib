@@ -33,8 +33,12 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   null なら武装ごと)。XML は `EwlWeapon/Projectile/PoolSize`。`EwlWeapon` モジュールは同じブロック種別で弾を共有する。
 - `BundleAssets.Load<T>(ModAssetBundle, string)`。AssetBundle からアセットを取り出し、バンドル・名前・型ごとに覚える
   (見つからなかった名前も覚える)。未読込・読込エラー・見つからないときは null。未読込時の待ち方は型の説明を参照。
+- `ProjectileSpec.ShowWhenLoaded`(既定 false)/ XML `EwlWeapon/Projectile/ShowWhenLoaded`。撃てる状態の間、次の弾の見た目を
+  発射位置に表示する(発射の瞬間に消え、発射間隔の後に戻る。弾切れ・リロード中は表示しない)。
 
 ### Changed
+- `EwlWeapon` の押下判定(長押し OFF の連射切替・リロードキー)を `IsHeld` の変化で取るようにした(MP ホストでクライアントの
+  `IsPressed` を取りこぼさないため)。
 - 発射音・爆発音を本体の作法で鳴らすようにした。本体のミキサー(発射音 Blocks・爆発音 Explosions)を通るので音量スライダー・水中のこもり・
   スロー時のピッチが効く。3D の聞こえ方(距離減衰)はバニラの大砲(発射音)・爆弾(爆発音)に揃え、ピッチは毎回 ±5% 揺らす。
   音量はクリップのまま(従来の `PlayClipAtPoint` と同じ 1.0)。

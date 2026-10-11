@@ -87,6 +87,7 @@ EWL.Api.ProjectileSpec::MeshRotation : UnityEngine.Vector3
 EWL.Api.ProjectileSpec::MeshScale : UnityEngine.Vector3
 EWL.Api.ProjectileSpec::PoolKey : System.String
 EWL.Api.ProjectileSpec::PoolSize : System.Int32
+EWL.Api.ProjectileSpec::ShowWhenLoaded : System.Boolean
 EWL.Api.ProjectileSpec::System.Void .ctor()
 EWL.Api.ProjectileSpec::Texture : UnityEngine.Texture
 EWL.Api.ProjectileSpec::TimeFuse : System.Single
@@ -200,6 +201,7 @@ EWL.Modules.ProjectileXml::Lifetime : System.Single XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::Mass : System.Single XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::Mesh : Modding.Serialization.MeshReference XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::PoolSize : System.Int32 XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::ShowWhenLoaded : System.Boolean XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::System.Void .ctor()
 EWL.Modules.ProjectileXml::Texture : Modding.Serialization.ResourceReference XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::TimeFuse : System.Single XmlElement() DefaultValue()

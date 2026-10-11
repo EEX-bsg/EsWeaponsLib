@@ -19,6 +19,8 @@ namespace EWL.Modules
         private MSlider _timeFuseSlider;
         private Weapon _weapon;
         private bool _autoFire;
+        private bool _fireHeldBefore;
+        private bool _reloadHeldBefore;
         private ModAssetBundle _effectBundle;
 
         public override void SafeAwake()
@@ -33,7 +35,7 @@ namespace EWL.Modules
 
         public override void OnSimulateStart()
         {
-            _autoFire = false;
+            _autoFire = _fireHeldBefore = _reloadHeldBefore = false;
             _weapon = Weapon.Create(BlockBehaviour, BuildSpec());
             _effectBundle = ResolveBundle(Module.Effects.AssetBundle);
             // 本体はバンドルを非同期で読む。未読込なら読込完了で差し込む(読込済みで購読すると本体が全アセットを読み直すので、そのときは購読しない)
@@ -53,15 +55,28 @@ namespace EWL.Modules
         {
             if (_weapon == null) return;
             bool hold = _holdToggle != null ? _holdToggle.IsActive : Module.Fire.Hold;
-            // 実キーとエミュレーション(ロジックブロック等)は別経路
-            if (!hold && (_fireKey.IsPressed || _fireKey.EmulationPressed())) _autoFire = !_autoFire;
-            bool trigger = hold ? _fireKey.IsHeld || _fireKey.EmulationHeld(true) : _autoFire;
-            if (trigger)
+            bool fireHeld = IsHeld(_fireKey);
+            bool firePressed = fireHeld && !_fireHeldBefore;
+            _fireHeldBefore = fireHeld;
+            if (!hold && firePressed) _autoFire = !_autoFire;
+            if (hold ? fireHeld : _autoFire)
             {
                 ApplySliders(_weapon.Spec);
                 _weapon.TryFire();
             }
-            if (_reloadKey != null && (_reloadKey.IsPressed || _reloadKey.EmulationPressed())) _weapon.TryReload();
+            if (_reloadKey != null)
+            {
+                bool reloadHeld = IsHeld(_reloadKey);
+                if (reloadHeld && !_reloadHeldBefore) _weapon.TryReload();
+                _reloadHeldBefore = reloadHeld;
+            }
+        }
+
+        // 押した瞬間は IsHeld の変化で取る。MP ホストではクライアントの IsPressed が1フレームしか立たず取りこぼすことがある。
+        // 実キーとエミュレーション(ロジックブロック等)は別経路。
+        private static bool IsHeld(MKey key)
+        {
+            return key.IsHeld || key.EmulationHeld(true);
         }
 
         private WeaponSpec BuildSpec()
@@ -99,6 +114,7 @@ namespace EWL.Modules
             projectile.Bounciness = projectileXml.Bounciness;
             projectile.FrictionCombine = projectileXml.FrictionCombine;
             projectile.BounceCombine = projectileXml.BounceCombine;
+            projectile.ShowWhenLoaded = projectileXml.ShowWhenLoaded;
             if (projectileXml.Colliders != null)
                 foreach (var collider in projectileXml.Colliders) projectile.Colliders.Add(ToShape(collider));
             if (projectileXml.Mesh != null)

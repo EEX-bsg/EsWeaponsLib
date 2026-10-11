@@ -78,6 +78,9 @@ namespace EWL.Api
         public Vector3 MeshPosition = Vector3.zero;
         public Vector3 MeshRotation = Vector3.zero;
         public Vector3 MeshScale = Vector3.one;
+        /// <summary>撃てる状態の間、次の弾の見た目を発射位置に表示する(迫撃砲・爆弾など)。発射の瞬間に消え、発射間隔の後に戻る。
+        /// 弾切れ・リロード中は表示しない。見た目だけでコライダーは持たない。</summary>
+        public bool ShowWhenLoaded = false;
     }
 
     /// <summary>最初の命中で1回だけ適用する。</summary>

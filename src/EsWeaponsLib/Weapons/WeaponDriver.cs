@@ -23,6 +23,10 @@ namespace EWL.Weapons
         private Collider[] _ownColliders;
         private float _nextFireTime;
         private bool _bursting;
+        private int _pendingShots; // 遅延待ちで、まだ弾が出ていない発射
+        private GameObject _loadedVisual;
+        private MeshFilter _loadedMeshFilter;
+        private MeshRenderer _loadedRenderer;
         private PhysicMaterial _physicMaterial;
         private Material _material;
         private Texture _materialTexture;
@@ -50,6 +54,50 @@ namespace EWL.Weapons
         {
             _bursting = false;
             IsReloading = false;
+            _pendingShots = 0;
+        }
+
+        private void Update()
+        {
+            bool show = Spec.Projectile.ShowWhenLoaded && !IsReloading && HasAmmo()
+                && (_pendingShots > 0 || (Time.time >= _nextFireTime && !_bursting));
+            if (show) UpdateLoadedVisual();
+            if (_loadedVisual != null && _loadedVisual.activeSelf != show) _loadedVisual.SetActive(show);
+        }
+
+        // 発射位置に置く次の弾の見た目。Spec は書き換えられうるので表示中は毎フレーム合わせる(割り当てなし)。
+        private void UpdateLoadedVisual()
+        {
+            var projectile = Spec.Projectile;
+            if (_loadedVisual == null)
+            {
+                _loadedVisual = new GameObject("EwlLoadedProjectile");
+                _loadedVisual.transform.SetParent(transform, false);
+                var visual = new GameObject("Vis");
+                visual.transform.SetParent(_loadedVisual.transform, false);
+                _loadedMeshFilter = visual.AddComponent<MeshFilter>();
+                _loadedRenderer = visual.AddComponent<MeshRenderer>();
+                _owned.Add(_loadedVisual);
+            }
+            var root = _loadedVisual.transform;
+            root.localPosition = Spec.Fire.MuzzlePosition;
+            root.localRotation = Spec.Fire.MuzzleRotation;
+            var visualTransform = _loadedMeshFilter.transform;
+            if (projectile.Mesh != null)
+            {
+                visualTransform.localPosition = projectile.MeshPosition;
+                visualTransform.localRotation = Quaternion.Euler(projectile.MeshRotation);
+                visualTransform.localScale = projectile.MeshScale;
+                _loadedMeshFilter.sharedMesh = projectile.Mesh;
+            }
+            else
+            {
+                visualTransform.localPosition = Vector3.zero;
+                visualTransform.localRotation = Quaternion.identity;
+                visualTransform.localScale = Vector3.one * (Projectile.DefaultRadius * 2f);
+                _loadedMeshFilter.sharedMesh = Projectile.SphereMesh();
+            }
+            _loadedRenderer.sharedMaterial = MaterialFor(projectile);
         }
 
         private void OnDestroy()
@@ -139,8 +187,10 @@ namespace EWL.Weapons
 
         private IEnumerator Shoot(float delay)
         {
+            _pendingShots++;
             if (delay > 0f) yield return new WaitForSeconds(delay);
             yield return new WaitForFixedUpdate();
+            _pendingShots--;
             if (_block == null || !Simulation.HasAuthority(_block) || _block.Rigidbody == null) yield break;
 
             var fire = Spec.Fire;

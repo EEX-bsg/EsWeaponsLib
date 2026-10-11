@@ -13,7 +13,7 @@ namespace EWL.Weapons
         private const float ColliderEnableDelay = 0.02f; // 発射直後の自機誤爆防止(ACM と同じ)
         private const float RemoveAfterHit = 1f;         // 爆発も即消滅もしない弾が命中後に消えるまで(ACM と同じ)
         private const float TimeFuseRandom = 0.05f;      // 時限信管起爆の乱数幅(ACM と同じ)
-        private const float DefaultRadius = 0.1f;
+        internal const float DefaultRadius = 0.1f;
 
         private static Mesh _sphereMesh;
 
@@ -163,7 +163,7 @@ namespace EWL.Weapons
                     if (other != null) Physics.IgnoreCollision(collider, other, ignore); // シミュ中に破棄済みのことがある
         }
 
-        private static Mesh SphereMesh()
+        internal static Mesh SphereMesh()
         {
             if (_sphereMesh != null) return _sphereMesh;
             var primitive = GameObject.CreatePrimitive(PrimitiveType.Sphere);

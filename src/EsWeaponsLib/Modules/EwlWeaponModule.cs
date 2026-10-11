@@ -96,6 +96,8 @@ namespace EWL.Modules
         /// <summary>ブロックを定義した Mod のリソース名。</summary>
         [XmlElement, DefaultValue(null)] public MeshReference Mesh;
         [XmlElement, DefaultValue(null)] public ResourceReference Texture;
+        /// <summary>撃てる状態の間、次の弾の見た目を発射位置に表示する。</summary>
+        [XmlElement, DefaultValue(null)] public bool ShowWhenLoaded = false;
     }
 
     [Serializable]
