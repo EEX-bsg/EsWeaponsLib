@@ -162,7 +162,10 @@ namespace EWL.Weapons
         {
             _age += Time.deltaTime;
             float elapsed = Mathf.Min(Time.time - _networkTime, MaxExtrapolation);
-            var predicted = _networkPosition + _networkVelocity * elapsed;
+            // Unity の Drag は速度の指数減衰とみなせる: 移動量 = v (1 - e^-kt) / k
+            float drag = _spec.Projectile.Drag;
+            float travelTime = drag > 0.0001f ? (1f - Mathf.Exp(-drag * elapsed)) / drag : elapsed;
+            var predicted = _networkPosition + _networkVelocity * travelTime;
             if (!_spec.Projectile.IgnoreGravity) predicted += Physics.gravity * (0.5f * elapsed * elapsed);
             _correction *= Mathf.Exp(-CorrectionRate * Time.deltaTime);
             transform.position = predicted + _correction;
