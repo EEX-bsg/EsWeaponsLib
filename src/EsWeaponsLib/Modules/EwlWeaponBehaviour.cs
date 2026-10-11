@@ -56,7 +56,11 @@ namespace EWL.Modules
 			// 実キーとエミュレーション(ロジックブロック等)は別経路
 			if (!hold && (_fireKey.IsPressed || _fireKey.EmulationPressed())) _autoFire = !_autoFire;
 			bool trigger = hold ? _fireKey.IsHeld || _fireKey.EmulationHeld(true) : _autoFire;
-			if (trigger) _weapon.TryFire();
+			if (trigger)
+			{
+				ApplySliders(_weapon.Spec);
+				_weapon.TryFire();
+			}
 			if (_reloadKey != null && (_reloadKey.IsPressed || _reloadKey.EmulationPressed())) _weapon.TryReload();
 		}
 
@@ -73,7 +77,6 @@ namespace EWL.Modules
 			fire.Delay = Module.Fire.Delay;
 			fire.RandomDelay = Module.Fire.RandomDelay;
 			fire.Recoil = Module.Fire.Recoil;
-			if (_delaySlider != null) fire.Delay += _delaySlider.Value;
 			fire.Ammo = Module.Fire.Ammo;
 			fire.BurstCount = Module.Fire.BurstCount;
 			fire.BurstInterval = Module.Fire.BurstInterval;
@@ -89,7 +92,7 @@ namespace EWL.Modules
 			projectile.IgnoreGravity = projectileXml.IgnoreGravity;
 			projectile.CollisionMode = projectileXml.CollisionMode;
 			projectile.Lifetime = projectileXml.Lifetime;
-			projectile.TimeFuse = _timeFuseSlider != null ? _timeFuseSlider.Value : projectileXml.TimeFuse;
+			projectile.TimeFuse = projectileXml.TimeFuse;
 			projectile.PoolSize = projectileXml.PoolSize;
 			projectile.PoolKey = PoolKeyFor(Module);
 			projectile.Friction = projectileXml.Friction;
@@ -131,7 +134,15 @@ namespace EWL.Modules
 			AddClips(effectsXml.FireSounds, effects.FireSounds, "Effects/FireSounds");
 			AddClips(effectsXml.ExplosionSounds, effects.ExplosionSounds, "Effects/ExplosionSounds");
 			AddClips(effectsXml.ReloadSounds, effects.ReloadSounds, "Effects/ReloadSounds");
+			ApplySliders(spec);
 			return spec;
+		}
+
+		// スライダーはシミュ中に他のモジュールが動かすことがある(キーで信管時間を変える等)ので、発射ごとに読み直す。
+		private void ApplySliders(WeaponSpec spec)
+		{
+			if (_delaySlider != null) spec.Fire.Delay = Module.Fire.Delay + _delaySlider.Value;
+			if (_timeFuseSlider != null) spec.Projectile.TimeFuse = _timeFuseSlider.Value;
 		}
 
 		// Spec は発射のたびに読まれるので、シミュ中に差し込んでも次の弾から反映される。

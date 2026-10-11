@@ -31,6 +31,7 @@ namespace EWL.Weapons
 		private Collider[] _ignored;
 		private PooledEffect _trail, _bullet;
 		private float _age;
+		private float _timeFuse; // 発射時の値(スライダーで変わっても飛行中の弾は変えない)
 		private bool _active, _collidersOn, _hit, _detonating;
 
 		/// <summary>弾のオブジェクトを組み立てる(非アクティブ)。形はここで固定。</summary>
@@ -59,6 +60,7 @@ namespace EWL.Weapons
 			_spec = spec;
 			_simulationScope = Simulation.Scope;
 			_age = 0f;
+			_timeFuse = projectileSpec.TimeFuse;
 			_active = true;
 			_collidersOn = _hit = _detonating = false;
 
@@ -180,7 +182,7 @@ namespace EWL.Weapons
 				foreach (var collider in _colliders) collider.enabled = true;
 			}
 			var projectileSpec = _spec.Projectile;
-			if (!_detonating && projectileSpec.TimeFuse > 0f && _age >= projectileSpec.TimeFuse)
+			if (!_detonating && _timeFuse > 0f && _age >= _timeFuse)
 				Detonate(Random.Range(0f, TimeFuseRandom), transform.rotation);
 			if (_age >= projectileSpec.Lifetime) Despawn();
 		}

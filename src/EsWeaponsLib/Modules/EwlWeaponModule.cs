@@ -30,11 +30,11 @@ namespace EWL.Modules
 		[XmlElement, DefaultValue(null)]
 		public MToggleReference AutoReloadToggle;
 
-		/// <summary>値 [s] を Fire/Delay に加える。</summary>
+		/// <summary>値 [s] を Fire/Delay に加える。発射ごとに読む。</summary>
 		[XmlElement, DefaultValue(null)]
 		public MSliderReference DelaySlider;
 
-		/// <summary>値 [s] を Projectile/TimeFuse に使う(XML の値より優先)。</summary>
+		/// <summary>値 [s] を Projectile/TimeFuse に使う(XML の値より優先)。発射ごとに読み、飛行中の弾は変えない。</summary>
 		[XmlElement, DefaultValue(null)]
 		public MSliderReference TimeFuseSlider;
 
