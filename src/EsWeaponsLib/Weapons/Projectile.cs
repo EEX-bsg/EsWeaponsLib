@@ -40,6 +40,7 @@ namespace EWL.Weapons
         private PooledEffect _trail, _bullet;
         private float _age;
         private float _timeFuse; // 発射時の値(スライダーで変わっても飛行中の弾は変えない)
+        private bool _godToolExplosion; // 発射時の値(飛行中に武装ブロックが壊れてもマシンを辿らない)
         private bool _active, _collidersOn, _hit, _detonating;
         // 撃った側(命中イベント用。発射時点の値)
         private Weapon _weapon;
@@ -119,6 +120,7 @@ namespace EWL.Weapons
             _simulationScope = owner.Scope;
             _age = 0f;
             _timeFuse = spec.Projectile.TimeFuse;
+            _godToolExplosion = spec.Impact.ExplodesOnlyWithGodTool && Simulation.IsExplodingCannonballs(owner.Block);
             _active = true;
             _proxy = _collidersOn = _hit = _detonating = false;
 
@@ -303,7 +305,7 @@ namespace EWL.Weapons
             EffectPlayer.Fade(_trail);
             _trail = null;
 
-            if (impact.ExplosionRadius > 0f)
+            if (Explodes)
             {
                 var normal = collision.contacts.Length > 0 ? collision.contacts[0].normal : -transform.forward;
                 Detonate(Random.Range(impact.FuseDelay, impact.FuseDelay + impact.FuseRandom), Quaternion.FromToRotation(Vector3.forward, normal));
@@ -326,6 +328,15 @@ namespace EWL.Weapons
             transform.localScale = new Vector3(local.x / lossy.x, local.y / lossy.y, local.z / lossy.z);
         }
 
+        private bool Explodes
+        {
+            get
+            {
+                var impact = _spec.Impact;
+                return impact.ExplosionRadius > 0f && (!impact.ExplodesOnlyWithGodTool || _godToolExplosion);
+            }
+        }
+
         private void Detonate(float delay, Quaternion effectRotation)
         {
             _detonating = true;
@@ -338,8 +349,9 @@ namespace EWL.Weapons
             var impact = _spec.Impact;
             var effects = _spec.Effects;
             var pos = transform.position;
-            if (impact.ExplosionRadius > 0f)
+            if (Explodes)
             {
+                if (_godToolExplosion) Simulation.MarkGodToolUsed();
                 var affected = Weapon.HasHitListeners(_weapon) ? new List<Rigidbody>() : null;
                 Damage.Explode(pos, impact.ExplosionRadius, impact.ExplosionPower, impact.ExplosionUpPower, affected);
                 if (affected != null)

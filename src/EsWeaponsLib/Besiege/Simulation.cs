@@ -39,5 +39,17 @@ namespace EWL.Besiege
         {
             return block.ParentMachine != null && block.ParentMachine.InfiniteAmmoMode;
         }
+
+        /// <summary>ゴッドツール「爆発する砲弾」。静的な GodTools はローカル UI の値なので、MP でも正しい発射者のマシンのフラグを読む。</summary>
+        internal static bool IsExplodingCannonballs(BlockBehaviour block)
+        {
+            return block != null && block.ParentMachine != null && block.ParentMachine.ExplodingCannonballs;
+        }
+
+        /// <summary>ゴッドツールの効果が出たことを記録する(本体と同じく、レベルのクリア記録に反映される)。</summary>
+        internal static void MarkGodToolUsed()
+        {
+            StatMaster.GodTools.HasBeenUsed = true;
+        }
     }
 }

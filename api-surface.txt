@@ -71,6 +71,7 @@ EWL.Api.ImpactSpec::Attach : System.Boolean
 EWL.Api.ImpactSpec::BlockDamage : System.Single
 EWL.Api.ImpactSpec::DespawnOnHit : System.Boolean
 EWL.Api.ImpactSpec::EntityDamage : System.Single
+EWL.Api.ImpactSpec::ExplodesOnlyWithGodTool : System.Boolean
 EWL.Api.ImpactSpec::ExplosionPower : System.Single
 EWL.Api.ImpactSpec::ExplosionRadius : System.Single
 EWL.Api.ImpactSpec::ExplosionUpPower : System.Single
@@ -196,6 +197,7 @@ EWL.Modules.ImpactXml::Attach : System.Boolean XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::BlockDamage : System.Single XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::DespawnOnHit : System.Boolean XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::EntityDamage : System.Single XmlElement() DefaultValue()
+EWL.Modules.ImpactXml::ExplodesOnlyWithGodTool : System.Boolean XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::ExplosionPower : System.Single XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::ExplosionRadius : System.Single XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::ExplosionUpPower : System.Single XmlElement() DefaultValue()

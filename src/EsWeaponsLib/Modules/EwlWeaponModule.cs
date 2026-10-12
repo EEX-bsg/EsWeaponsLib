@@ -120,6 +120,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(null)] public float ImpactForce = 10f;
         [XmlElement, DefaultValue(null)] public bool Attach = false;
         [XmlElement, DefaultValue(null)] public float ExplosionRadius = 0f;
+        [XmlElement, DefaultValue(null)] public bool ExplodesOnlyWithGodTool = false;
         [XmlElement, DefaultValue(null)] public float ExplosionPower = 0f;
         [XmlElement, DefaultValue(null)] public float ExplosionUpPower = 0f;
         [XmlElement, DefaultValue(null)] public float FuseDelay = 0f;

@@ -176,6 +176,7 @@ namespace EWL.Weapons
         private void ConsumeOne()
         {
             bool infinite = Simulation.IsInfiniteAmmo(_block);
+            if (infinite) Simulation.MarkGodToolUsed();
             if (Ammo > 0 && (UsesMagazine || !infinite)) Ammo--;
             if (Fired != null) Fired();
             ProjectileSync.WeaponStateChanged(this, WeaponStateFlags.Fired);

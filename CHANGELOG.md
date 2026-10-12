@@ -44,6 +44,9 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   ローカルシミュの弾は他のプレイヤーに配信しない。
 - 命中イベント `Weapon.Hit`(その武装の弾)と静的 `Weapon.AnyHit`(全武装)。引数 `ProjectileHit`(撃った武装・ブロック・プレイヤー ID・
   チーム、当たったブロック・コライダー・位置、爆風か)。直撃は1回、爆風は剛体ごとに1回。実行権威側(SP・MP ホスト・ローカルシミュ)でだけ発火。
+- ゴッドツール「爆発する砲弾」対応。`ImpactSpec.ExplodesOnlyWithGodTool` / XML `Impact/ExplodesOnlyWithGodTool`(既定 false)。
+  true の弾は通常は爆発せず、発射者のマシンでこのゴッドツールが有効なときだけ `ExplosionRadius` 等で爆発する(判定は発射時)。
+  爆発したとき・無限弾薬で撃ったときは本体と同じく「ゴッドツール使用済み」を記録する。
 
 ### Changed
 - 拡散(`Spread`)で曲げた方向に弾の向きも合わせるようにした(従来は向きは発射位置の向きのまま)。

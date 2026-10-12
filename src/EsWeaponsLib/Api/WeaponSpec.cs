@@ -108,6 +108,8 @@ namespace EWL.Api
         public bool Attach = false;
         /// <summary>爆発半径 [m]。0 なら爆発しない。</summary>
         public float ExplosionRadius = 0f;
+        /// <summary>通常は爆発しない弾として扱い、ゴッドツール「爆発する砲弾」が有効なときだけ ExplosionRadius 等で爆発する。</summary>
+        public bool ExplodesOnlyWithGodTool = false;
         /// <summary>AddExplosionForce の力。</summary>
         public float ExplosionPower = 0f;
         /// <summary>AddExplosionForce の上向き補正。</summary>

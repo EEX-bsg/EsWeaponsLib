@@ -141,6 +141,7 @@ namespace EWL.Modules
             impact.ImpactForce = impactXml.ImpactForce;
             impact.Attach = impactXml.Attach;
             impact.ExplosionRadius = impactXml.ExplosionRadius;
+            impact.ExplodesOnlyWithGodTool = impactXml.ExplodesOnlyWithGodTool;
             impact.ExplosionPower = impactXml.ExplosionPower;
             impact.ExplosionUpPower = impactXml.ExplosionUpPower;
             impact.FuseDelay = impactXml.FuseDelay;
