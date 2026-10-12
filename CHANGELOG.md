@@ -62,3 +62,8 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
     旧 `<ExplodeRadius>2</ExplodeRadius>` → 新 `<ExplosionRadius>2</ExplosionRadius>`。
   - `Projectile/Radius` を削除。球コライダーは `<Colliders><SphereCollider><Radius>0.1</Radius></SphereCollider></Colliders>`。
   - `Fire/Hold` の既定を `true` に変更。`false` は「押すたびに連射の開始・停止を切替」(旧: 押すたび1発)。
+
+### Fixed
+- 撃った武装が消えた後(MP で撃った人だけがビルドに戻った等)に、飛行中の弾の見た目がマテリアルエラーになり、摩擦・反発も既定値に
+  戻っていた。弾のマテリアル・物理マテリアルを武装の所有から外し、同じテクスチャ・同じ値どうしで共有するようにした。
+  弾は武装が消えても最後まで飛ぶ(従来の方針どおり)。

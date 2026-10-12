@@ -291,7 +291,8 @@ namespace EWL.Weapons
         {
             if (_hit || _detonating) return;
             var other = collision.collider.GetComponentInParent<Projectile>();
-            if (other != null && other._owner == _owner) return; // 同じ武装の弾同士は無視
+            // 同じ武装の弾同士は無視。参照で比べる(武装が破棄済みだと Unity の == は別々の武装でも一致する)
+            if (other != null && ReferenceEquals(other._owner, _owner)) return;
             _hit = true;
 
             var impact = _spec.Impact;

@@ -69,6 +69,7 @@
     <Compile Include="Modules\EwlWeaponModule.cs" />
     <Compile Include="Net\ProjectileSync.cs" />
     <Compile Include="Weapons\Projectile.cs" />
+    <Compile Include="Weapons\ProjectileMaterials.cs" />
     <Compile Include="Weapons\ProjectilePool.cs" />
     <Compile Include="Weapons\WeaponDriver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

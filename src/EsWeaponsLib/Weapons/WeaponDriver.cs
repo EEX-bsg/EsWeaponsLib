@@ -28,9 +28,6 @@ namespace EWL.Weapons
         private GameObject _loadedVisual;
         private MeshFilter _loadedMeshFilter;
         private MeshRenderer _loadedRenderer;
-        private PhysicMaterial _physicMaterial;
-        private Material _material;
-        private Texture _materialTexture;
         private string _privatePoolKey;
         private readonly List<UnityEngine.Object> _owned = new List<UnityEngine.Object>();
 
@@ -283,38 +280,15 @@ namespace EWL.Weapons
             }
         }
 
-        // 発射ごとに Spec を読む。値が変わったら新しく作り、古いもの(飛行中の弾が使用中)は武装の破棄時にまとめて破棄する。
-        private PhysicMaterial PhysicMaterialFor(ProjectileSpec projectile)
+        // 発射ごとに Spec を読む。武装が消えても飛行中の弾が使い続けるので共有品を使う。
+        private static PhysicMaterial PhysicMaterialFor(ProjectileSpec projectile)
         {
-            var cached = _physicMaterial;
-            if (cached != null && cached.dynamicFriction == projectile.Friction && cached.frictionCombine == projectile.FrictionCombine
-                && cached.bounciness == projectile.Bounciness && cached.bounceCombine == projectile.BounceCombine) return cached;
-            cached = _physicMaterial = new PhysicMaterial("EwlProjectile")
-            {
-                staticFriction = projectile.Friction,
-                dynamicFriction = projectile.Friction,
-                frictionCombine = projectile.FrictionCombine,
-                bounciness = projectile.Bounciness,
-                bounceCombine = projectile.BounceCombine,
-            };
-            _owned.Add(cached);
-            return cached;
+            return ProjectileMaterials.For(projectile.Friction, projectile.FrictionCombine, projectile.Bounciness, projectile.BounceCombine);
         }
 
-        private Material MaterialFor(ProjectileSpec projectile)
+        private static Material MaterialFor(ProjectileSpec projectile)
         {
-            if (_material != null && _materialTexture == projectile.Texture) return _material;
-            // Standard は Besiege のビルドで紫になることがあるので Legacy Diffuse を優先
-            var shader = Shader.Find("Legacy Shaders/Diffuse") ?? Shader.Find("Diffuse") ?? Shader.Find("Standard");
-            if (shader == null)
-            {
-                Debug.LogWarning("[EWL] No usable shader for projectile material.");
-                return null;
-            }
-            _material = new Material(shader) { mainTexture = projectile.Texture };
-            _materialTexture = projectile.Texture;
-            _owned.Add(_material);
-            return _material;
+            return ProjectileMaterials.For(projectile.Texture);
         }
     }
 }
