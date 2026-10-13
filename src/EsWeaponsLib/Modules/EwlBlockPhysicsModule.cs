@@ -26,7 +26,8 @@ namespace EWL.Modules
         /// <summary>
         /// ブロックに足すコライダー。ブロックの Colliders と同じ書式(layer・trigger 属性も同じ)で、BoxCollider は Center も書ける。
         /// layer="12" にすると、他のブロックをそこに置け、シミュ開始時に置いたブロックがこのブロックへ接続する面になる。
-        /// その面をクリックして置いたブロックは、コライダーの Position + 面の法線 × 0.5 に置かれる(当たった点ではない)。
+        /// BoxCollider は6面のどこでも置け、クリックした点を面の中心から1マス単位に丸めた位置に置かれる。
+        /// Sphere/Capsule はバニラと同じく、コライダーの Position + 当たった面の法線 × 0.5 に置かれる(当たった点ではない)。
         /// Material を書けば、これらにも適用する。
         /// </summary>
         [XmlArray("AdditionalColliders"), DefaultValue(null), CanBeEmpty]

@@ -30,7 +30,8 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   書けばブロックの全コライダーに適用)、`Rotation`(AxisX/AxisY/AxisZ = Locked/Limited/Free、Spring/Damper/Limit[度])。
 - `EwlBlockPhysics/AdditionalColliders`(省略可)。ブロックにコライダーを足す。書式はブロックの `Colliders` と同じ
   (SphereCollider/CapsuleCollider/BoxCollider、`layer`・`trigger` 属性)で、BoxCollider は `Center`(Unity の BoxCollider.center)も書ける。
-  `layer="12"` で他ブロックを置けて接続される面になる(置き位置はコライダーの Position + 法線 × 0.5)。`Material` を書けばこれらにも適用。
+  `layer="12"` で他ブロックを置けて接続される面になる(BoxCollider は6面のどこでも置け、
+  クリックした点を面の中心から1マス単位に丸めた位置に置かれる。Sphere/Capsule はコライダーの Position + 法線 × 0.5)。`Material` を書けばこれらにも適用。
 - 弾とエフェクトのプール。`ProjectileSpec.PoolSize`(既定 50。同時に飛べる弾の上限で、武装の生成時にこの数まで事前生成し、
   上限では最古の弾を回収して撃つ。エフェクトもプレハブごとにこの数まで)、`ProjectileSpec.PoolKey`(弾のオブジェクトを共有するキー。
   null なら武装ごと)。XML は `EwlWeapon/Projectile/PoolSize`。`EwlWeapon` モジュールは同じブロック種別で弾を共有する。

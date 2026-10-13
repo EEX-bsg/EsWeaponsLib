@@ -9,6 +9,9 @@ namespace EWL.Modules
     public class EwlBlockPhysicsBehaviour : BlockModuleBehaviour<EwlBlockPhysicsModule>
     {
         private const string AdditionalColliderName = "EwlAdditionalCollider";
+        private const string AttachFaceName = "EwlAttachFace";
+        private const int AttachLayer = 12;
+        private const float AttachFaceGap = 0.01f;
 
         private PhysicMaterial _material;
 
@@ -36,8 +39,43 @@ namespace EWL.Modules
             {
                 var collider = shape.CreateCollider(transform);
                 collider.gameObject.name = AdditionalColliderName;
-                var box = shape as BoxColliderXml;
-                if (box != null) ((BoxCollider)collider).center = box.Center;
+                var box = collider as BoxCollider;
+                var boxXml = shape as BoxColliderXml;
+                if (boxXml != null) box.center = boxXml.Center;
+                if (box != null && collider.gameObject.layer == AttachLayer) AddAttachFaces(box);
+            }
+        }
+
+        // 本体はクリックしたコライダーの原点 + 法線 × 0.5 にブロックを置く(箱の中心・大きさは見ない)ので、大きな箱の面には置けない。
+        // 面ごとに本体の AddPointMultiSnap の板を重ねる: 原点を面の 0.5 内側に置けば、当たった点を1マス単位に丸めた面上の位置になる。
+        // 板の中心(center)の向きが本体の丸めの法線になるので、板の面は板の +Z に置く。
+        private void AddAttachFaces(BoxCollider box)
+        {
+            var boxTransform = box.transform;
+            var size = Vector3.Scale(boxTransform.localScale, box.size);
+            var middle = boxTransform.localPosition + boxTransform.localRotation * Vector3.Scale(boxTransform.localScale, box.center);
+            for (int axis = 0; axis < 3; axis++)
+            {
+                for (int sign = -1; sign <= 1; sign += 2)
+                {
+                    var normal = Vector3.zero;
+                    normal[axis] = sign;
+                    var faceRotation = Quaternion.LookRotation(normal, axis == 1 ? Vector3.forward : Vector3.up);
+                    var faceSize = Quaternion.Inverse(faceRotation) * size;
+
+                    var face = new GameObject(AttachFaceName);
+                    face.layer = AttachLayer;
+                    face.tag = "AddPointMultiSnap";
+                    face.transform.parent = transform;
+                    face.transform.localPosition = middle + boxTransform.localRotation * normal * (size[axis] / 2f - 0.5f);
+                    face.transform.localRotation = boxTransform.localRotation * faceRotation;
+                    face.transform.localScale = Vector3.one;
+                    var plate = face.AddComponent<BoxCollider>();
+                    plate.isTrigger = true;
+                    // 箱の面よりわずかに外へ出し、クリックが箱より先に板へ当たるようにする
+                    plate.center = new Vector3(0f, 0f, 0.5f + AttachFaceGap);
+                    plate.size = new Vector3(Mathf.Abs(faceSize.x), Mathf.Abs(faceSize.y), 0f);
+                }
             }
         }
 
