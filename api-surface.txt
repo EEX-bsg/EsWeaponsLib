@@ -181,6 +181,7 @@ EWL.Modules.EwlWeaponModule::Effects : EWL.Modules.EffectsXml XmlElement() Defau
 EWL.Modules.EwlWeaponModule::Fire : EWL.Modules.FireXml XmlElement() DefaultValue() Reloadable()
 EWL.Modules.EwlWeaponModule::FireDelaySlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::FireKey : Modding.Serialization.MKeyReference XmlElement() RequireToValidate()
+EWL.Modules.EwlWeaponModule::FireRateSlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::HoldToFireToggle : Modding.Serialization.MToggleReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::Impact : EWL.Modules.ImpactXml XmlElement() DefaultValue() Reloadable()
 EWL.Modules.EwlWeaponModule::MagazineCapacitySlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()

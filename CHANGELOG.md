@@ -27,6 +27,8 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   `Fire` に BurstCount/BurstInterval/MagazineCapacity/ReloadTime/AutoReload、`Effects` に ReloadSounds を追加。
   `EwlWeapon/MagazineCapacitySlider`(省略可): 値を四捨五入して Fire/MagazineCapacity に使う(XML の値より優先、シミュ開始時に読む)。
   弾倉の容量は XML の数値が基本で、ユーザーに変えさせたい Mod だけが書く。
+  `EwlWeapon/FireRateSlider`(省略可): 値 [発/s] の逆数を Fire/Interval に使う(XML の値より優先、0 以下なら Fire/Interval、発射ごとに読む)。
+  スライダーがある間は Fire/Interval は使われない。スライダーの既定値と Fire/Interval を揃えておくと、外したときも同じ間隔になる。
 - XML モジュール `EwlBlockPhysics`(仮称)。全要素省略可で、省略した項目は本体の値のまま。
   `JointStrength`(接合の破断力・破断トルク。0 = 変えない)、`Material`(Friction/Bounciness/FrictionCombine/BounceCombine。
   書けばブロックの全コライダーに適用)、`Rotation`(AxisX/AxisY/AxisZ = Locked/Limited/Free、Spring/Damper/Limit[度])。

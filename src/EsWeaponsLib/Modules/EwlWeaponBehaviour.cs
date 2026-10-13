@@ -15,6 +15,7 @@ namespace EWL.Modules
         private MToggle _holdToggle;
         private MKey _reloadKey;
         private MToggle _autoReloadToggle;
+        private MSlider _fireRateSlider;
         private MSlider _fireDelaySlider;
         private MSlider _timeFuseSlider;
         private MSlider _magazineCapacitySlider;
@@ -30,6 +31,7 @@ namespace EWL.Modules
             if (Module.HoldToFireToggle != null) _holdToggle = GetToggle(Module.HoldToFireToggle);
             if (Module.ReloadKey != null) _reloadKey = GetKey(Module.ReloadKey);
             if (Module.AutoReloadToggle != null) _autoReloadToggle = GetToggle(Module.AutoReloadToggle);
+            if (Module.FireRateSlider != null) _fireRateSlider = GetSlider(Module.FireRateSlider);
             if (Module.FireDelaySlider != null) _fireDelaySlider = GetSlider(Module.FireDelaySlider);
             if (Module.TimeFuseSlider != null) _timeFuseSlider = GetSlider(Module.TimeFuseSlider);
             if (Module.MagazineCapacitySlider != null) _magazineCapacitySlider = GetSlider(Module.MagazineCapacitySlider);
@@ -170,6 +172,7 @@ namespace EWL.Modules
         // スライダーはシミュ中に他のモジュールが動かすことがある(キーで信管時間を変える等)ので、発射ごとに読み直す。
         private void ApplySliders(WeaponSpec spec)
         {
+            if (_fireRateSlider != null) spec.Fire.Interval = _fireRateSlider.Value > 0f ? 1f / _fireRateSlider.Value : Module.Fire.Interval;
             if (_fireDelaySlider != null) spec.Fire.Delay = Module.Fire.Delay + _fireDelaySlider.Value;
             if (_timeFuseSlider != null) spec.Projectile.TimeFuse = _timeFuseSlider.Value;
         }
