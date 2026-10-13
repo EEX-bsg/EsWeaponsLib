@@ -17,6 +17,7 @@ namespace EWL.Modules
         private MToggle _autoReloadToggle;
         private MSlider _fireDelaySlider;
         private MSlider _timeFuseSlider;
+        private MSlider _magazineCapacitySlider;
         private Weapon _weapon;
         private bool _autoFire;
         private bool _fireHeldBefore;
@@ -31,6 +32,7 @@ namespace EWL.Modules
             if (Module.AutoReloadToggle != null) _autoReloadToggle = GetToggle(Module.AutoReloadToggle);
             if (Module.FireDelaySlider != null) _fireDelaySlider = GetSlider(Module.FireDelaySlider);
             if (Module.TimeFuseSlider != null) _timeFuseSlider = GetSlider(Module.TimeFuseSlider);
+            if (Module.MagazineCapacitySlider != null) _magazineCapacitySlider = GetSlider(Module.MagazineCapacitySlider);
         }
 
         public override void OnSimulateStart()
@@ -95,7 +97,10 @@ namespace EWL.Modules
             fire.Ammo = Module.Fire.Ammo;
             fire.BurstCount = Module.Fire.BurstCount;
             fire.BurstInterval = Module.Fire.BurstInterval;
-            fire.MagazineCapacity = Module.Fire.MagazineCapacity;
+            // 弾倉は武装の生成時に詰めるので、容量はシミュ開始時だけ読む(発射ごとの ApplySliders には入れない)
+            fire.MagazineCapacity = _magazineCapacitySlider != null
+                ? Mathf.RoundToInt(_magazineCapacitySlider.Value)
+                : Module.Fire.MagazineCapacity;
             fire.ReloadTime = Module.Fire.ReloadTime;
             fire.AutoReload = _autoReloadToggle != null ? _autoReloadToggle.IsActive : Module.Fire.AutoReload;
             fire.EjectVelocity = Module.Fire.EjectVelocity;

@@ -40,6 +40,10 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(null)]
         public MSliderReference TimeFuseSlider;
 
+        /// <summary>値を四捨五入して Fire/MagazineCapacity に使う(XML の値より優先)。シミュ開始時に読む。</summary>
+        [XmlElement, DefaultValue(null)]
+        public MSliderReference MagazineCapacitySlider;
+
         [XmlElement, DefaultValue(null), Reloadable] public MuzzleXml Muzzle = new MuzzleXml();
         [XmlElement, DefaultValue(null), Reloadable] public FireXml Fire = new FireXml();
         [XmlElement, DefaultValue(null), Reloadable] public ProjectileXml Projectile = new ProjectileXml();

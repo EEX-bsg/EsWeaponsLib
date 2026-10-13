@@ -25,6 +25,8 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   無限弾薬では弾倉は減り(リロードは要る)、予備弾は減らない。
   `EwlWeapon` に `ReloadKey` / `AutoReloadToggle` / `FireDelaySlider`(値を Fire/Delay に加算)/ `TimeFuseSlider`(値を Projectile/TimeFuse に使う。どちらも発射ごとに読み、時限信管は発射時の値で固定)、
   `Fire` に BurstCount/BurstInterval/MagazineCapacity/ReloadTime/AutoReload、`Effects` に ReloadSounds を追加。
+  `EwlWeapon/MagazineCapacitySlider`(省略可): 値を四捨五入して Fire/MagazineCapacity に使う(XML の値より優先、シミュ開始時に読む)。
+  弾倉の容量は XML の数値が基本で、ユーザーに変えさせたい Mod だけが書く。
 - XML モジュール `EwlBlockPhysics`(仮称)。全要素省略可で、省略した項目は本体の値のまま。
   `JointStrength`(接合の破断力・破断トルク。0 = 変えない)、`Material`(Friction/Bounciness/FrictionCombine/BounceCombine。
   書けばブロックの全コライダーに適用)、`Rotation`(AxisX/AxisY/AxisZ = Locked/Limited/Free、Spring/Damper/Limit[度])。
