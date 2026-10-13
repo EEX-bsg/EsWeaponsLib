@@ -12,6 +12,7 @@ class EWL.Api.WeaponSpec : System.Object
 class EWL.Mod : Modding.ModEntryPoint
 class EWL.Modules.BlockMaterialXml : Modding.Serialization.Element
 class EWL.Modules.BoosterXml : Modding.Serialization.Element
+class EWL.Modules.BoxColliderXml : Modding.Serialization.BoxModCollider
 class EWL.Modules.EffectsXml : Modding.Serialization.Element
 class EWL.Modules.EwlBlockPhysicsBehaviour : Modding.Modules.BlockModuleBehaviour`1<EWL.Modules.EwlBlockPhysicsModule>
 class EWL.Modules.EwlBlockPhysicsModule : Modding.Modules.BlockModule
@@ -139,6 +140,8 @@ EWL.Modules.BoosterXml::BurnTime : System.Single XmlElement() DefaultValue()
 EWL.Modules.BoosterXml::LateralDrag : System.Single XmlElement() DefaultValue()
 EWL.Modules.BoosterXml::System.Void .ctor()
 EWL.Modules.BoosterXml::Thrust : System.Single XmlElement() DefaultValue()
+EWL.Modules.BoxColliderXml::Center : Modding.Serialization.Vector3 XmlElement() DefaultValue()
+EWL.Modules.BoxColliderXml::System.Void .ctor()
 EWL.Modules.EffectsXml::AssetBundle : Modding.Serialization.ResourceReference XmlElement() DefaultValue()
 EWL.Modules.EffectsXml::Bullet : System.String XmlElement() DefaultValue()
 EWL.Modules.EffectsXml::Explosion : System.String XmlElement() DefaultValue()
@@ -155,6 +158,7 @@ EWL.Modules.EffectsXml::Trail : System.String XmlElement() DefaultValue()
 EWL.Modules.EwlBlockPhysicsBehaviour::System.Void .ctor()
 EWL.Modules.EwlBlockPhysicsBehaviour::virtual System.Void SafeAwake()
 EWL.Modules.EwlBlockPhysicsModule [XmlRootAttribute(EwlBlockPhysics)]
+EWL.Modules.EwlBlockPhysicsModule::AdditionalColliders : System.Collections.Generic.List`1<Modding.Serialization.ModCollider> XmlArray(AdditionalColliders) DefaultValue()
 EWL.Modules.EwlBlockPhysicsModule::JointStrength : System.Single XmlElement() DefaultValue()
 EWL.Modules.EwlBlockPhysicsModule::Material : EWL.Modules.BlockMaterialXml XmlElement() DefaultValue()
 EWL.Modules.EwlBlockPhysicsModule::Rotation : EWL.Modules.JointRotationXml XmlElement() DefaultValue()

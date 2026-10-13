@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Xml.Serialization;
 using Modding.Modules;
 using Modding.Serialization;
 using UnityEngine;
+using Vector3 = Modding.Serialization.Vector3;
 
 namespace EWL.Modules
 {
@@ -20,6 +22,25 @@ namespace EWL.Modules
 
         /// <summary>書けば接合の回転軸を設定する。</summary>
         [XmlElement, DefaultValue(null)] public JointRotationXml Rotation;
+
+        /// <summary>
+        /// ブロックに足すコライダー。ブロックの Colliders と同じ書式(layer・trigger 属性も同じ)で、BoxCollider は Center も書ける。
+        /// layer="12" にすると、他のブロックをそこに置け、シミュ開始時に置いたブロックがこのブロックへ接続する面になる。
+        /// その面をクリックして置いたブロックは、コライダーの Position + 面の法線 × 0.5 に置かれる(当たった点ではない)。
+        /// Material を書けば、これらにも適用する。
+        /// </summary>
+        [XmlArray("AdditionalColliders"), DefaultValue(null), CanBeEmpty]
+        [XmlArrayItem("SphereCollider", typeof(SphereModCollider))]
+        [XmlArrayItem("CapsuleCollider", typeof(CapsuleModCollider))]
+        [XmlArrayItem("BoxCollider", typeof(BoxColliderXml))]
+        public List<ModCollider> AdditionalColliders = new List<ModCollider>();
+    }
+
+    /// <summary>ブロックの BoxCollider に Center(Unity の BoxCollider.center。Scale 前の大きさ 1 の箱での座標)を足したもの。</summary>
+    [Serializable]
+    public class BoxColliderXml : BoxModCollider
+    {
+        [XmlElement, DefaultValue(null)] public Vector3 Center = UnityEngine.Vector3.zero;
     }
 
     [Serializable]
