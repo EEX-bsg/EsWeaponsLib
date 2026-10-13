@@ -66,7 +66,7 @@ namespace EWL.Modules
             if (hold ? fireHeld : _autoFire)
             {
                 ApplySliders(_weapon.Spec);
-                _weapon.TryFire();
+                if (_fireRateSlider == null || _fireRateSlider.Value > 0f) _weapon.TryFire();
             }
             if (_reloadKey != null)
             {
@@ -172,7 +172,7 @@ namespace EWL.Modules
         // スライダーはシミュ中に他のモジュールが動かすことがある(キーで信管時間を変える等)ので、発射ごとに読み直す。
         private void ApplySliders(WeaponSpec spec)
         {
-            if (_fireRateSlider != null) spec.Fire.Interval = _fireRateSlider.Value > 0f ? 1f / _fireRateSlider.Value : Module.Fire.Interval;
+            if (_fireRateSlider != null && _fireRateSlider.Value > 0f) spec.Fire.Interval = 1f / _fireRateSlider.Value;
             if (_fireDelaySlider != null) spec.Fire.Delay = Module.Fire.Delay + _fireDelaySlider.Value;
             if (_timeFuseSlider != null) spec.Projectile.TimeFuse = _timeFuseSlider.Value;
         }

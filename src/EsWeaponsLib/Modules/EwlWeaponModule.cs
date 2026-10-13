@@ -32,7 +32,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(null)]
         public MToggleReference AutoReloadToggle;
 
-        /// <summary>値 [発/s] の逆数を Fire/Interval に使う(XML の値より優先。0 以下なら Fire/Interval)。発射ごとに読む。</summary>
+        /// <summary>値 [発/s] の逆数を Fire/Interval に使う(XML の値より優先。0 以下なら撃たない)。発射ごとに読む。</summary>
         [XmlElement, DefaultValue(null)]
         public MSliderReference FireRateSlider;
 
