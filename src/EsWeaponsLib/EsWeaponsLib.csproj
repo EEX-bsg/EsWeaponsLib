@@ -62,6 +62,7 @@
     <Compile Include="Besiege\AttackerTags.cs" />
     <Compile Include="Besiege\Damage.cs" />
     <Compile Include="Besiege\ExplosiveTag.cs" />
+    <Compile Include="Besiege\MachineTargets.cs" />
     <Compile Include="Besiege\Simulation.cs" />
     <Compile Include="Besiege\Sounds.cs" />
     <Compile Include="Effects\EffectPlayer.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="Modules\EwlWeaponBehaviour.cs" />
     <Compile Include="Modules\EwlWeaponModule.cs" />
     <Compile Include="Net\ProjectileSync.cs" />
+    <Compile Include="Weapons\MissileGuidance.cs" />
     <Compile Include="Weapons\Projectile.cs" />
     <Compile Include="Weapons\ProjectileMaterials.cs" />
     <Compile Include="Weapons\ProjectilePool.cs" />

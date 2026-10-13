@@ -37,6 +37,8 @@ namespace EWL.Weapons
         private WeaponSpec _spec;
         private Collider[] _ignored;
         private PooledEffect _trail, _bullet;
+        private MissileGuidance _guidance; // 誘導する弾だけ。弾のオブジェクトと一緒に使い回す
+        private float _guidanceGain; // 発射時の値。0 なら誘導しない
         private float _age;
         private float _timeFuse; // 発射時の値(スライダーで変わっても飛行中の弾は変えない)
         private bool _godToolExplosion; // 発射時の値(飛行中に武装ブロックが壊れてもマシンを辿らない)
@@ -94,6 +96,12 @@ namespace EWL.Weapons
             _rb.collisionDetectionMode = projectileSpec.CollisionMode;
             _rb.velocity = velocity;
             _rb.angularVelocity = Vector3.zero;
+            if (_guidanceGain > 0f) // 目標は発射時に決めて変えない
+            {
+                if (_guidance == null) _guidance = new MissileGuidance();
+                var direction = rot * Vector3.forward;
+                _guidance.Begin(MachineTargets.FindEnemyCore(owner.Block, pos, direction, MissileGuidance.LockOnAngle), direction);
+            }
             AttachEffects();
         }
 
@@ -122,6 +130,7 @@ namespace EWL.Weapons
             _timeFuse = spec.Projectile.TimeFuse > 0f ? spec.Projectile.TimeFuse + Random.Range(0f, spec.Projectile.TimeFuseRandomExtra) : 0f;
             _godToolExplosion = spec.Impact.ExplodesOnlyWithGodTool && Simulation.IsExplodingCannonballs(owner.Block);
             _active = true;
+            _guidanceGain = spec.Guidance.Gain;
             _proxy = _collidersOn = _hit = _detonating = false;
 
             transform.SetParent(Home.Root, false); // 刺さった先から戻す。置き場は原点・無回転なのでワールド座標のまま扱える
@@ -169,6 +178,9 @@ namespace EWL.Weapons
             float travelTime = drag > 0.0001f ? (1f - Mathf.Exp(-drag * elapsed)) / drag : elapsed;
             var predicted = _networkPosition + _networkVelocity * travelTime;
             if (!_spec.Projectile.IgnoreGravity) predicted += Physics.gravity * (0.5f * elapsed * elapsed);
+            // 誘導弾は向きが変わるので、受け取った速度の向きへ回す(スナップショットに向きは無い)
+            if (_guidanceGain > 0f && _networkVelocity.sqrMagnitude > 0.01f)
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(_networkVelocity), 1f - Mathf.Exp(-CorrectionRate * Time.deltaTime));
             var booster = _spec.Booster;
             if (booster.Thrust > 0f && (booster.BurnTime <= 0f || _age < booster.BurnTime) && _spec.Projectile.Mass > 0f)
                 predicted += transform.forward * (booster.Thrust / _spec.Projectile.Mass * 0.5f * elapsed * elapsed);
@@ -276,6 +288,7 @@ namespace EWL.Weapons
         private void FixedUpdate()
         {
             if (!_active || _proxy || _hit || _detonating) return;
+            if (_guidanceGain > 0f) _guidance.Step(_rb, transform, _guidanceGain, _age);
             var booster = _spec.Booster;
             if (booster.Thrust <= 0f || (booster.BurnTime > 0f && _age >= booster.BurnTime)) return;
             var forward = transform.forward;
@@ -400,6 +413,7 @@ namespace EWL.Weapons
             EffectPlayer.Fade(_trail);
             EffectPlayer.Return(_bullet);
             _trail = _bullet = null;
+            if (_guidance != null) _guidance.End();
             SetIgnore(false);
             _ignored = null;
             _owner = null;

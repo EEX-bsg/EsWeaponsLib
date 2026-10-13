@@ -5,6 +5,7 @@ class EWL.Api.BundleAssets : System.Object
 class EWL.Api.ColliderShape : System.Object
 class EWL.Api.EffectSpec : System.Object
 class EWL.Api.FireSpec : System.Object
+class EWL.Api.GuidanceSpec : System.Object
 class EWL.Api.ImpactSpec : System.Object
 class EWL.Api.ProjectileHit : System.Object
 class EWL.Api.ProjectileSpec : System.Object
@@ -20,6 +21,7 @@ class EWL.Modules.EwlBlockPhysicsModule : Modding.Modules.BlockModule
 class EWL.Modules.EwlWeaponBehaviour : Modding.Modules.BlockModuleBehaviour`1<EWL.Modules.EwlWeaponModule>
 class EWL.Modules.EwlWeaponModule : Modding.Modules.BlockModule
 class EWL.Modules.FireXml : Modding.Serialization.Element
+class EWL.Modules.GuidanceXml : Modding.Serialization.Element
 class EWL.Modules.ImpactXml : Modding.Serialization.Element
 class EWL.Modules.JointRotationXml : Modding.Serialization.Element
 class EWL.Modules.MuzzleXml : Modding.Serialization.Element
@@ -73,6 +75,8 @@ EWL.Api.FireSpec::ReloadTime : System.Single
 EWL.Api.FireSpec::Spread : System.Single
 EWL.Api.FireSpec::System.Void .ctor()
 EWL.Api.FireSpec::Velocity : System.Single
+EWL.Api.GuidanceSpec::Gain : System.Single
+EWL.Api.GuidanceSpec::System.Void .ctor()
 EWL.Api.ImpactSpec::Attach : System.Boolean
 EWL.Api.ImpactSpec::BlockDamage : System.Single
 EWL.Api.ImpactSpec::DespawnOnHit : System.Boolean
@@ -132,6 +136,7 @@ EWL.Api.Weapon::System.Void Destroy()
 EWL.Api.WeaponSpec::Booster : EWL.Api.BoosterSpec
 EWL.Api.WeaponSpec::Effects : EWL.Api.EffectSpec
 EWL.Api.WeaponSpec::Fire : EWL.Api.FireSpec
+EWL.Api.WeaponSpec::Guidance : EWL.Api.GuidanceSpec
 EWL.Api.WeaponSpec::Impact : EWL.Api.ImpactSpec
 EWL.Api.WeaponSpec::Projectile : EWL.Api.ProjectileSpec
 EWL.Api.WeaponSpec::System.Void .ctor()
@@ -182,6 +187,7 @@ EWL.Modules.EwlWeaponModule::Fire : EWL.Modules.FireXml XmlElement() DefaultValu
 EWL.Modules.EwlWeaponModule::FireDelaySlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::FireKey : Modding.Serialization.MKeyReference XmlElement() RequireToValidate()
 EWL.Modules.EwlWeaponModule::FireRateSlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
+EWL.Modules.EwlWeaponModule::Guidance : EWL.Modules.GuidanceXml XmlElement() DefaultValue() Reloadable()
 EWL.Modules.EwlWeaponModule::HoldToFireToggle : Modding.Serialization.MToggleReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::Impact : EWL.Modules.ImpactXml XmlElement() DefaultValue() Reloadable()
 EWL.Modules.EwlWeaponModule::MagazineCapacitySlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
@@ -205,6 +211,8 @@ EWL.Modules.FireXml::ReloadTime : System.Single XmlElement() DefaultValue(1)
 EWL.Modules.FireXml::Spread : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.FireXml::System.Void .ctor()
 EWL.Modules.FireXml::Velocity : System.Single XmlElement() DefaultValue(100)
+EWL.Modules.GuidanceXml::Gain : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.GuidanceXml::System.Void .ctor()
 EWL.Modules.ImpactXml::Attach : System.Boolean XmlElement() DefaultValue(False)
 EWL.Modules.ImpactXml::BlockDamage : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ImpactXml::DespawnOnHit : System.Boolean XmlElement() DefaultValue(False)

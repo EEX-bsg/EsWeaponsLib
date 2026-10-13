@@ -46,6 +46,12 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
 - 弾の推進(ロケット)。`WeaponSpec.Booster`(`BoosterSpec`: `Thrust` [N]、`BurnTime` [s、0 = 消えるまで]、`LateralDrag`)/
   XML `EwlWeapon/Booster/Thrust|BurnTime|LateralDrag`。推力は弾の前方へ毎物理フレーム、命中で止まる。
   `FireSpec.EjectVelocity` / XML `Fire/EjectVelocity`(弾ローカル軸で足す初速。発射筒から押し出す等)。
+- **誘導(仮実装。C# API・XML とも今後破壊的に変更する予定。依存する場合は変更に追従する前提で使うこと)**。
+  `WeaponSpec.Guidance`(`GuidanceSpec.Gain`、既定 0 = 誘導しない)/ XML `EwlWeapon/Guidance/Gain`。
+  発射の瞬間に、発射方向の前方 30 度以内にいる敵マシン(シミュ中・自分以外・同じチームを除く。チーム無しは全員が敵)の
+  コアブロックのうち最も近いものを目標にし、飛行中は変えない。目標が無ければ発射方向を保って飛ぶ。ロックオン表示などの UI は無い。
+  操舵はトルクで向きを変えるだけなので `Booster` と組み合わせる。実行権威側だけで動き、MP クライアントの表示は弾の速度の向きへ回す。
+  SP とローカルシミュでは他のマシンがいないので誘導しない。
 - MP 同期。MP ホストのグローバルシミュで撃った弾を、クライアントでは見た目だけの弾(当たり判定なし)として表示する。
   発射エフェクト・音、爆発エフェクト・音、`Weapon.Ammo` / `ReserveAmmo` / `IsReloading`、`Fired` / `ReloadStarted` もクライアントに届く。
   利用者は同期コードを書かない。条件: `Weapon` を**全ピアで、ブロックごとに同じ順で**生成する(シミュ開始時に作れば満たす)。

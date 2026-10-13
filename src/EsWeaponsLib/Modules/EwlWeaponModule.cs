@@ -55,6 +55,14 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(null), Reloadable] public EffectsXml Effects = new EffectsXml();
         /// <summary>弾の推進(ロケット)。Thrust [N] が 0 なら推進しない。</summary>
         [XmlElement, DefaultValue(null), Reloadable] public BoosterXml Booster = new BoosterXml();
+        /// <summary>誘導(仮実装。要素ごと今後破壊的に変更する予定)。Gain が 0 なら誘導しない。</summary>
+        [XmlElement, DefaultValue(null), Reloadable] public GuidanceXml Guidance = new GuidanceXml();
+    }
+
+    [Serializable]
+    public class GuidanceXml : Element
+    {
+        [XmlElement, DefaultValue(0f)] public float Gain = 0f;
     }
 
     [Serializable]

@@ -14,6 +14,19 @@ namespace EWL.Api
         public ImpactSpec Impact = new ImpactSpec();
         public EffectSpec Effects = new EffectSpec();
         public BoosterSpec Booster = new BoosterSpec();
+        public GuidanceSpec Guidance = new GuidanceSpec();
+    }
+
+    /// <summary>
+    /// 誘導(仮実装)。この型・XML の Guidance 要素を含め、目標の決め方・操舵とも今後破壊的に変更する予定。
+    /// 発射の瞬間に、発射方向の前方一定角度内にいる敵マシンの
+    /// コアブロックのうち最も近いものを目標にし、飛行中は変えない。目標が無ければ発射方向を保って飛ぶ。
+    /// 弾の向きをトルクで変えるだけなので、推進(<see cref="BoosterSpec"/>)と組み合わせて使う。
+    /// </summary>
+    public sealed class GuidanceSpec
+    {
+        /// <summary>誘導の強さ(旋回トルクの係数)。0 なら誘導しない。</summary>
+        public float Gain = 0f;
     }
 
     /// <summary>弾の推進(ロケット)。Thrust が 0 なら推進しない。命中したら推力は止まる。</summary>
