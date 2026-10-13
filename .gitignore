@@ -17,3 +17,7 @@
 
 # Local AI agent settings (same policy as ACMu: keep Claude Code setup out of the public repository)
 /.claude/
+
+# Codex
+/.codex/
+/temp-skin-probe/
