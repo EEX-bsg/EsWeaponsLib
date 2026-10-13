@@ -111,6 +111,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(20f)] public float Lifetime = 20f;
         [XmlElement, DefaultValue(0f)] public float TimeFuse = 0f;
         [XmlElement, DefaultValue(0.05f)] public float TimeFuseRandomExtra = 0.05f;
+        [XmlElement, DefaultValue(0.02f)] public float ColliderEnableDelay = 0.02f;
         [XmlElement, DefaultValue(50)] public int PoolSize = 50;
         [XmlElement, DefaultValue(0.6f)] public float Friction = 0.6f;
         [XmlElement, DefaultValue(0f)] public float Bounciness = 0f;

@@ -74,6 +74,9 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   (弾のコライダー・`PoolSize` も、弾のプールを作り直して反映)と、`EwlBlockPhysics` の `JointStrength` / `Material` / `Rotation`。
   キー・トグル・スライダーの参照と `EwlBlockPhysics/AdditionalColliders` は対象外(Besiege の再起動が必要)。
   `EwlBlockPhysics` の `Material` / `Rotation` を XML から消したときは、置いてあるブロックには再起動まで前の設定が残る。
+- `ProjectileSpec.ColliderEnableDelay` / XML `EwlWeapon/Projectile/ColliderEnableDelay`(既定 0.02 秒。これまでの固定値と同じ):
+  発射後、弾のコライダーを有効にするまでの時間。初速の遅い弾(ロケット・ミサイル・爆弾等)が自機に当たるのを防ぐときに延ばす。
+  0 なら発射と同時に有効(負値は 0 扱い)。撃った武装ブロックとはこの値に関係なく衝突しない。
 
 ### Changed
 - [Breaking] 遅延・信管の乱数幅の名前を整理し、時限信管の乱数幅を独立させた(C# と XML 共通。乱数はどれも 0〜値の上乗せ)。

@@ -123,6 +123,7 @@ namespace EWL.Modules
             projectile.Lifetime = projectileXml.Lifetime;
             projectile.TimeFuse = projectileXml.TimeFuse;
             projectile.TimeFuseRandomExtra = projectileXml.TimeFuseRandomExtra;
+            projectile.ColliderEnableDelay = projectileXml.ColliderEnableDelay;
             projectile.PoolSize = projectileXml.PoolSize;
             projectile.PoolKey = PoolKeyFor(Module);
             projectile.Friction = projectileXml.Friction;

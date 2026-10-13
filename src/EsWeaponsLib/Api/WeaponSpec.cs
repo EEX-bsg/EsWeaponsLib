@@ -88,6 +88,9 @@ namespace EWL.Api
         public float TimeFuse = 0f;
         /// <summary>時限信管に加える乱数 [s](0〜この値)。発射時に決める。TimeFuse が 0 のときは使わない。</summary>
         public float TimeFuseRandomExtra = 0.05f;
+        /// <summary>発射後、弾のコライダーを有効にするまでの時間 [s]。自機との干渉を防ぐ。初速の遅い弾(ロケット・ミサイル・爆弾等)は
+        /// 長めにする。0 なら発射と同時に有効(負値は 0 扱い)。撃った武装ブロックとはこの値に関係なく衝突しない。</summary>
+        public float ColliderEnableDelay = 0.02f;
         /// <summary>コライダー(弾ローカル)。空なら半径 0.1 の球。</summary>
         public List<ColliderShape> Colliders = new List<ColliderShape>();
         public float Friction = 0.6f;

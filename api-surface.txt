@@ -99,6 +99,7 @@ EWL.Api.ProjectileHit::Weapon : EWL.Api.Weapon {get}
 EWL.Api.ProjectileSpec::AngularDrag : System.Single
 EWL.Api.ProjectileSpec::BounceCombine : UnityEngine.PhysicMaterialCombine
 EWL.Api.ProjectileSpec::Bounciness : System.Single
+EWL.Api.ProjectileSpec::ColliderEnableDelay : System.Single
 EWL.Api.ProjectileSpec::Colliders : System.Collections.Generic.List`1<EWL.Api.ColliderShape>
 EWL.Api.ProjectileSpec::CollisionMode : UnityEngine.CollisionDetectionMode
 EWL.Api.ProjectileSpec::Drag : System.Single
@@ -238,6 +239,7 @@ EWL.Modules.MuzzleXml::System.Void .ctor()
 EWL.Modules.ProjectileXml::AngularDrag : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ProjectileXml::BounceCombine : UnityEngine.PhysicMaterialCombine XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::Bounciness : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.ProjectileXml::ColliderEnableDelay : System.Single XmlElement() DefaultValue(0.02)
 EWL.Modules.ProjectileXml::Colliders : System.Collections.Generic.List`1<Modding.Serialization.ModCollider> XmlArray(Colliders) DefaultValue()
 EWL.Modules.ProjectileXml::CollisionMode : UnityEngine.CollisionDetectionMode XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::Drag : System.Single XmlElement() DefaultValue(0)

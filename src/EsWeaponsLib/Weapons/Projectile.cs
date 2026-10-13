@@ -12,7 +12,6 @@ namespace EWL.Weapons
     // 実弾はシミュ権威側にだけ存在する。MP クライアントではホストの弾の見た目だけを出すプロキシとして使う(当たり判定なし)。
     internal sealed class Projectile : MonoBehaviour
     {
-        private const float ColliderEnableDelay = 0.02f; // 発射直後の自機誤爆防止(ACM と同じ)
         private const float RemoveAfterHit = 1f;         // 爆発も即消滅もしない弾が命中後に消えるまで(ACM と同じ)
         private const float MaxExtrapolation = 0.5f;     // プロキシ: スナップショットが途絶えたら外挿を止める
         private const float CorrectionRate = 10f;        // プロキシ: スナップショットとのずれを詰める速さ [1/s]
@@ -41,6 +40,7 @@ namespace EWL.Weapons
         private float _guidanceGain; // 発射時の値。0 なら誘導しない
         private float _age;
         private float _timeFuse; // 発射時の値(スライダーで変わっても飛行中の弾は変えない)
+        private float _colliderEnableDelay; // 発射時の値
         private bool _godToolExplosion; // 発射時の値(飛行中に武装ブロックが壊れてもマシンを辿らない)
         private bool _active, _collidersOn, _hit, _detonating;
         // 撃った側(命中イベント用。発射時点の値)
@@ -88,6 +88,7 @@ namespace EWL.Weapons
             gameObject.SetActive(true);
             _ignored = ignore;
             SetIgnore(true); // 非アクティブ中に呼ぶと効かないことがあるのでアクティブ化の後
+            if (_colliderEnableDelay <= 0f) EnableColliders();
             _rb.isKinematic = false;
             _rb.mass = projectileSpec.Mass;
             _rb.drag = projectileSpec.Drag;
@@ -127,6 +128,7 @@ namespace EWL.Weapons
             _spec = spec;
             _simulationScope = owner.Scope;
             _age = 0f;
+            _colliderEnableDelay = spec.Projectile.ColliderEnableDelay;
             _timeFuse = spec.Projectile.TimeFuse > 0f ? spec.Projectile.TimeFuse + Random.Range(0f, spec.Projectile.TimeFuseRandomExtra) : 0f;
             _godToolExplosion = spec.Impact.ExplodesOnlyWithGodTool && Simulation.IsExplodingCannonballs(owner.Block);
             _active = true;
@@ -252,6 +254,12 @@ namespace EWL.Weapons
             _renderer.sharedMaterial = material;
         }
 
+        private void EnableColliders()
+        {
+            _collidersOn = true;
+            foreach (var collider in _colliders) collider.enabled = true;
+        }
+
         private void SetIgnore(bool ignore)
         {
             if (_ignored == null) return;
@@ -274,11 +282,7 @@ namespace EWL.Weapons
             if (_simulationScope == null) { Despawn(); return; } // シミュ終了(武装ブロックが壊れても弾は飛び続ける)
             if (_proxy) { UpdateProxy(); return; }
             _age += Time.deltaTime;
-            if (!_collidersOn && _age >= ColliderEnableDelay)
-            {
-                _collidersOn = true;
-                foreach (var collider in _colliders) collider.enabled = true;
-            }
+            if (!_collidersOn && _age >= _colliderEnableDelay) EnableColliders();
             var projectileSpec = _spec.Projectile;
             if (!_detonating && _timeFuse > 0f && _age >= _timeFuse)
                 Detonate(0f, transform.rotation);
