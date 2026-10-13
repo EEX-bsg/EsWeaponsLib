@@ -31,7 +31,7 @@ function Add-Type-Surface($t) {
   }
   foreach ($f in $t.Fields) {
     if ((Is-VisibleMember $f) -and -not $f.IsSpecialName) {
-      $xml = ($f.CustomAttributes | Where-Object { $_.AttributeType.Name -in "XmlElementAttribute","XmlArrayAttribute","XmlAttributeAttribute","DefaultValueAttribute","RequireToValidateAttribute" } | ForEach-Object { "$($_.AttributeType.Name -replace 'Attribute$','')(" + (($_.ConstructorArguments | ForEach-Object { $_.Value }) -join ",") + ")" }) -join " "
+      $xml = ($f.CustomAttributes | Where-Object { $_.AttributeType.Name -in "XmlElementAttribute","XmlArrayAttribute","XmlAttributeAttribute","DefaultValueAttribute","RequireToValidateAttribute","ReloadableAttribute" } | ForEach-Object { "$($_.AttributeType.Name -replace 'Attribute$','')(" + (($_.ConstructorArguments | ForEach-Object { $_.Value }) -join ",") + ")" }) -join " "
       $lines.Add("$($t.FullName)::$($f.Name) : $($f.FieldType.FullName) $xml".TrimEnd())
     }
   }

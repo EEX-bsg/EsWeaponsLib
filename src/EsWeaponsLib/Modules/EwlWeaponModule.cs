@@ -11,7 +11,9 @@ namespace EWL.Modules
 {
     // XML スキーマ(C# API ではない)。FireKey 以外は全て省略可・既定値は EWL.Api の各 Spec と同じ。
     // 値の意味は EWL.Api.WeaponSpec のコメントを参照。
-    // 注意: enum 型の要素に DefaultValue(null) を付けると XmlSerializer が例外になる。enum は実際の値を書く。
+    // DefaultValue は「省略可」の目印(本体は値を読まず、省略時は初期化子の値)。float・int・bool・enum は初期化子と同じ値を書く(enum に null は例外になる)。
+    // Reloadable: Debug の Mod で XML を保存すると、その要素を丸ごと差し替える(子要素の中の個別指定は効かない)。次のシミュ開始から反映。
+    // キー・トグル・スライダーはブロック生成時にしか読まないので付けない。
     [XmlRoot("EwlWeapon")]
     public class EwlWeaponModule : BlockModule
     {
@@ -38,13 +40,13 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(null)]
         public MSliderReference TimeFuseSlider;
 
-        [XmlElement, DefaultValue(null)] public MuzzleXml Muzzle = new MuzzleXml();
-        [XmlElement, DefaultValue(null)] public FireXml Fire = new FireXml();
-        [XmlElement, DefaultValue(null)] public ProjectileXml Projectile = new ProjectileXml();
-        [XmlElement, DefaultValue(null)] public ImpactXml Impact = new ImpactXml();
-        [XmlElement, DefaultValue(null)] public EffectsXml Effects = new EffectsXml();
+        [XmlElement, DefaultValue(null), Reloadable] public MuzzleXml Muzzle = new MuzzleXml();
+        [XmlElement, DefaultValue(null), Reloadable] public FireXml Fire = new FireXml();
+        [XmlElement, DefaultValue(null), Reloadable] public ProjectileXml Projectile = new ProjectileXml();
+        [XmlElement, DefaultValue(null), Reloadable] public ImpactXml Impact = new ImpactXml();
+        [XmlElement, DefaultValue(null), Reloadable] public EffectsXml Effects = new EffectsXml();
         /// <summary>弾の推進(ロケット)。Thrust [N] が 0 なら推進しない。</summary>
-        [XmlElement, DefaultValue(null)] public BoosterXml Booster = new BoosterXml();
+        [XmlElement, DefaultValue(null), Reloadable] public BoosterXml Booster = new BoosterXml();
     }
 
     [Serializable]
@@ -57,19 +59,19 @@ namespace EWL.Modules
     [Serializable]
     public class FireXml : Element
     {
-        [XmlElement, DefaultValue(null)] public float Velocity = 100f;
-        [XmlElement, DefaultValue(null)] public float Interval = 0.5f;
-        [XmlElement, DefaultValue(null)] public bool Hold = true;
-        [XmlElement, DefaultValue(null)] public float Spread = 0f;
-        [XmlElement, DefaultValue(null)] public float Delay = 0f;
-        [XmlElement, DefaultValue(null)] public float DelayRandomExtra = 0f;
-        [XmlElement, DefaultValue(null)] public float Recoil = 1f;
-        [XmlElement, DefaultValue(null)] public int Ammo = -1;
-        [XmlElement, DefaultValue(null)] public int BurstCount = 1;
-        [XmlElement, DefaultValue(null)] public float BurstInterval = 0.1f;
-        [XmlElement, DefaultValue(null)] public int MagazineCapacity = 0;
-        [XmlElement, DefaultValue(null)] public float ReloadTime = 1f;
-        [XmlElement, DefaultValue(null)] public bool AutoReload = true;
+        [XmlElement, DefaultValue(100f)] public float Velocity = 100f;
+        [XmlElement, DefaultValue(0.5f)] public float Interval = 0.5f;
+        [XmlElement, DefaultValue(true)] public bool Hold = true;
+        [XmlElement, DefaultValue(0f)] public float Spread = 0f;
+        [XmlElement, DefaultValue(0f)] public float Delay = 0f;
+        [XmlElement, DefaultValue(0f)] public float DelayRandomExtra = 0f;
+        [XmlElement, DefaultValue(1f)] public float Recoil = 1f;
+        [XmlElement, DefaultValue(-1)] public int Ammo = -1;
+        [XmlElement, DefaultValue(1)] public int BurstCount = 1;
+        [XmlElement, DefaultValue(0.1f)] public float BurstInterval = 0.1f;
+        [XmlElement, DefaultValue(0)] public int MagazineCapacity = 0;
+        [XmlElement, DefaultValue(1f)] public float ReloadTime = 1f;
+        [XmlElement, DefaultValue(true)] public bool AutoReload = true;
         /// <summary>発射時に弾のローカル軸で足す速度 [m/s]。</summary>
         [XmlElement, DefaultValue(null)] public Vector3 EjectVelocity = UnityEngine.Vector3.zero;
     }
@@ -77,25 +79,25 @@ namespace EWL.Modules
     [Serializable]
     public class BoosterXml : Element
     {
-        [XmlElement, DefaultValue(null)] public float Thrust = 0f;
-        [XmlElement, DefaultValue(null)] public float BurnTime = 0f;
-        [XmlElement, DefaultValue(null)] public float LateralDrag = 0f;
+        [XmlElement, DefaultValue(0f)] public float Thrust = 0f;
+        [XmlElement, DefaultValue(0f)] public float BurnTime = 0f;
+        [XmlElement, DefaultValue(0f)] public float LateralDrag = 0f;
     }
 
     [Serializable]
     public class ProjectileXml : Element
     {
-        [XmlElement, DefaultValue(null)] public float Mass = 1f;
-        [XmlElement, DefaultValue(null)] public float Drag = 0f;
-        [XmlElement, DefaultValue(null)] public float AngularDrag = 0f;
-        [XmlElement, DefaultValue(null)] public bool IgnoreGravity = false;
+        [XmlElement, DefaultValue(1f)] public float Mass = 1f;
+        [XmlElement, DefaultValue(0f)] public float Drag = 0f;
+        [XmlElement, DefaultValue(0f)] public float AngularDrag = 0f;
+        [XmlElement, DefaultValue(false)] public bool IgnoreGravity = false;
         [XmlElement, DefaultValue(CollisionDetectionMode.ContinuousDynamic)] public CollisionDetectionMode CollisionMode = CollisionDetectionMode.ContinuousDynamic;
-        [XmlElement, DefaultValue(null)] public float Lifetime = 20f;
-        [XmlElement, DefaultValue(null)] public float TimeFuse = 0f;
-        [XmlElement, DefaultValue(null)] public float TimeFuseRandomExtra = 0.05f;
-        [XmlElement, DefaultValue(null)] public int PoolSize = 50;
-        [XmlElement, DefaultValue(null)] public float Friction = 0.6f;
-        [XmlElement, DefaultValue(null)] public float Bounciness = 0f;
+        [XmlElement, DefaultValue(20f)] public float Lifetime = 20f;
+        [XmlElement, DefaultValue(0f)] public float TimeFuse = 0f;
+        [XmlElement, DefaultValue(0.05f)] public float TimeFuseRandomExtra = 0.05f;
+        [XmlElement, DefaultValue(50)] public int PoolSize = 50;
+        [XmlElement, DefaultValue(0.6f)] public float Friction = 0.6f;
+        [XmlElement, DefaultValue(0f)] public float Bounciness = 0f;
         [XmlElement, DefaultValue(PhysicMaterialCombine.Average)] public PhysicMaterialCombine FrictionCombine = PhysicMaterialCombine.Average;
         [XmlElement, DefaultValue(PhysicMaterialCombine.Average)] public PhysicMaterialCombine BounceCombine = PhysicMaterialCombine.Average;
 
@@ -110,23 +112,23 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(null)] public MeshReference Mesh;
         [XmlElement, DefaultValue(null)] public ResourceReference Texture;
         /// <summary>撃てる状態の間、次の弾の見た目を発射位置に表示する。</summary>
-        [XmlElement, DefaultValue(null)] public bool ShowWhenLoaded = false;
+        [XmlElement, DefaultValue(false)] public bool ShowWhenLoaded = false;
     }
 
     [Serializable]
     public class ImpactXml : Element
     {
-        [XmlElement, DefaultValue(null)] public float BlockDamage = 0f;
-        [XmlElement, DefaultValue(null)] public float EntityDamage = 0f;
-        [XmlElement, DefaultValue(null)] public float ImpactForce = 10f;
-        [XmlElement, DefaultValue(null)] public bool Attach = false;
-        [XmlElement, DefaultValue(null)] public float ExplosionRadius = 0f;
-        [XmlElement, DefaultValue(null)] public bool ExplodesOnlyWithGodTool = false;
-        [XmlElement, DefaultValue(null)] public float ExplosionPower = 0f;
-        [XmlElement, DefaultValue(null)] public float ExplosionUpPower = 0f;
-        [XmlElement, DefaultValue(null)] public float DetonationDelay = 0f;
-        [XmlElement, DefaultValue(null)] public float DetonationDelayRandomExtra = 0f;
-        [XmlElement, DefaultValue(null)] public bool DespawnOnHit = false;
+        [XmlElement, DefaultValue(0f)] public float BlockDamage = 0f;
+        [XmlElement, DefaultValue(0f)] public float EntityDamage = 0f;
+        [XmlElement, DefaultValue(10f)] public float ImpactForce = 10f;
+        [XmlElement, DefaultValue(false)] public bool Attach = false;
+        [XmlElement, DefaultValue(0f)] public float ExplosionRadius = 0f;
+        [XmlElement, DefaultValue(false)] public bool ExplodesOnlyWithGodTool = false;
+        [XmlElement, DefaultValue(0f)] public float ExplosionPower = 0f;
+        [XmlElement, DefaultValue(0f)] public float ExplosionUpPower = 0f;
+        [XmlElement, DefaultValue(0f)] public float DetonationDelay = 0f;
+        [XmlElement, DefaultValue(0f)] public float DetonationDelayRandomExtra = 0f;
+        [XmlElement, DefaultValue(false)] public bool DespawnOnHit = false;
     }
 
     /// <summary>プレハブ名は AssetBundle 内のアセット名。Mac/Linux では「バンドル名+Mac」があればそちらを使う。</summary>
@@ -141,7 +143,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(null)] public string Trail;
         [XmlElement, DefaultValue(null)] public string Bullet;
         [XmlElement, DefaultValue(null)] public string Explosion;
-        [XmlElement, DefaultValue(null)] public bool ExplosionFacesNormal = false;
+        [XmlElement, DefaultValue(false)] public bool ExplosionFacesNormal = false;
 
         [XmlArray("FireSounds"), XmlArrayItem("AudioClip"), DefaultValue(null), CanBeEmpty]
         public List<ResourceReference> FireSounds = new List<ResourceReference>();

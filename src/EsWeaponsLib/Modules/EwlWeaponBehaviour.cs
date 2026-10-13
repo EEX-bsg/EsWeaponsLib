@@ -182,12 +182,14 @@ namespace EWL.Modules
         }
 
         // モジュールのインスタンスはブロック定義ごとに1つなので、同じブロック種別の武装は弾のプールを共有する。
-        private static readonly Dictionary<EwlWeaponModule, string> PoolKeys = new Dictionary<EwlWeaponModule, string>();
+        // キーは Projectile 要素ごと: XML の再読込で要素が差し替わると別のプールになり、弾の形(プールごとに固定)も作り直される。
+        // 古いプールはシーンが変わるまで残る(再読込は Debug の Mod だけ)。
+        private static readonly Dictionary<ProjectileXml, string> PoolKeys = new Dictionary<ProjectileXml, string>();
 
         private static string PoolKeyFor(EwlWeaponModule module)
         {
             string key;
-            if (!PoolKeys.TryGetValue(module, out key)) PoolKeys[module] = key = "EwlWeapon#" + PoolKeys.Count;
+            if (!PoolKeys.TryGetValue(module.Projectile, out key)) PoolKeys[module.Projectile] = key = "EwlWeapon#" + PoolKeys.Count;
             return key;
         }
 

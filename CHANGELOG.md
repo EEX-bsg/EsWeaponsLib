@@ -59,6 +59,11 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
 - コンソールコマンド `ewl_detonations`: このシミュで爆発したボムと起爆させた人・判定の経路を出す(確認用)。
 - `Weapon.PoolKey`: この武装が使う弾のプールのキー(`PoolKey` 未指定なら武装専用のキー)。置き場は
   `EsWeaponsLib (Scene)/ProjectilePool/(キー)`。弾に直接触るのは非推奨で、置き場の構成は 1.0 まで変わりうる。
+- XML の再読込(ブロック定義 Mod の `Mod.xml` が `<Debug>true</Debug>` のとき、ゲーム中に XML を保存すると反映)。
+  次のシミュ開始から効く。対象は `EwlWeapon` の `Muzzle` / `Fire` / `Projectile` / `Impact` / `Effects` / `Booster`
+  (弾のコライダー・`PoolSize` も、弾のプールを作り直して反映)と、`EwlBlockPhysics` の `JointStrength` / `Material` / `Rotation`。
+  キー・トグル・スライダーの参照と `EwlBlockPhysics/AdditionalColliders` は対象外(Besiege の再起動が必要)。
+  `EwlBlockPhysics` の `Material` / `Rotation` を XML から消したときは、置いてあるブロックには再起動まで前の設定が残る。
 
 ### Changed
 - [Breaking] 遅延・信管の乱数幅の名前を整理し、時限信管の乱数幅を独立させた(C# と XML 共通。乱数はどれも 0〜値の上乗せ)。

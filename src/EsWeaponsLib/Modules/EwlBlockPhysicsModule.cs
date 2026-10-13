@@ -10,18 +10,20 @@ using Vector3 = Modding.Serialization.Vector3;
 namespace EWL.Modules
 {
     // XML スキーマ(C# API ではない)。全要素省略可。省略した項目は本体の値のまま変えない。
-    // 注意: enum 型の要素に DefaultValue(null) を付けると XmlSerializer が例外になる。enum は実際の値を書く。
+    // DefaultValue は「省略可」の目印(本体は値を読まず、省略時は初期化子の値)。float・int・bool・enum は初期化子と同じ値を書く(enum に null は例外になる)。
+    // Reloadable: Debug の Mod で XML を保存すると、その要素を丸ごと差し替える。シミュ用ブロックの生成時に適用されるので次のシミュから反映。
+    // AdditionalColliders はビルドブロックに足して複製するものなので付けない。
     [XmlRoot("EwlBlockPhysics")]
     public class EwlBlockPhysicsModule : BlockModule
     {
         /// <summary>親ブロックとの接合の破断力・破断トルク。0 = 変えない。壊れない接合は INF。</summary>
-        [XmlElement, DefaultValue(null)] public float JointStrength = 0f;
+        [XmlElement, DefaultValue(0f), Reloadable] public float JointStrength = 0f;
 
         /// <summary>書けばブロックのコライダー全部に物理マテリアルを設定する。</summary>
-        [XmlElement, DefaultValue(null)] public BlockMaterialXml Material;
+        [XmlElement, DefaultValue(null), Reloadable] public BlockMaterialXml Material;
 
         /// <summary>書けば接合の回転軸を設定する。</summary>
-        [XmlElement, DefaultValue(null)] public JointRotationXml Rotation;
+        [XmlElement, DefaultValue(null), Reloadable] public JointRotationXml Rotation;
 
         /// <summary>
         /// ブロックに足すコライダー。ブロックの Colliders と同じ書式(layer・trigger 属性も同じ)で、BoxCollider は Center も書ける。
@@ -47,8 +49,8 @@ namespace EWL.Modules
     [Serializable]
     public class BlockMaterialXml : Element
     {
-        [XmlElement, DefaultValue(null)] public float Friction = 0.6f;
-        [XmlElement, DefaultValue(null)] public float Bounciness = 0f;
+        [XmlElement, DefaultValue(0.6f)] public float Friction = 0.6f;
+        [XmlElement, DefaultValue(0f)] public float Bounciness = 0f;
         [XmlElement, DefaultValue(PhysicMaterialCombine.Average)] public PhysicMaterialCombine FrictionCombine = PhysicMaterialCombine.Average;
         [XmlElement, DefaultValue(PhysicMaterialCombine.Average)] public PhysicMaterialCombine BounceCombine = PhysicMaterialCombine.Average;
     }
@@ -60,8 +62,8 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(ConfigurableJointMotion.Locked)] public ConfigurableJointMotion AxisX = ConfigurableJointMotion.Locked;
         [XmlElement, DefaultValue(ConfigurableJointMotion.Locked)] public ConfigurableJointMotion AxisY = ConfigurableJointMotion.Locked;
         [XmlElement, DefaultValue(ConfigurableJointMotion.Locked)] public ConfigurableJointMotion AxisZ = ConfigurableJointMotion.Locked;
-        [XmlElement, DefaultValue(null)] public float Spring = 0f;
-        [XmlElement, DefaultValue(null)] public float Damper = 0f;
-        [XmlElement, DefaultValue(null)] public float Limit = 0f;
+        [XmlElement, DefaultValue(0f)] public float Spring = 0f;
+        [XmlElement, DefaultValue(0f)] public float Damper = 0f;
+        [XmlElement, DefaultValue(0f)] public float Limit = 0f;
     }
 }

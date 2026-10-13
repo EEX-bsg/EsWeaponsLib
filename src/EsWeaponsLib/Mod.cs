@@ -10,8 +10,8 @@ namespace EWL
     {
         public override void OnLoad()
         {
-            CustomModules.AddBlockModule<EwlWeaponModule, EwlWeaponBehaviour>("EwlWeapon", false);
-            CustomModules.AddBlockModule<EwlBlockPhysicsModule, EwlBlockPhysicsBehaviour>("EwlBlockPhysics", false);
+            CustomModules.AddBlockModule<EwlWeaponModule, EwlWeaponBehaviour>("EwlWeapon", true);
+            CustomModules.AddBlockModule<EwlBlockPhysicsModule, EwlBlockPhysicsBehaviour>("EwlBlockPhysics", true);
             ProjectileSync.Initialize();
             // ゲーム終了まで購読したまま(Mod はアンロードされない)
             Events.OnBlockInit += ExplosiveTag.OnBlockInit;
