@@ -54,6 +54,13 @@ namespace EWL.Api
         /// <summary>リロード中なら true(撃てない)。</summary>
         public bool IsReloading { get { return _driver.IsReloading; } }
 
+        /// <summary>
+        /// この武装が使う弾のプールのキー。<see cref="ProjectileSpec.PoolKey"/> が空ならこの武装専用のキー。破棄済みなら null。
+        /// プールの置き場はシーン直下の "EsWeaponsLib (Scene)/ProjectilePool/(キー)" で、待機中・飛行中の弾はその子(刺さった弾は刺さった先の子)。
+        /// 弾に直接触るのは推奨しない(足りない操作は API への追加を提案してほしい)。置き場の構成は 1.0 まで変わりうる。
+        /// </summary>
+        public string PoolKey { get { return _driver != null ? _driver.PoolKey : null; } }
+
         /// <summary>破棄済みなら false。</summary>
         public bool IsAlive { get { return _driver != null; } }
 

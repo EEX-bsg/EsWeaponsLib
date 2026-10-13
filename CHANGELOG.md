@@ -57,6 +57,8 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   EWL の弾の直撃・爆風(その中で起きた誘爆を含む)はその撃ち手、バニラの矢・砲弾の直撃と発射済みロケットの衝突はその持ち主、落下・体当たり等のブロック衝突はボムの持ち主。
   位置では推定しないので、グレネード・ロケット・燃料樽の爆風、着火、他 Mod の弾で起爆したボムは不明。キル・デスの判定は利用側の責務。
 - コンソールコマンド `ewl_detonations`: このシミュで爆発したボムと起爆させた人・判定の経路を出す(確認用)。
+- `Weapon.PoolKey`: この武装が使う弾のプールのキー(`PoolKey` 未指定なら武装専用のキー)。置き場は
+  `EsWeaponsLib (Scene)/ProjectilePool/(キー)`。弾に直接触るのは非推奨で、置き場の構成は 1.0 まで変わりうる。
 
 ### Changed
 - [Breaking] 遅延・信管の乱数幅の名前を整理し、時限信管の乱数幅を独立させた(C# と XML 共通。乱数はどれも 0〜値の上乗せ)。
@@ -65,6 +67,8 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   追加 `Projectile.TimeFuseRandomExtra`(既定 0.05 秒。発射時に時限信管へ上乗せ。従来は起爆時に固定 0〜0.05 秒待っていた)。
 - [Breaking] `ProjectileHit.ShooterPlayerId` / `ShooterTeam` を `ProjectileHit.Shooter`(`Attacker`)にまとめた。
   旧 `hit.ShooterPlayerId` → 新 `hit.Shooter.PlayerId`、旧 `hit.ShooterTeam` → 新 `hit.Shooter.Team`。
+- EWL のオブジェクトをシーン直下に並べず、寿命で2つにまとめた。常駐する仕組みは `EsWeaponsLib`(DontDestroyOnLoad)、
+  弾・エフェクトのプールは `EsWeaponsLib (Scene)` の下(飛行中の弾・ワールドのエフェクトを含む)。プールはシーンが変わると全部捨てて作り直す。
 - 拡散(`Spread`)で曲げた方向に弾の向きも合わせるようにした(従来は向きは発射位置の向きのまま)。
 - `EwlWeapon` の押下判定(長押し OFF の連射切替・リロードキー)を `IsHeld` の変化で取るようにした(MP ホストでクライアントの
   `IsPressed` を取りこぼさないため)。

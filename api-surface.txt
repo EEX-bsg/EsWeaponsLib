@@ -121,6 +121,7 @@ EWL.Api.Weapon::event System.Action`1<EWL.Api.ProjectileHit> AnyHit
 EWL.Api.Weapon::event System.Action`1<EWL.Api.ProjectileHit> Hit
 EWL.Api.Weapon::IsAlive : System.Boolean {get}
 EWL.Api.Weapon::IsReloading : System.Boolean {get}
+EWL.Api.Weapon::PoolKey : System.String {get}
 EWL.Api.Weapon::ReserveAmmo : System.Int32 {get}
 EWL.Api.Weapon::Spec : EWL.Api.WeaponSpec {get;set}
 EWL.Api.Weapon::static EWL.Api.Weapon Create(BlockBehaviour, EWL.Api.WeaponSpec)

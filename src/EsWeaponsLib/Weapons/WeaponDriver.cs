@@ -124,7 +124,7 @@ namespace EWL.Weapons
         }
 
         /// <summary>PoolKey 未指定ならこの武装専用のプール。</summary>
-        private string PoolKey
+        internal string PoolKey
         {
             get
             {
