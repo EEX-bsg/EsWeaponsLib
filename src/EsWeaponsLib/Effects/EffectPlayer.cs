@@ -73,7 +73,7 @@ namespace EWL.Effects
             foreach (var source in sources) if (!source.isPlaying) return source;
             if (sources.Count >= MaxSoundsPerTemplate) return null;
 
-            var created = new GameObject("[EWL] Sound").AddComponent<AudioSource>();
+            var created = new GameObject("Sound").AddComponent<AudioSource>();
             created.transform.SetParent(PoolRoot(), false);
             created.playOnAwake = false;
             Sounds.CopySpatialSettings(template, created);
@@ -88,7 +88,7 @@ namespace EWL.Effects
             if (!Pools.TryGetValue(prefab, out pool))
             {
                 pool = new Pool();
-                pool.Root = new GameObject("[EWL] " + prefab.name).transform;
+                pool.Root = new GameObject(prefab.name).transform;
                 pool.Root.SetParent(PoolRoot(), false);
                 Pools[prefab] = pool;
             }
@@ -129,10 +129,7 @@ namespace EWL.Effects
 
         private static Transform PoolRoot()
         {
-            if (_poolRoot != null) return _poolRoot;
-            var root = new GameObject("[EWL] EffectPool");
-            Object.DontDestroyOnLoad(root);
-            _poolRoot = root.transform;
+            if (_poolRoot == null) _poolRoot = ModRoot.CreateChild("EffectPool");
             return _poolRoot;
         }
     }

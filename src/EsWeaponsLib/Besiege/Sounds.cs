@@ -81,8 +81,7 @@ namespace EWL.Besiege
         private static AudioSource Fallback()
         {
             if (_fallbackTemplate != null) return _fallbackTemplate;
-            var holder = new GameObject("[EWL] SoundTemplate");
-            UnityEngine.Object.DontDestroyOnLoad(holder);
+            var holder = ModRoot.CreateChild("SoundTemplate").gameObject;
             holder.SetActive(false);
             _fallbackTemplate = holder.AddComponent<AudioSource>();
             _fallbackTemplate.spatialBlend = 1f;

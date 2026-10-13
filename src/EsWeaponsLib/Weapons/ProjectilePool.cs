@@ -84,7 +84,7 @@ namespace EWL.Weapons
             if (!Pools.TryGetValue(key, out pool))
             {
                 pool = new Pool();
-                pool.Root = new GameObject("[EWL] " + key).transform;
+                pool.Root = new GameObject(key).transform;
                 pool.Root.SetParent(PoolRoot(), false);
                 Pools[key] = pool;
             }
@@ -113,10 +113,7 @@ namespace EWL.Weapons
 
         private static Transform PoolRoot()
         {
-            if (_poolRoot != null) return _poolRoot;
-            var root = new GameObject("[EWL] ProjectilePool");
-            Object.DontDestroyOnLoad(root);
-            _poolRoot = root.transform;
+            if (_poolRoot == null) _poolRoot = ModRoot.CreateChild("ProjectilePool");
             return _poolRoot;
         }
     }

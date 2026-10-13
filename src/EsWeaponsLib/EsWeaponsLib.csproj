@@ -66,6 +66,7 @@
     <Compile Include="Besiege\Sounds.cs" />
     <Compile Include="Effects\EffectPlayer.cs" />
     <Compile Include="Mod.cs" />
+    <Compile Include="ModRoot.cs" />
     <Compile Include="Modules\EwlBlockPhysicsBehaviour.cs" />
     <Compile Include="Modules\EwlBlockPhysicsModule.cs" />
     <Compile Include="Modules\EwlWeaponBehaviour.cs" />

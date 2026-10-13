@@ -54,9 +54,7 @@ namespace EWL.Net
             ModNetworking.Callbacks[_despawnType] += Receive(OnDespawn);
             ModNetworking.Callbacks[_snapshotType] += Receive(OnSnapshot);
             ModNetworking.Callbacks[_weaponStateType] += Receive(OnWeaponState);
-            var host = new GameObject("[EWL] ProjectileSync");
-            DontDestroyOnLoad(host);
-            host.AddComponent<ProjectileSync>();
+            ModRoot.CreateChild("ProjectileSync").gameObject.AddComponent<ProjectileSync>();
         }
 
         // ---- ホスト ----
