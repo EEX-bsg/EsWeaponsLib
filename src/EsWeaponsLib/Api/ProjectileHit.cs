@@ -16,11 +16,8 @@ namespace EWL.Api
         /// <summary>撃ったブロック(シミュ用)。壊れた・シミュが終わった後は null。</summary>
         public BlockBehaviour ShooterBlock { get; internal set; }
 
-        /// <summary>撃ったプレイヤーの NetworkId(<c>Modding.Common.Player.From</c> で引ける)。SP は 0。</summary>
-        public ushort ShooterPlayerId { get; internal set; }
-
-        /// <summary>撃ったブロックのチーム。SP・未所属は <c>MPTeam.None</c>。</summary>
-        public MPTeam ShooterTeam { get; internal set; }
+        /// <summary>撃った人(発射時点の値。撃ったブロックが消えても残る)。</summary>
+        public Attacker Shooter { get; internal set; }
 
         /// <summary>当たったブロック(子ブロックを持つブロックは当たった子)。地形・エンティティ等は null。</summary>
         public BlockBehaviour Block { get; internal set; }

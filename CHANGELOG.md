@@ -45,13 +45,21 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   発射エフェクト・音、爆発エフェクト・音、`Weapon.Ammo` / `ReserveAmmo` / `IsReloading`、`Fired` / `ReloadStarted` もクライアントに届く。
   利用者は同期コードを書かない。条件: `Weapon` を**全ピアで、ブロックごとに同じ順で**生成する(シミュ開始時に作れば満たす)。
   ローカルシミュの弾は他のプレイヤーに配信しない。
-- 命中イベント `Weapon.Hit`(その武装の弾)と静的 `Weapon.AnyHit`(全武装)。引数 `ProjectileHit`(撃った武装・ブロック・プレイヤー ID・
-  チーム、当たったブロック・コライダー・位置、爆風か)。直撃は1回、爆風は剛体ごとに1回。実行権威側(SP・MP ホスト・ローカルシミュ)でだけ発火。
+- 命中イベント `Weapon.Hit`(その武装の弾)と静的 `Weapon.AnyHit`(全武装)。引数 `ProjectileHit`(撃った武装・ブロック・撃った人 `Shooter`、
+  当たったブロック・コライダー・位置、爆風か)。直撃は1回、爆風は剛体ごとに1回。実行権威側(SP・MP ホスト・ローカルシミュ)でだけ発火。
 - ゴッドツール「爆発する砲弾」対応。`ImpactSpec.ExplodesOnlyWithGodTool` / XML `Impact/ExplodesOnlyWithGodTool`(既定 false)。
   true の弾は通常は爆発せず、発射者のマシンでこのゴッドツールが有効なときだけ `ExplosionRadius` 等で爆発する(判定は発射時)。
   爆発したとき・無限弾薬で撃ったときは本体と同じく「ゴッドツール使用済み」を記録する。
+- 攻撃者のタグ `Attacker`(`PlayerId` / `Team` / `Player`)。発射・起爆の時点の値なので、撃った人がリスポーン・観戦・退出しても読める。
+  `Player` は接続ごとに別の参照で、退出した人の番号が再利用されても別人と区別できる(SP は null)。
+- `Attacker.GetDetonator(BlockBehaviour)`: 爆発済みのバニラのボムを起爆させた人(不明なら null。実行権威側だけ)。誘爆の連鎖は根本までたどる。
+  EWL の弾の直撃・爆風(その中で起きた誘爆を含む)はその撃ち手、バニラの矢・砲弾の直撃と発射済みロケットの衝突はその持ち主、落下・体当たり等のブロック衝突はボムの持ち主。
+  位置では推定しないので、グレネード・ロケット・燃料樽の爆風、着火、他 Mod の弾で起爆したボムは不明。キル・デスの判定は利用側の責務。
+- コンソールコマンド `ewl_detonations`: このシミュで爆発したボムと起爆させた人・判定の経路を出す(確認用)。
 
 ### Changed
+- [Breaking] `ProjectileHit.ShooterPlayerId` / `ShooterTeam` を `ProjectileHit.Shooter`(`Attacker`)にまとめた。
+  旧 `hit.ShooterPlayerId` → 新 `hit.Shooter.PlayerId`、旧 `hit.ShooterTeam` → 新 `hit.Shooter.Team`。
 - 拡散(`Spread`)で曲げた方向に弾の向きも合わせるようにした(従来は向きは発射位置の向きのまま)。
 - `EwlWeapon` の押下判定(長押し OFF の連射切替・リロードキー)を `IsHeld` の変化で取るようにした(MP ホストでクライアントの
   `IsPressed` を取りこぼさないため)。

@@ -45,14 +45,16 @@ namespace EWL.Weapons
         // 撃った側(命中イベント用。発射時点の値)
         private Weapon _weapon;
         private BlockBehaviour _shooterBlock;
-        private ushort _shooterPlayerId;
-        private MPTeam _shooterTeam;
+        private Attacker _shooter;
         // プロキシ
         private bool _proxy;
         private Vector3 _networkPosition, _networkVelocity, _correction;
         private float _networkTime;
 
         internal Vector3 Velocity { get { return _rb.velocity; } }
+
+        /// <summary>撃った人(実弾のみ。プロキシ・待機中は null)。</summary>
+        internal Attacker Shooter { get { return _shooter; } }
 
         /// <summary>弾のオブジェクトを組み立てる(非アクティブ)。形はここで固定。</summary>
         internal static Projectile Build(Transform parent, ProjectileSpec spec)
@@ -79,8 +81,7 @@ namespace EWL.Weapons
             Begin(owner, spec, pos, rot, material);
             _weapon = owner.Owner;
             _shooterBlock = owner.Block;
-            _shooterPlayerId = Simulation.PlayerIdOf(owner.Block);
-            _shooterTeam = owner.Block.Team;
+            _shooter = AttackerTags.OfBlock(owner.Block);
             foreach (var collider in _colliders) collider.sharedMaterial = physicMaterial;
 
             gameObject.SetActive(true);
@@ -296,7 +297,7 @@ namespace EWL.Weapons
             _hit = true;
 
             var impact = _spec.Impact;
-            var attachTo = Damage.ApplyHit(collision.collider, _rb.velocity, impact.ImpactForce, impact.BlockDamage, impact.EntityDamage, impact.Attach);
+            var attachTo = Damage.ApplyHit(collision.collider, _rb.velocity, impact.ImpactForce, impact.BlockDamage, impact.EntityDamage, impact.Attach, _shooter);
             if (Weapon.HasHitListeners(_weapon))
             {
                 var point = collision.contacts.Length > 0 ? collision.contacts[0].point : transform.position;
@@ -354,7 +355,7 @@ namespace EWL.Weapons
             {
                 if (_godToolExplosion) Simulation.MarkGodToolUsed();
                 var affected = Weapon.HasHitListeners(_weapon) ? new List<Rigidbody>() : null;
-                Damage.Explode(pos, impact.ExplosionRadius, impact.ExplosionPower, impact.ExplosionUpPower, affected);
+                Damage.Explode(pos, impact.ExplosionRadius, impact.ExplosionPower, impact.ExplosionUpPower, affected, _shooter);
                 if (affected != null)
                     foreach (var body in affected) RaiseHit(body.GetComponent<BlockBehaviour>(), null, pos, true);
                 var rotation = effects.ExplosionFacesNormal ? effectRotation : Quaternion.identity;
@@ -382,8 +383,7 @@ namespace EWL.Weapons
             {
                 Weapon = _weapon,
                 ShooterBlock = _shooterBlock,
-                ShooterPlayerId = _shooterPlayerId,
-                ShooterTeam = _shooterTeam,
+                Shooter = _shooter,
                 Block = block,
                 Collider = collider,
                 Point = point,
@@ -408,6 +408,7 @@ namespace EWL.Weapons
             _simulationScope = null;
             _weapon = null;
             _shooterBlock = null;
+            _shooter = null;
             ProjectilePool.Release(this);
         }
 

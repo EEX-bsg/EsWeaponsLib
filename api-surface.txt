@@ -1,4 +1,5 @@
 assembly EsWeaponsLib 1.0.0.0
+class EWL.Api.Attacker : System.Object
 class EWL.Api.BoosterSpec : System.Object
 class EWL.Api.BundleAssets : System.Object
 class EWL.Api.ColliderShape : System.Object
@@ -24,6 +25,10 @@ class EWL.Modules.JointRotationXml : Modding.Serialization.Element
 class EWL.Modules.MuzzleXml : Modding.Serialization.Element
 class EWL.Modules.ProjectileXml : Modding.Serialization.Element
 enum EWL.Api.ColliderKind : System.Enum
+EWL.Api.Attacker::Player : Modding.Common.Player {get}
+EWL.Api.Attacker::PlayerId : System.UInt16 {get}
+EWL.Api.Attacker::static EWL.Api.Attacker GetDetonator(BlockBehaviour)
+EWL.Api.Attacker::Team : MPTeam {get}
 EWL.Api.BoosterSpec::BurnTime : System.Single
 EWL.Api.BoosterSpec::LateralDrag : System.Single
 EWL.Api.BoosterSpec::System.Void .ctor()
@@ -84,9 +89,8 @@ EWL.Api.ProjectileHit::Block : BlockBehaviour {get}
 EWL.Api.ProjectileHit::Collider : UnityEngine.Collider {get}
 EWL.Api.ProjectileHit::IsExplosion : System.Boolean {get}
 EWL.Api.ProjectileHit::Point : UnityEngine.Vector3 {get}
+EWL.Api.ProjectileHit::Shooter : EWL.Api.Attacker {get}
 EWL.Api.ProjectileHit::ShooterBlock : BlockBehaviour {get}
-EWL.Api.ProjectileHit::ShooterPlayerId : System.UInt16 {get}
-EWL.Api.ProjectileHit::ShooterTeam : MPTeam {get}
 EWL.Api.ProjectileHit::Weapon : EWL.Api.Weapon {get}
 EWL.Api.ProjectileSpec::AngularDrag : System.Single
 EWL.Api.ProjectileSpec::BounceCombine : UnityEngine.PhysicMaterialCombine
