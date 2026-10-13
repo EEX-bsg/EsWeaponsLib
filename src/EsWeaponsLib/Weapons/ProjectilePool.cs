@@ -6,7 +6,8 @@ namespace EWL.Weapons
 {
     // 弾のプール(ACMu と同じ設計)。キーごとに待機キューと「同時に飛べる数」の上限を持つ。
     //  1) 待機中があれば再利用 2) 上限未満なら生成 3) 上限なら同じキーの最古の弾を回収して再利用(発射は止めない)。
-    // 武装の生成時に上限数まで事前生成する。待機中の弾は DontDestroyOnLoad の置き場に置き、シミュをまたいで再利用する。
+    // 武装の生成時に上限数まで事前生成する。弾は待機中も飛行中もキーごとの置き場の子(刺さったときだけ刺さった先の子)。
+    // 置き場は EWL のルート(DontDestroyOnLoad)の下にあり、待機中の弾はシミュをまたいで再利用する。飛行中の弾はシミュ終了で戻る。
     // 弾の形(コライダー)はキーごとに最初に組み立てたもので固定。質量・見た目・物理マテリアルは発射ごとに設定し直す。
     internal static class ProjectilePool
     {
@@ -52,7 +53,12 @@ namespace EWL.Weapons
         {
             var pool = projectile.Home;
             pool.Active.Remove(projectile);
-            if (pool.Discarded) { Object.Destroy(projectile.gameObject); return; }
+            if (pool.Discarded)
+            {
+                Object.Destroy(projectile.gameObject);
+                DestroyRootIfEmpty(pool);
+                return;
+            }
             projectile.gameObject.SetActive(false);
             projectile.transform.SetParent(pool.Root, false);
             projectile.transform.localScale = Vector3.one; // 刺さったときの補正を戻す
@@ -65,17 +71,25 @@ namespace EWL.Weapons
             var pool = projectile.Home;
             if (pool == null || !pool.Active.Remove(projectile)) return;
             pool.Total--;
+            if (pool.Discarded) DestroyRootIfEmpty(pool);
         }
 
-        /// <summary>武装専用のキー(PoolKey 未指定)のプールを、武装の破棄時に捨てる。使用中の弾は回収時に破棄される。</summary>
+        /// <summary>武装専用のキー(PoolKey 未指定)のプールを、武装の破棄時に捨てる。
+        /// 飛行中の弾も置き場の子なので、置き場は最後の弾が戻ったときに消す。</summary>
         internal static void Discard(string key)
         {
             Pool pool;
             if (!Pools.TryGetValue(key, out pool)) return;
             Pools.Remove(key);
             pool.Discarded = true;
+            foreach (var idle in pool.Idle) if (idle != null) Object.Destroy(idle.gameObject); // 終了時は破棄済みのことがある
             pool.Idle.Clear();
-            if (pool.Root != null) Object.Destroy(pool.Root.gameObject); // 待機中の弾も子なので一緒に消える(終了時は破棄済みのことがある)
+            DestroyRootIfEmpty(pool);
+        }
+
+        private static void DestroyRootIfEmpty(Pool pool)
+        {
+            if (pool.Active.Count == 0 && pool.Root != null) Object.Destroy(pool.Root.gameObject);
         }
 
         private static Pool GetPool(string key, int maxCount)

@@ -125,7 +125,7 @@ namespace EWL.Weapons
             _active = true;
             _proxy = _collidersOn = _hit = _detonating = false;
 
-            transform.SetParent(null, false);
+            transform.SetParent(Home.Root, false); // 刺さった先から戻す。置き場は原点・無回転なのでワールド座標のまま扱える
             transform.position = pos;
             transform.rotation = rot;
             transform.localScale = Vector3.one;

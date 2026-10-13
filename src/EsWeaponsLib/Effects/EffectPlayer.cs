@@ -6,7 +6,8 @@ namespace EWL.Effects
 {
     // エフェクトの再生とプール(ACMu と同じ設計)。プレハブごとに待機キューを持ち、生成数は上限まで。
     // 上限に達したらそのエフェクトは出さない(負荷を増やさないことを優先)。
-    // 待機中のオブジェクトは DontDestroyOnLoad の置き場に置き、シミュやシーンをまたいで再利用する。
+    // 弾などに付いていない間(待機中・ワールドで再生中・切り離して消えかけ)はプレハブごとの置き場の子。
+    // 置き場は EWL のルート(DontDestroyOnLoad)の下にあり、シミュやシーンをまたいで再利用する。
     // 使用中のエフェクトは持ち主(シミュの目印)が消えたら即座に戻る。親ごと破棄された場合は数だけ減らす。
     internal static class EffectPlayer
     {
@@ -21,7 +22,7 @@ namespace EWL.Effects
         private static readonly Dictionary<GameObject, Pool> Pools = new Dictionary<GameObject, Pool>();
         private static Transform _poolRoot;
 
-        /// <summary>一回再生し、パーティクルが消えたらプールへ戻す。parent が null ならワールドに置く。</summary>
+        /// <summary>一回再生し、パーティクルが消えたらプールへ戻す。parent が null ならワールド座標で置き場に置く。</summary>
         internal static void PlayOnce(GameObject prefab, Transform parent, Vector3 pos, Quaternion rot, Vector3 scale,
             Object owner, int maxCount)
         {
@@ -157,7 +158,7 @@ namespace EWL.Effects
             _hasOwner = owner != null;
             _deadline = Time.time + NoParticleLifetime;
 
-            transform.SetParent(parent, false);
+            transform.SetParent(parent != null ? parent : Home.Root, false); // 置き場は原点・無回転
             transform.localPosition = pos;
             transform.localRotation = rot;
             transform.localScale = scale;
@@ -173,7 +174,7 @@ namespace EWL.Effects
         {
             if (IsIdle) return;
             KeepAlive = false;
-            transform.SetParent(null, true);
+            transform.SetParent(Home.Root, true);
             foreach (var particles in _systems) particles.Stop();
             _deadline = Time.time + NoParticleLifetime;
         }
