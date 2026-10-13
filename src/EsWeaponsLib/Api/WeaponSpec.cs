@@ -44,7 +44,7 @@ namespace EWL.Api
         /// <summary>発射要求から弾が出るまでの固定遅延 [s]。</summary>
         public float Delay = 0f;
         /// <summary>遅延に加える乱数幅 [s](0〜この値)。</summary>
-        public float RandomDelay = 0f;
+        public float DelayRandomExtra = 0f;
         /// <summary>反動。弾の運動量 × この値の撃力をブロックへ逆向きに与える。</summary>
         public float Recoil = 1f;
         /// <summary>総弾数(弾倉内を含む)。負値で無制限。マシンの無限弾薬設定時は消費しない
@@ -73,6 +73,8 @@ namespace EWL.Api
         public float Lifetime = 20f;
         /// <summary>時限信管 [s]。0 なら無効。経過で起爆(爆発しない弾は消える)。</summary>
         public float TimeFuse = 0f;
+        /// <summary>時限信管に加える乱数 [s](0〜この値)。発射時に決める。TimeFuse が 0 のときは使わない。</summary>
+        public float TimeFuseRandomExtra = 0.05f;
         /// <summary>コライダー(弾ローカル)。空なら半径 0.1 の球。</summary>
         public List<ColliderShape> Colliders = new List<ColliderShape>();
         public float Friction = 0.6f;
@@ -115,9 +117,9 @@ namespace EWL.Api
         /// <summary>AddExplosionForce の上向き補正。</summary>
         public float ExplosionUpPower = 0f;
         /// <summary>命中から起爆までの遅延 [s]。</summary>
-        public float FuseDelay = 0f;
+        public float DetonationDelay = 0f;
         /// <summary>起爆遅延に加える乱数幅 [s](0〜この値)。</summary>
-        public float FuseRandom = 0f;
+        public float DetonationDelayRandomExtra = 0f;
         /// <summary>爆発しない弾を命中時に即消す。false なら命中の1秒後に消える。</summary>
         public bool DespawnOnHit = false;
     }

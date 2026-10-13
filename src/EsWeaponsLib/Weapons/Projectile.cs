@@ -14,7 +14,6 @@ namespace EWL.Weapons
     {
         private const float ColliderEnableDelay = 0.02f; // 発射直後の自機誤爆防止(ACM と同じ)
         private const float RemoveAfterHit = 1f;         // 爆発も即消滅もしない弾が命中後に消えるまで(ACM と同じ)
-        private const float TimeFuseRandom = 0.05f;      // 時限信管起爆の乱数幅(ACM と同じ)
         private const float MaxExtrapolation = 0.5f;     // プロキシ: スナップショットが途絶えたら外挿を止める
         private const float CorrectionRate = 10f;        // プロキシ: スナップショットとのずれを詰める速さ [1/s]
         internal const float DefaultRadius = 0.1f;
@@ -120,7 +119,7 @@ namespace EWL.Weapons
             _spec = spec;
             _simulationScope = owner.Scope;
             _age = 0f;
-            _timeFuse = spec.Projectile.TimeFuse;
+            _timeFuse = spec.Projectile.TimeFuse > 0f ? spec.Projectile.TimeFuse + Random.Range(0f, spec.Projectile.TimeFuseRandomExtra) : 0f;
             _godToolExplosion = spec.Impact.ExplodesOnlyWithGodTool && Simulation.IsExplodingCannonballs(owner.Block);
             _active = true;
             _proxy = _collidersOn = _hit = _detonating = false;
@@ -270,7 +269,7 @@ namespace EWL.Weapons
             }
             var projectileSpec = _spec.Projectile;
             if (!_detonating && _timeFuse > 0f && _age >= _timeFuse)
-                Detonate(Random.Range(0f, TimeFuseRandom), transform.rotation);
+                Detonate(0f, transform.rotation);
             if (_age >= projectileSpec.Lifetime) Despawn();
         }
 
@@ -310,7 +309,7 @@ namespace EWL.Weapons
             if (Explodes)
             {
                 var normal = collision.contacts.Length > 0 ? collision.contacts[0].normal : -transform.forward;
-                Detonate(Random.Range(impact.FuseDelay, impact.FuseDelay + impact.FuseRandom), Quaternion.FromToRotation(Vector3.forward, normal));
+                Detonate(Random.Range(impact.DetonationDelay, impact.DetonationDelay + impact.DetonationDelayRandomExtra), Quaternion.FromToRotation(Vector3.forward, normal));
             }
             else if (impact.DespawnOnHit) Despawn();
             else StartCoroutine(DespawnAfter(RemoveAfterHit));

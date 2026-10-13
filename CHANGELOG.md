@@ -14,16 +14,16 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   (`Create(BlockBehaviour, WeaponSpec)` / `TryFire()` / `Destroy()` / `Spec` / `Ammo` / `Fired` / `GetAll(GameObject)`)。
   `Spec` は発射のたびに読まれる。SP のみ(MP 同期なし)。
 - XML モジュール `EwlWeapon`(仮称)。`EWL.Api` だけで実装した標準モジュール。`FireKey` 以外は省略可。
-  `HoldToFireToggle`、`Muzzle`、`Fire`(Velocity/Interval/Hold/Spread/Delay/RandomDelay/Recoil/Ammo)、
-  `Projectile`(Mass/Drag/AngularDrag/IgnoreGravity/CollisionMode/Lifetime/TimeFuse/Friction/Bounciness/FrictionCombine/BounceCombine/
+  `HoldToFireToggle`、`Muzzle`、`Fire`(Velocity/Interval/Hold/Spread/Delay/DelayRandomExtra/Recoil/Ammo)、
+  `Projectile`(Mass/Drag/AngularDrag/IgnoreGravity/CollisionMode/Lifetime/TimeFuse/TimeFuseRandomExtra/Friction/Bounciness/FrictionCombine/BounceCombine/
   Colliders/Mesh/Texture)、`Impact`(BlockDamage/EntityDamage/ImpactForce/Attach/ExplosionRadius/ExplosionPower/ExplosionUpPower/
-  FuseDelay/FuseRandom/DespawnOnHit)、`Effects`(AssetBundle/ShotFlash+Position/Rotation/Scale/Trail/Bullet/Explosion/
+  DetonationDelay/DetonationDelayRandomExtra/DespawnOnHit)、`Effects`(AssetBundle/ShotFlash+Position/Rotation/Scale/Trail/Bullet/Explosion/
   ExplosionFacesNormal/FireSounds/ExplosionSounds)。
 - バースト・弾倉・リロード。`FireSpec.BurstCount`(既定 1)/`BurstInterval`(既定 0.1 秒)/`MagazineCapacity`(既定 0 = 弾倉なし)/
   `ReloadTime`(既定 1 秒)/`AutoReload`(既定 true)、`EffectSpec.ReloadSounds`、`Weapon.ReserveAmmo` / `IsReloading` / `TryReload()` /
   `ReloadStarted`。弾倉を使う武装では `Weapon.Ammo` は弾倉内の弾、`FireSpec.Ammo` は弾倉を含む総弾数。`Fired` はバーストの1発ごと。
   無限弾薬では弾倉は減り(リロードは要る)、予備弾は減らない。
-  `EwlWeapon` に `ReloadKey` / `AutoReloadToggle` / `DelaySlider`(値を Fire/Delay に加算)/ `TimeFuseSlider`(値を Projectile/TimeFuse に使う。どちらも発射ごとに読み、時限信管は発射時の値で固定)、
+  `EwlWeapon` に `ReloadKey` / `AutoReloadToggle` / `FireDelaySlider`(値を Fire/Delay に加算)/ `TimeFuseSlider`(値を Projectile/TimeFuse に使う。どちらも発射ごとに読み、時限信管は発射時の値で固定)、
   `Fire` に BurstCount/BurstInterval/MagazineCapacity/ReloadTime/AutoReload、`Effects` に ReloadSounds を追加。
 - XML モジュール `EwlBlockPhysics`(仮称)。全要素省略可で、省略した項目は本体の値のまま。
   `JointStrength`(接合の破断力・破断トルク。0 = 変えない)、`Material`(Friction/Bounciness/FrictionCombine/BounceCombine。
@@ -59,6 +59,10 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
 - コンソールコマンド `ewl_detonations`: このシミュで爆発したボムと起爆させた人・判定の経路を出す(確認用)。
 
 ### Changed
+- [Breaking] 遅延・信管の乱数幅の名前を整理し、時限信管の乱数幅を独立させた(C# と XML 共通。乱数はどれも 0〜値の上乗せ)。
+  旧 `Fire.RandomDelay` → 新 `Fire.DelayRandomExtra`、旧 `Impact.FuseDelay` → 新 `Impact.DetonationDelay`、
+  旧 `Impact.FuseRandom` → 新 `Impact.DetonationDelayRandomExtra`、旧 `EwlWeapon/DelaySlider` → 新 `EwlWeapon/FireDelaySlider`。
+  追加 `Projectile.TimeFuseRandomExtra`(既定 0.05 秒。発射時に時限信管へ上乗せ。従来は起爆時に固定 0〜0.05 秒待っていた)。
 - [Breaking] `ProjectileHit.ShooterPlayerId` / `ShooterTeam` を `ProjectileHit.Shooter`(`Attacker`)にまとめた。
   旧 `hit.ShooterPlayerId` → 新 `hit.Shooter.PlayerId`、旧 `hit.ShooterTeam` → 新 `hit.Shooter.Team`。
 - 拡散(`Spread`)で曲げた方向に弾の向きも合わせるようにした(従来は向きは発射位置の向きのまま)。

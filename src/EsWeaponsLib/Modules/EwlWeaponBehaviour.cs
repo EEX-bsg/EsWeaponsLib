@@ -15,7 +15,7 @@ namespace EWL.Modules
         private MToggle _holdToggle;
         private MKey _reloadKey;
         private MToggle _autoReloadToggle;
-        private MSlider _delaySlider;
+        private MSlider _fireDelaySlider;
         private MSlider _timeFuseSlider;
         private Weapon _weapon;
         private bool _autoFire;
@@ -29,7 +29,7 @@ namespace EWL.Modules
             if (Module.HoldToFireToggle != null) _holdToggle = GetToggle(Module.HoldToFireToggle);
             if (Module.ReloadKey != null) _reloadKey = GetKey(Module.ReloadKey);
             if (Module.AutoReloadToggle != null) _autoReloadToggle = GetToggle(Module.AutoReloadToggle);
-            if (Module.DelaySlider != null) _delaySlider = GetSlider(Module.DelaySlider);
+            if (Module.FireDelaySlider != null) _fireDelaySlider = GetSlider(Module.FireDelaySlider);
             if (Module.TimeFuseSlider != null) _timeFuseSlider = GetSlider(Module.TimeFuseSlider);
         }
 
@@ -90,7 +90,7 @@ namespace EWL.Modules
             fire.Interval = Module.Fire.Interval;
             fire.Spread = Module.Fire.Spread;
             fire.Delay = Module.Fire.Delay;
-            fire.RandomDelay = Module.Fire.RandomDelay;
+            fire.DelayRandomExtra = Module.Fire.DelayRandomExtra;
             fire.Recoil = Module.Fire.Recoil;
             fire.Ammo = Module.Fire.Ammo;
             fire.BurstCount = Module.Fire.BurstCount;
@@ -114,6 +114,7 @@ namespace EWL.Modules
             projectile.CollisionMode = projectileXml.CollisionMode;
             projectile.Lifetime = projectileXml.Lifetime;
             projectile.TimeFuse = projectileXml.TimeFuse;
+            projectile.TimeFuseRandomExtra = projectileXml.TimeFuseRandomExtra;
             projectile.PoolSize = projectileXml.PoolSize;
             projectile.PoolKey = PoolKeyFor(Module);
             projectile.Friction = projectileXml.Friction;
@@ -144,8 +145,8 @@ namespace EWL.Modules
             impact.ExplodesOnlyWithGodTool = impactXml.ExplodesOnlyWithGodTool;
             impact.ExplosionPower = impactXml.ExplosionPower;
             impact.ExplosionUpPower = impactXml.ExplosionUpPower;
-            impact.FuseDelay = impactXml.FuseDelay;
-            impact.FuseRandom = impactXml.FuseRandom;
+            impact.DetonationDelay = impactXml.DetonationDelay;
+            impact.DetonationDelayRandomExtra = impactXml.DetonationDelayRandomExtra;
             impact.DespawnOnHit = impactXml.DespawnOnHit;
 
             var effectsXml = Module.Effects;
@@ -164,7 +165,7 @@ namespace EWL.Modules
         // スライダーはシミュ中に他のモジュールが動かすことがある(キーで信管時間を変える等)ので、発射ごとに読み直す。
         private void ApplySliders(WeaponSpec spec)
         {
-            if (_delaySlider != null) spec.Fire.Delay = Module.Fire.Delay + _delaySlider.Value;
+            if (_fireDelaySlider != null) spec.Fire.Delay = Module.Fire.Delay + _fireDelaySlider.Value;
             if (_timeFuseSlider != null) spec.Projectile.TimeFuse = _timeFuseSlider.Value;
         }
 

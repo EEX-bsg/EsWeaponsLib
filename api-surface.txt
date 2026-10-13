@@ -62,12 +62,12 @@ EWL.Api.FireSpec::AutoReload : System.Boolean
 EWL.Api.FireSpec::BurstCount : System.Int32
 EWL.Api.FireSpec::BurstInterval : System.Single
 EWL.Api.FireSpec::Delay : System.Single
+EWL.Api.FireSpec::DelayRandomExtra : System.Single
 EWL.Api.FireSpec::EjectVelocity : UnityEngine.Vector3
 EWL.Api.FireSpec::Interval : System.Single
 EWL.Api.FireSpec::MagazineCapacity : System.Int32
 EWL.Api.FireSpec::MuzzlePosition : UnityEngine.Vector3
 EWL.Api.FireSpec::MuzzleRotation : UnityEngine.Quaternion
-EWL.Api.FireSpec::RandomDelay : System.Single
 EWL.Api.FireSpec::Recoil : System.Single
 EWL.Api.FireSpec::ReloadTime : System.Single
 EWL.Api.FireSpec::Spread : System.Single
@@ -76,13 +76,13 @@ EWL.Api.FireSpec::Velocity : System.Single
 EWL.Api.ImpactSpec::Attach : System.Boolean
 EWL.Api.ImpactSpec::BlockDamage : System.Single
 EWL.Api.ImpactSpec::DespawnOnHit : System.Boolean
+EWL.Api.ImpactSpec::DetonationDelay : System.Single
+EWL.Api.ImpactSpec::DetonationDelayRandomExtra : System.Single
 EWL.Api.ImpactSpec::EntityDamage : System.Single
 EWL.Api.ImpactSpec::ExplodesOnlyWithGodTool : System.Boolean
 EWL.Api.ImpactSpec::ExplosionPower : System.Single
 EWL.Api.ImpactSpec::ExplosionRadius : System.Single
 EWL.Api.ImpactSpec::ExplosionUpPower : System.Single
-EWL.Api.ImpactSpec::FuseDelay : System.Single
-EWL.Api.ImpactSpec::FuseRandom : System.Single
 EWL.Api.ImpactSpec::ImpactForce : System.Single
 EWL.Api.ImpactSpec::System.Void .ctor()
 EWL.Api.ProjectileHit::Block : BlockBehaviour {get}
@@ -113,6 +113,7 @@ EWL.Api.ProjectileSpec::ShowWhenLoaded : System.Boolean
 EWL.Api.ProjectileSpec::System.Void .ctor()
 EWL.Api.ProjectileSpec::Texture : UnityEngine.Texture
 EWL.Api.ProjectileSpec::TimeFuse : System.Single
+EWL.Api.ProjectileSpec::TimeFuseRandomExtra : System.Single
 EWL.Api.Weapon::Ammo : System.Int32 {get}
 EWL.Api.Weapon::event System.Action Fired
 EWL.Api.Weapon::event System.Action ReloadStarted
@@ -175,9 +176,9 @@ EWL.Modules.EwlWeaponBehaviour::virtual System.Void SimulateUpdateHost()
 EWL.Modules.EwlWeaponModule [XmlRootAttribute(EwlWeapon)]
 EWL.Modules.EwlWeaponModule::AutoReloadToggle : Modding.Serialization.MToggleReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::Booster : EWL.Modules.BoosterXml XmlElement() DefaultValue()
-EWL.Modules.EwlWeaponModule::DelaySlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::Effects : EWL.Modules.EffectsXml XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::Fire : EWL.Modules.FireXml XmlElement() DefaultValue()
+EWL.Modules.EwlWeaponModule::FireDelaySlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::FireKey : Modding.Serialization.MKeyReference XmlElement() RequireToValidate()
 EWL.Modules.EwlWeaponModule::HoldToFireToggle : Modding.Serialization.MToggleReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::Impact : EWL.Modules.ImpactXml XmlElement() DefaultValue()
@@ -191,11 +192,11 @@ EWL.Modules.FireXml::AutoReload : System.Boolean XmlElement() DefaultValue()
 EWL.Modules.FireXml::BurstCount : System.Int32 XmlElement() DefaultValue()
 EWL.Modules.FireXml::BurstInterval : System.Single XmlElement() DefaultValue()
 EWL.Modules.FireXml::Delay : System.Single XmlElement() DefaultValue()
+EWL.Modules.FireXml::DelayRandomExtra : System.Single XmlElement() DefaultValue()
 EWL.Modules.FireXml::EjectVelocity : Modding.Serialization.Vector3 XmlElement() DefaultValue()
 EWL.Modules.FireXml::Hold : System.Boolean XmlElement() DefaultValue()
 EWL.Modules.FireXml::Interval : System.Single XmlElement() DefaultValue()
 EWL.Modules.FireXml::MagazineCapacity : System.Int32 XmlElement() DefaultValue()
-EWL.Modules.FireXml::RandomDelay : System.Single XmlElement() DefaultValue()
 EWL.Modules.FireXml::Recoil : System.Single XmlElement() DefaultValue()
 EWL.Modules.FireXml::ReloadTime : System.Single XmlElement() DefaultValue()
 EWL.Modules.FireXml::Spread : System.Single XmlElement() DefaultValue()
@@ -204,13 +205,13 @@ EWL.Modules.FireXml::Velocity : System.Single XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::Attach : System.Boolean XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::BlockDamage : System.Single XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::DespawnOnHit : System.Boolean XmlElement() DefaultValue()
+EWL.Modules.ImpactXml::DetonationDelay : System.Single XmlElement() DefaultValue()
+EWL.Modules.ImpactXml::DetonationDelayRandomExtra : System.Single XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::EntityDamage : System.Single XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::ExplodesOnlyWithGodTool : System.Boolean XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::ExplosionPower : System.Single XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::ExplosionRadius : System.Single XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::ExplosionUpPower : System.Single XmlElement() DefaultValue()
-EWL.Modules.ImpactXml::FuseDelay : System.Single XmlElement() DefaultValue()
-EWL.Modules.ImpactXml::FuseRandom : System.Single XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::ImpactForce : System.Single XmlElement() DefaultValue()
 EWL.Modules.ImpactXml::System.Void .ctor()
 EWL.Modules.JointRotationXml::AxisX : UnityEngine.ConfigurableJointMotion XmlElement() DefaultValue()
@@ -240,3 +241,4 @@ EWL.Modules.ProjectileXml::ShowWhenLoaded : System.Boolean XmlElement() DefaultV
 EWL.Modules.ProjectileXml::System.Void .ctor()
 EWL.Modules.ProjectileXml::Texture : Modding.Serialization.ResourceReference XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::TimeFuse : System.Single XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::TimeFuseRandomExtra : System.Single XmlElement() DefaultValue()

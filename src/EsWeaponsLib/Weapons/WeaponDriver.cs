@@ -163,7 +163,7 @@ namespace EWL.Weapons
                 if (_block == null || !HasAmmo()) break;
                 ConsumeOne();
                 var fire = Spec.Fire;
-                StartCoroutine(Shoot(fire.Delay + UnityEngine.Random.Range(0f, fire.RandomDelay)));
+                StartCoroutine(Shoot(fire.Delay + UnityEngine.Random.Range(0f, fire.DelayRandomExtra)));
             }
             _nextFireTime = Time.time + Spec.Fire.Interval;
             _bursting = false;

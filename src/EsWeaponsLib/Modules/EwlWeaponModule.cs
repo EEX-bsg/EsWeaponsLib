@@ -32,9 +32,9 @@ namespace EWL.Modules
 
         /// <summary>値 [s] を Fire/Delay に加える。発射ごとに読む。</summary>
         [XmlElement, DefaultValue(null)]
-        public MSliderReference DelaySlider;
+        public MSliderReference FireDelaySlider;
 
-        /// <summary>値 [s] を Projectile/TimeFuse に使う(XML の値より優先)。発射ごとに読み、飛行中の弾は変えない。</summary>
+        /// <summary>値 [s] を Projectile/TimeFuse に使う(XML の値より優先)。Projectile/TimeFuseRandomExtra の乱数は別に加わる。発射ごとに読み、飛行中の弾は変えない。</summary>
         [XmlElement, DefaultValue(null)]
         public MSliderReference TimeFuseSlider;
 
@@ -62,7 +62,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(null)] public bool Hold = true;
         [XmlElement, DefaultValue(null)] public float Spread = 0f;
         [XmlElement, DefaultValue(null)] public float Delay = 0f;
-        [XmlElement, DefaultValue(null)] public float RandomDelay = 0f;
+        [XmlElement, DefaultValue(null)] public float DelayRandomExtra = 0f;
         [XmlElement, DefaultValue(null)] public float Recoil = 1f;
         [XmlElement, DefaultValue(null)] public int Ammo = -1;
         [XmlElement, DefaultValue(null)] public int BurstCount = 1;
@@ -92,6 +92,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(CollisionDetectionMode.ContinuousDynamic)] public CollisionDetectionMode CollisionMode = CollisionDetectionMode.ContinuousDynamic;
         [XmlElement, DefaultValue(null)] public float Lifetime = 20f;
         [XmlElement, DefaultValue(null)] public float TimeFuse = 0f;
+        [XmlElement, DefaultValue(null)] public float TimeFuseRandomExtra = 0.05f;
         [XmlElement, DefaultValue(null)] public int PoolSize = 50;
         [XmlElement, DefaultValue(null)] public float Friction = 0.6f;
         [XmlElement, DefaultValue(null)] public float Bounciness = 0f;
@@ -123,8 +124,8 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(null)] public bool ExplodesOnlyWithGodTool = false;
         [XmlElement, DefaultValue(null)] public float ExplosionPower = 0f;
         [XmlElement, DefaultValue(null)] public float ExplosionUpPower = 0f;
-        [XmlElement, DefaultValue(null)] public float FuseDelay = 0f;
-        [XmlElement, DefaultValue(null)] public float FuseRandom = 0f;
+        [XmlElement, DefaultValue(null)] public float DetonationDelay = 0f;
+        [XmlElement, DefaultValue(null)] public float DetonationDelayRandomExtra = 0f;
         [XmlElement, DefaultValue(null)] public bool DespawnOnHit = false;
     }
 
