@@ -7,7 +7,7 @@ namespace EWL.Effects
     // エフェクトの再生とプール(ACMu と同じ設計)。プレハブごとに待機キューを持ち、生成数は上限まで。
     // 上限に達したらそのエフェクトは出さない(負荷を増やさないことを優先)。
     // 弾などに付いていない間(待機中・ワールドで再生中・切り離して消えかけ)はプレハブごとの置き場の子。
-    // 置き場は EWL のルート(DontDestroyOnLoad)の下にあり、シミュやシーンをまたいで再利用する。
+    // 置き場は SceneRoot の下。シミュをまたいで再利用し、シーンが変わったら全部捨てる。
     // 使用中のエフェクトは持ち主(シミュの目印)が消えたら即座に戻る。親ごと破棄された場合は数だけ減らす。
     internal static class EffectPlayer
     {
@@ -68,6 +68,7 @@ namespace EWL.Effects
 
         private static AudioSource IdleSoundSource(AudioSource template)
         {
+            var poolRoot = PoolRoot();
             List<AudioSource> sources;
             if (!SoundPools.TryGetValue(template, out sources)) SoundPools[template] = sources = new List<AudioSource>();
             sources.RemoveAll(source => source == null);
@@ -75,7 +76,7 @@ namespace EWL.Effects
             if (sources.Count >= MaxSoundsPerTemplate) return null;
 
             var created = new GameObject("Sound").AddComponent<AudioSource>();
-            created.transform.SetParent(PoolRoot(), false);
+            created.transform.SetParent(poolRoot, false);
             created.playOnAwake = false;
             Sounds.CopySpatialSettings(template, created);
             sources.Add(created);
@@ -85,12 +86,13 @@ namespace EWL.Effects
         private static PooledEffect Rent(GameObject prefab, int maxCount)
         {
             if (prefab == null) return null;
+            var poolRoot = PoolRoot();
             Pool pool;
             if (!Pools.TryGetValue(prefab, out pool))
             {
                 pool = new Pool();
                 pool.Root = new GameObject(prefab.name).transform;
-                pool.Root.SetParent(PoolRoot(), false);
+                pool.Root.SetParent(poolRoot, false);
                 Pools[prefab] = pool;
             }
             if (maxCount > pool.MaxCount) pool.MaxCount = maxCount;
@@ -128,9 +130,13 @@ namespace EWL.Effects
             if (!effect.IsIdle) effect.Home.Total--;
         }
 
+        // 置き場が消えていたらシーンが変わった: 中のエフェクトも音も全部消えているので、プールを一から作り直す。
         private static Transform PoolRoot()
         {
-            if (_poolRoot == null) _poolRoot = ModRoot.CreateChild("EffectPool");
+            if (_poolRoot != null) return _poolRoot;
+            Pools.Clear();
+            SoundPools.Clear();
+            _poolRoot = SceneRoot.CreateChild("EffectPool");
             return _poolRoot;
         }
     }

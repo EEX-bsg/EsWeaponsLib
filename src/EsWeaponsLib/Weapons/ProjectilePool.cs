@@ -7,7 +7,7 @@ namespace EWL.Weapons
     // 弾のプール(ACMu と同じ設計)。キーごとに待機キューと「同時に飛べる数」の上限を持つ。
     //  1) 待機中があれば再利用 2) 上限未満なら生成 3) 上限なら同じキーの最古の弾を回収して再利用(発射は止めない)。
     // 武装の生成時に上限数まで事前生成する。弾は待機中も飛行中もキーごとの置き場の子(刺さったときだけ刺さった先の子)。
-    // 置き場は EWL のルート(DontDestroyOnLoad)の下にあり、待機中の弾はシミュをまたいで再利用する。飛行中の弾はシミュ終了で戻る。
+    // 置き場は SceneRoot の下。待機中の弾はシミュをまたいで再利用し、シーンが変わったら全部捨てる。飛行中の弾はシミュ終了で戻る。
     // 弾の形(コライダー)はキーごとに最初に組み立てたもので固定。質量・見た目・物理マテリアルは発射ごとに設定し直す。
     internal static class ProjectilePool
     {
@@ -94,12 +94,13 @@ namespace EWL.Weapons
 
         private static Pool GetPool(string key, int maxCount)
         {
+            var poolRoot = PoolRoot();
             Pool pool;
             if (!Pools.TryGetValue(key, out pool))
             {
                 pool = new Pool();
                 pool.Root = new GameObject(key).transform;
-                pool.Root.SetParent(PoolRoot(), false);
+                pool.Root.SetParent(poolRoot, false);
                 Pools[key] = pool;
             }
             maxCount = Mathf.Clamp(maxCount, 1, MaxPoolSize);
@@ -107,7 +108,7 @@ namespace EWL.Weapons
             return pool;
         }
 
-        // 待機中は DontDestroyOnLoad の置き場にあるので通常は起きないが、外部から破棄されたものは数から外す。
+        // 通常は起きないが、外部から破棄されたものは数から外す。
         private static void DropDestroyedIdle(Pool pool)
         {
             while (pool.Idle.Count > 0 && pool.Idle.Peek() == null)
@@ -125,9 +126,12 @@ namespace EWL.Weapons
             return projectile;
         }
 
+        // 置き場が消えていたらシーンが変わった: 中の弾も全部消えているので、プールを一から作り直す。
         private static Transform PoolRoot()
         {
-            if (_poolRoot == null) _poolRoot = ModRoot.CreateChild("ProjectilePool");
+            if (_poolRoot != null) return _poolRoot;
+            Pools.Clear();
+            _poolRoot = SceneRoot.CreateChild("ProjectilePool");
             return _poolRoot;
         }
     }
