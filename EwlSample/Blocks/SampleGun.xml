@@ -12,26 +12,22 @@
         <!-- 省略した要素は既定値。全要素は src/EsWeaponsLib/Modules/EwlWeaponModule.cs を参照。 -->
         <EwlWeapon modid="0d219960-b202-4906-b29d-8d90a61a89b8">
             <FireKey key="fire" />
-            <Muzzle>
-                <Position x="0" y="0" z="1.3" />
-            </Muzzle>
-            <Fire>
-                <Velocity>150</Velocity>
-                <Interval>0.3</Interval>
-                <Hold>true</Hold>
-                <Spread>0.5</Spread>
-            </Fire>
+            <HoldToFire>true</HoldToFire>
+            <MuzzlePosition x="0" y="0" z="1.3" />
+            <MuzzleVelocity>150</MuzzleVelocity>
+            <FireInterval>0.3</FireInterval>
+            <Spread>0.5</Spread>
             <Projectile>
                 <Mass>0.5</Mass>
                 <Lifetime>8</Lifetime>
-            </Projectile>
-            <Impact>
                 <BlockDamage>1</BlockDamage>
                 <EntityDamage>50</EntityDamage>
-                <ExplosionRadius>2</ExplosionRadius>
-                <ExplosionPower>1500</ExplosionPower>
-                <ExplosionUpPower>0.5</ExplosionUpPower>
-            </Impact>
+                <Explosion>
+                    <Radius>2</Radius>
+                    <Force>1500</Force>
+                    <UpwardsModifier>0.5</UpwardsModifier>
+                </Explosion>
+            </Projectile>
         </EwlWeapon>
     </Modules>
 

@@ -3,10 +3,8 @@ class EWL.Api.Attacker : System.Object
 class EWL.Api.BoosterSpec : System.Object
 class EWL.Api.BundleAssets : System.Object
 class EWL.Api.ColliderShape : System.Object
-class EWL.Api.EffectSpec : System.Object
-class EWL.Api.FireSpec : System.Object
+class EWL.Api.ExplosionSpec : System.Object
 class EWL.Api.GuidanceSpec : System.Object
-class EWL.Api.ImpactSpec : System.Object
 class EWL.Api.ProjectileHit : System.Object
 class EWL.Api.ProjectileSpec : System.Object
 class EWL.Api.Weapon : System.Object
@@ -15,18 +13,16 @@ class EWL.Mod : Modding.ModEntryPoint
 class EWL.Modules.BlockMaterialXml : Modding.Serialization.Element
 class EWL.Modules.BoosterXml : Modding.Serialization.Element
 class EWL.Modules.BoxColliderXml : Modding.Serialization.BoxModCollider
-class EWL.Modules.EffectsXml : Modding.Serialization.Element
 class EWL.Modules.EwlBlockPhysicsBehaviour : Modding.Modules.BlockModuleBehaviour`1<EWL.Modules.EwlBlockPhysicsModule>
 class EWL.Modules.EwlBlockPhysicsModule : Modding.Modules.BlockModule
 class EWL.Modules.EwlWeaponBehaviour : Modding.Modules.BlockModuleBehaviour`1<EWL.Modules.EwlWeaponModule>
 class EWL.Modules.EwlWeaponModule : Modding.Modules.BlockModule
-class EWL.Modules.FireXml : Modding.Serialization.Element
+class EWL.Modules.ExplosionXml : Modding.Serialization.Element
 class EWL.Modules.GuidanceXml : Modding.Serialization.Element
-class EWL.Modules.ImpactXml : Modding.Serialization.Element
 class EWL.Modules.JointRotationXml : Modding.Serialization.Element
-class EWL.Modules.MuzzleXml : Modding.Serialization.Element
 class EWL.Modules.ProjectileXml : Modding.Serialization.Element
 enum EWL.Api.ColliderKind : System.Enum
+enum EWL.Api.HitKind : System.Enum
 EWL.Api.Attacker::Player : Modding.Common.Player {get}
 EWL.Api.Attacker::PlayerId : System.UInt16 {get}
 EWL.Api.Attacker::static EWL.Api.Attacker GetDetonator(BlockBehaviour)
@@ -47,65 +43,45 @@ EWL.Api.ColliderShape::Radius : System.Single
 EWL.Api.ColliderShape::Rotation : UnityEngine.Vector3
 EWL.Api.ColliderShape::Size : UnityEngine.Vector3
 EWL.Api.ColliderShape::System.Void .ctor()
-EWL.Api.EffectSpec::Bullet : UnityEngine.GameObject
-EWL.Api.EffectSpec::Explosion : UnityEngine.GameObject
-EWL.Api.EffectSpec::ExplosionFacesNormal : System.Boolean
-EWL.Api.EffectSpec::ExplosionSounds : System.Collections.Generic.List`1<UnityEngine.AudioClip>
-EWL.Api.EffectSpec::FireSounds : System.Collections.Generic.List`1<UnityEngine.AudioClip>
-EWL.Api.EffectSpec::ReloadSounds : System.Collections.Generic.List`1<UnityEngine.AudioClip>
-EWL.Api.EffectSpec::ShotFlash : UnityEngine.GameObject
-EWL.Api.EffectSpec::ShotFlashPosition : UnityEngine.Vector3
-EWL.Api.EffectSpec::ShotFlashRotation : UnityEngine.Vector3
-EWL.Api.EffectSpec::ShotFlashScale : UnityEngine.Vector3
-EWL.Api.EffectSpec::System.Void .ctor()
-EWL.Api.EffectSpec::Trail : UnityEngine.GameObject
-EWL.Api.FireSpec::Ammo : System.Int32
-EWL.Api.FireSpec::AutoReload : System.Boolean
-EWL.Api.FireSpec::BurstCount : System.Int32
-EWL.Api.FireSpec::BurstInterval : System.Single
-EWL.Api.FireSpec::Delay : System.Single
-EWL.Api.FireSpec::DelayRandomExtra : System.Single
-EWL.Api.FireSpec::EjectVelocity : UnityEngine.Vector3
-EWL.Api.FireSpec::Interval : System.Single
-EWL.Api.FireSpec::MagazineCapacity : System.Int32
-EWL.Api.FireSpec::MuzzlePosition : UnityEngine.Vector3
-EWL.Api.FireSpec::MuzzleRotation : UnityEngine.Quaternion
-EWL.Api.FireSpec::Recoil : System.Single
-EWL.Api.FireSpec::ReloadTime : System.Single
-EWL.Api.FireSpec::Spread : System.Single
-EWL.Api.FireSpec::System.Void .ctor()
-EWL.Api.FireSpec::Velocity : System.Single
+EWL.Api.ExplosionSpec::Effect : UnityEngine.GameObject
+EWL.Api.ExplosionSpec::FacesHitNormal : System.Boolean
+EWL.Api.ExplosionSpec::Force : System.Single
+EWL.Api.ExplosionSpec::OnlyWithExplodingCannonballs : System.Boolean
+EWL.Api.ExplosionSpec::Radius : System.Single
+EWL.Api.ExplosionSpec::Sounds : System.Collections.Generic.List`1<UnityEngine.AudioClip>
+EWL.Api.ExplosionSpec::System.Void .ctor()
+EWL.Api.ExplosionSpec::UpwardsModifier : System.Single
 EWL.Api.GuidanceSpec::Gain : System.Single
 EWL.Api.GuidanceSpec::System.Void .ctor()
-EWL.Api.ImpactSpec::Attach : System.Boolean
-EWL.Api.ImpactSpec::BlockDamage : System.Single
-EWL.Api.ImpactSpec::DespawnOnHit : System.Boolean
-EWL.Api.ImpactSpec::DetonationDelay : System.Single
-EWL.Api.ImpactSpec::DetonationDelayRandomExtra : System.Single
-EWL.Api.ImpactSpec::EntityDamage : System.Single
-EWL.Api.ImpactSpec::ExplodesOnlyWithGodTool : System.Boolean
-EWL.Api.ImpactSpec::ExplosionPower : System.Single
-EWL.Api.ImpactSpec::ExplosionRadius : System.Single
-EWL.Api.ImpactSpec::ExplosionUpPower : System.Single
-EWL.Api.ImpactSpec::ImpactForce : System.Single
-EWL.Api.ImpactSpec::System.Void .ctor()
+EWL.Api.HitKind::Direct : EWL.Api.HitKind
+EWL.Api.HitKind::Explosion : EWL.Api.HitKind
 EWL.Api.ProjectileHit::Block : BlockBehaviour {get}
 EWL.Api.ProjectileHit::Collider : UnityEngine.Collider {get}
-EWL.Api.ProjectileHit::IsExplosion : System.Boolean {get}
+EWL.Api.ProjectileHit::Kind : EWL.Api.HitKind {get}
 EWL.Api.ProjectileHit::Point : UnityEngine.Vector3 {get}
 EWL.Api.ProjectileHit::Shooter : EWL.Api.Attacker {get}
 EWL.Api.ProjectileHit::ShooterBlock : BlockBehaviour {get}
 EWL.Api.ProjectileHit::Weapon : EWL.Api.Weapon {get}
 EWL.Api.ProjectileSpec::AngularDrag : System.Single
+EWL.Api.ProjectileSpec::BlockDamage : System.Single
+EWL.Api.ProjectileSpec::Booster : EWL.Api.BoosterSpec
 EWL.Api.ProjectileSpec::BounceCombine : UnityEngine.PhysicMaterialCombine
 EWL.Api.ProjectileSpec::Bounciness : System.Single
 EWL.Api.ProjectileSpec::ColliderEnableDelay : System.Single
 EWL.Api.ProjectileSpec::Colliders : System.Collections.Generic.List`1<EWL.Api.ColliderShape>
 EWL.Api.ProjectileSpec::CollisionMode : UnityEngine.CollisionDetectionMode
+EWL.Api.ProjectileSpec::DespawnOnHit : System.Boolean
+EWL.Api.ProjectileSpec::DetonationDelay : System.Single
+EWL.Api.ProjectileSpec::DetonationDelayRandomExtra : System.Single
 EWL.Api.ProjectileSpec::Drag : System.Single
+EWL.Api.ProjectileSpec::Effect : UnityEngine.GameObject
+EWL.Api.ProjectileSpec::EntityDamage : System.Single
+EWL.Api.ProjectileSpec::Explosion : EWL.Api.ExplosionSpec
 EWL.Api.ProjectileSpec::Friction : System.Single
 EWL.Api.ProjectileSpec::FrictionCombine : UnityEngine.PhysicMaterialCombine
+EWL.Api.ProjectileSpec::Guidance : EWL.Api.GuidanceSpec
 EWL.Api.ProjectileSpec::IgnoreGravity : System.Boolean
+EWL.Api.ProjectileSpec::ImpactForce : System.Single
 EWL.Api.ProjectileSpec::Lifetime : System.Single
 EWL.Api.ProjectileSpec::Mass : System.Single
 EWL.Api.ProjectileSpec::Mesh : UnityEngine.Mesh
@@ -114,11 +90,12 @@ EWL.Api.ProjectileSpec::MeshRotation : UnityEngine.Vector3
 EWL.Api.ProjectileSpec::MeshScale : UnityEngine.Vector3
 EWL.Api.ProjectileSpec::PoolKey : System.String
 EWL.Api.ProjectileSpec::PoolSize : System.Int32
-EWL.Api.ProjectileSpec::ShowWhenLoaded : System.Boolean
+EWL.Api.ProjectileSpec::StickOnHit : System.Boolean
 EWL.Api.ProjectileSpec::System.Void .ctor()
 EWL.Api.ProjectileSpec::Texture : UnityEngine.Texture
 EWL.Api.ProjectileSpec::TimeFuse : System.Single
 EWL.Api.ProjectileSpec::TimeFuseRandomExtra : System.Single
+EWL.Api.ProjectileSpec::Trail : UnityEngine.GameObject
 EWL.Api.Weapon::Ammo : System.Int32 {get}
 EWL.Api.Weapon::event System.Action Fired
 EWL.Api.Weapon::event System.Action ReloadStarted
@@ -134,13 +111,30 @@ EWL.Api.Weapon::static EWL.Api.Weapon[] GetAll(UnityEngine.GameObject)
 EWL.Api.Weapon::System.Boolean TryFire()
 EWL.Api.Weapon::System.Boolean TryReload()
 EWL.Api.Weapon::System.Void Destroy()
-EWL.Api.WeaponSpec::Booster : EWL.Api.BoosterSpec
-EWL.Api.WeaponSpec::Effects : EWL.Api.EffectSpec
-EWL.Api.WeaponSpec::Fire : EWL.Api.FireSpec
-EWL.Api.WeaponSpec::Guidance : EWL.Api.GuidanceSpec
-EWL.Api.WeaponSpec::Impact : EWL.Api.ImpactSpec
+EWL.Api.WeaponSpec::AutoReload : System.Boolean
+EWL.Api.WeaponSpec::BurstCount : System.Int32
+EWL.Api.WeaponSpec::BurstInterval : System.Single
+EWL.Api.WeaponSpec::EjectVelocity : UnityEngine.Vector3
+EWL.Api.WeaponSpec::FireDelay : System.Single
+EWL.Api.WeaponSpec::FireDelayRandomExtra : System.Single
+EWL.Api.WeaponSpec::FireInterval : System.Single
+EWL.Api.WeaponSpec::FireSounds : System.Collections.Generic.List`1<UnityEngine.AudioClip>
+EWL.Api.WeaponSpec::MagazineCapacity : System.Int32
+EWL.Api.WeaponSpec::MuzzleFlash : UnityEngine.GameObject
+EWL.Api.WeaponSpec::MuzzleFlashPosition : UnityEngine.Vector3
+EWL.Api.WeaponSpec::MuzzleFlashRotation : UnityEngine.Vector3
+EWL.Api.WeaponSpec::MuzzleFlashScale : UnityEngine.Vector3
+EWL.Api.WeaponSpec::MuzzlePosition : UnityEngine.Vector3
+EWL.Api.WeaponSpec::MuzzleRotation : UnityEngine.Vector3
+EWL.Api.WeaponSpec::MuzzleVelocity : System.Single
 EWL.Api.WeaponSpec::Projectile : EWL.Api.ProjectileSpec
+EWL.Api.WeaponSpec::RecoilMultiplier : System.Single
+EWL.Api.WeaponSpec::ReloadSounds : System.Collections.Generic.List`1<UnityEngine.AudioClip>
+EWL.Api.WeaponSpec::ReloadTime : System.Single
+EWL.Api.WeaponSpec::ShowLoadedProjectile : System.Boolean
+EWL.Api.WeaponSpec::Spread : System.Single
 EWL.Api.WeaponSpec::System.Void .ctor()
+EWL.Api.WeaponSpec::TotalAmmo : System.Int32
 EWL.Mod::System.Void .ctor()
 EWL.Mod::virtual System.Void OnLoad()
 EWL.Modules.BlockMaterialXml::BounceCombine : UnityEngine.PhysicMaterialCombine XmlElement() DefaultValue()
@@ -154,19 +148,6 @@ EWL.Modules.BoosterXml::System.Void .ctor()
 EWL.Modules.BoosterXml::Thrust : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.BoxColliderXml::Center : Modding.Serialization.Vector3 XmlElement() DefaultValue()
 EWL.Modules.BoxColliderXml::System.Void .ctor()
-EWL.Modules.EffectsXml::AssetBundle : Modding.Serialization.ResourceReference XmlElement() DefaultValue()
-EWL.Modules.EffectsXml::Bullet : System.String XmlElement() DefaultValue()
-EWL.Modules.EffectsXml::Explosion : System.String XmlElement() DefaultValue()
-EWL.Modules.EffectsXml::ExplosionFacesNormal : System.Boolean XmlElement() DefaultValue(False)
-EWL.Modules.EffectsXml::ExplosionSounds : System.Collections.Generic.List`1<Modding.Serialization.ResourceReference> XmlArray(ExplosionSounds) DefaultValue()
-EWL.Modules.EffectsXml::FireSounds : System.Collections.Generic.List`1<Modding.Serialization.ResourceReference> XmlArray(FireSounds) DefaultValue()
-EWL.Modules.EffectsXml::ReloadSounds : System.Collections.Generic.List`1<Modding.Serialization.ResourceReference> XmlArray(ReloadSounds) DefaultValue()
-EWL.Modules.EffectsXml::ShotFlash : System.String XmlElement() DefaultValue()
-EWL.Modules.EffectsXml::ShotFlashPosition : Modding.Serialization.Vector3 XmlElement() DefaultValue()
-EWL.Modules.EffectsXml::ShotFlashRotation : Modding.Serialization.Vector3 XmlElement() DefaultValue()
-EWL.Modules.EffectsXml::ShotFlashScale : Modding.Serialization.Vector3 XmlElement() DefaultValue()
-EWL.Modules.EffectsXml::System.Void .ctor()
-EWL.Modules.EffectsXml::Trail : System.String XmlElement() DefaultValue()
 EWL.Modules.EwlBlockPhysicsBehaviour::System.Void .ctor()
 EWL.Modules.EwlBlockPhysicsBehaviour::virtual System.Void SafeAwake()
 EWL.Modules.EwlBlockPhysicsModule [XmlRootAttribute(EwlBlockPhysics)]
@@ -181,51 +162,50 @@ EWL.Modules.EwlWeaponBehaviour::virtual System.Void OnSimulateStop()
 EWL.Modules.EwlWeaponBehaviour::virtual System.Void SafeAwake()
 EWL.Modules.EwlWeaponBehaviour::virtual System.Void SimulateUpdateHost()
 EWL.Modules.EwlWeaponModule [XmlRootAttribute(EwlWeapon)]
+EWL.Modules.EwlWeaponModule::AssetBundle : Modding.Serialization.ResourceReference XmlElement() DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::AutoReload : System.Boolean XmlElement() DefaultValue(True) Reloadable()
 EWL.Modules.EwlWeaponModule::AutoReloadToggle : Modding.Serialization.MToggleReference XmlElement() DefaultValue()
-EWL.Modules.EwlWeaponModule::Booster : EWL.Modules.BoosterXml XmlElement() DefaultValue() Reloadable()
-EWL.Modules.EwlWeaponModule::Effects : EWL.Modules.EffectsXml XmlElement() DefaultValue() Reloadable()
-EWL.Modules.EwlWeaponModule::Fire : EWL.Modules.FireXml XmlElement() DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::BurstCount : System.Int32 XmlElement() DefaultValue(1) Reloadable()
+EWL.Modules.EwlWeaponModule::BurstInterval : System.Single XmlElement() DefaultValue(0.1) Reloadable()
+EWL.Modules.EwlWeaponModule::EjectVelocity : Modding.Serialization.Vector3 XmlElement() DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::FireDelay : System.Single XmlElement() DefaultValue(0) Reloadable()
+EWL.Modules.EwlWeaponModule::FireDelayRandomExtra : System.Single XmlElement() DefaultValue(0) Reloadable()
 EWL.Modules.EwlWeaponModule::FireDelaySlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
+EWL.Modules.EwlWeaponModule::FireInterval : System.Single XmlElement() DefaultValue(0.5) Reloadable()
 EWL.Modules.EwlWeaponModule::FireKey : Modding.Serialization.MKeyReference XmlElement() RequireToValidate()
 EWL.Modules.EwlWeaponModule::FireRateSlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
-EWL.Modules.EwlWeaponModule::Guidance : EWL.Modules.GuidanceXml XmlElement() DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::FireSounds : System.Collections.Generic.List`1<Modding.Serialization.ResourceReference> XmlArray(FireSounds) DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::HoldToFire : System.Boolean XmlElement() DefaultValue(True) Reloadable()
 EWL.Modules.EwlWeaponModule::HoldToFireToggle : Modding.Serialization.MToggleReference XmlElement() DefaultValue()
-EWL.Modules.EwlWeaponModule::Impact : EWL.Modules.ImpactXml XmlElement() DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::MagazineCapacity : System.Int32 XmlElement() DefaultValue(0) Reloadable()
 EWL.Modules.EwlWeaponModule::MagazineCapacitySlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
-EWL.Modules.EwlWeaponModule::Muzzle : EWL.Modules.MuzzleXml XmlElement() DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::MuzzleFlash : System.String XmlElement() DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::MuzzleFlashPosition : Modding.Serialization.Vector3 XmlElement() DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::MuzzleFlashRotation : Modding.Serialization.Vector3 XmlElement() DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::MuzzleFlashScale : Modding.Serialization.Vector3 XmlElement() DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::MuzzlePosition : Modding.Serialization.Vector3 XmlElement() DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::MuzzleRotation : Modding.Serialization.Vector3 XmlElement() DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::MuzzleVelocity : System.Single XmlElement() DefaultValue(100) Reloadable()
 EWL.Modules.EwlWeaponModule::Projectile : EWL.Modules.ProjectileXml XmlElement() DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::RecoilMultiplier : System.Single XmlElement() DefaultValue(1) Reloadable()
 EWL.Modules.EwlWeaponModule::ReloadKey : Modding.Serialization.MKeyReference XmlElement() DefaultValue()
+EWL.Modules.EwlWeaponModule::ReloadSounds : System.Collections.Generic.List`1<Modding.Serialization.ResourceReference> XmlArray(ReloadSounds) DefaultValue() Reloadable()
+EWL.Modules.EwlWeaponModule::ReloadTime : System.Single XmlElement() DefaultValue(1) Reloadable()
+EWL.Modules.EwlWeaponModule::ShowLoadedProjectile : System.Boolean XmlElement() DefaultValue(False) Reloadable()
+EWL.Modules.EwlWeaponModule::Spread : System.Single XmlElement() DefaultValue(0) Reloadable()
 EWL.Modules.EwlWeaponModule::System.Void .ctor()
 EWL.Modules.EwlWeaponModule::TimeFuseSlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
-EWL.Modules.FireXml::Ammo : System.Int32 XmlElement() DefaultValue(-1)
-EWL.Modules.FireXml::AutoReload : System.Boolean XmlElement() DefaultValue(True)
-EWL.Modules.FireXml::BurstCount : System.Int32 XmlElement() DefaultValue(1)
-EWL.Modules.FireXml::BurstInterval : System.Single XmlElement() DefaultValue(0.1)
-EWL.Modules.FireXml::Delay : System.Single XmlElement() DefaultValue(0)
-EWL.Modules.FireXml::DelayRandomExtra : System.Single XmlElement() DefaultValue(0)
-EWL.Modules.FireXml::EjectVelocity : Modding.Serialization.Vector3 XmlElement() DefaultValue()
-EWL.Modules.FireXml::Hold : System.Boolean XmlElement() DefaultValue(True)
-EWL.Modules.FireXml::Interval : System.Single XmlElement() DefaultValue(0.5)
-EWL.Modules.FireXml::MagazineCapacity : System.Int32 XmlElement() DefaultValue(0)
-EWL.Modules.FireXml::Recoil : System.Single XmlElement() DefaultValue(1)
-EWL.Modules.FireXml::ReloadTime : System.Single XmlElement() DefaultValue(1)
-EWL.Modules.FireXml::Spread : System.Single XmlElement() DefaultValue(0)
-EWL.Modules.FireXml::System.Void .ctor()
-EWL.Modules.FireXml::Velocity : System.Single XmlElement() DefaultValue(100)
+EWL.Modules.EwlWeaponModule::TotalAmmo : System.Int32 XmlElement() DefaultValue(-1) Reloadable()
+EWL.Modules.ExplosionXml::Effect : System.String XmlElement() DefaultValue()
+EWL.Modules.ExplosionXml::FacesHitNormal : System.Boolean XmlElement() DefaultValue(False)
+EWL.Modules.ExplosionXml::Force : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.ExplosionXml::OnlyWithExplodingCannonballs : System.Boolean XmlElement() DefaultValue(False)
+EWL.Modules.ExplosionXml::Radius : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.ExplosionXml::Sounds : System.Collections.Generic.List`1<Modding.Serialization.ResourceReference> XmlArray(Sounds) DefaultValue()
+EWL.Modules.ExplosionXml::System.Void .ctor()
+EWL.Modules.ExplosionXml::UpwardsModifier : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.GuidanceXml::Gain : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.GuidanceXml::System.Void .ctor()
-EWL.Modules.ImpactXml::Attach : System.Boolean XmlElement() DefaultValue(False)
-EWL.Modules.ImpactXml::BlockDamage : System.Single XmlElement() DefaultValue(0)
-EWL.Modules.ImpactXml::DespawnOnHit : System.Boolean XmlElement() DefaultValue(False)
-EWL.Modules.ImpactXml::DetonationDelay : System.Single XmlElement() DefaultValue(0)
-EWL.Modules.ImpactXml::DetonationDelayRandomExtra : System.Single XmlElement() DefaultValue(0)
-EWL.Modules.ImpactXml::EntityDamage : System.Single XmlElement() DefaultValue(0)
-EWL.Modules.ImpactXml::ExplodesOnlyWithGodTool : System.Boolean XmlElement() DefaultValue(False)
-EWL.Modules.ImpactXml::ExplosionPower : System.Single XmlElement() DefaultValue(0)
-EWL.Modules.ImpactXml::ExplosionRadius : System.Single XmlElement() DefaultValue(0)
-EWL.Modules.ImpactXml::ExplosionUpPower : System.Single XmlElement() DefaultValue(0)
-EWL.Modules.ImpactXml::ImpactForce : System.Single XmlElement() DefaultValue(10)
-EWL.Modules.ImpactXml::System.Void .ctor()
 EWL.Modules.JointRotationXml::AxisX : UnityEngine.ConfigurableJointMotion XmlElement() DefaultValue()
 EWL.Modules.JointRotationXml::AxisY : UnityEngine.ConfigurableJointMotion XmlElement() DefaultValue()
 EWL.Modules.JointRotationXml::AxisZ : UnityEngine.ConfigurableJointMotion XmlElement() DefaultValue()
@@ -233,25 +213,33 @@ EWL.Modules.JointRotationXml::Damper : System.Single XmlElement() DefaultValue(0
 EWL.Modules.JointRotationXml::Limit : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.JointRotationXml::Spring : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.JointRotationXml::System.Void .ctor()
-EWL.Modules.MuzzleXml::Position : Modding.Serialization.Vector3 XmlElement() DefaultValue()
-EWL.Modules.MuzzleXml::Rotation : Modding.Serialization.Vector3 XmlElement() DefaultValue()
-EWL.Modules.MuzzleXml::System.Void .ctor()
 EWL.Modules.ProjectileXml::AngularDrag : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.ProjectileXml::BlockDamage : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.ProjectileXml::Booster : EWL.Modules.BoosterXml XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::BounceCombine : UnityEngine.PhysicMaterialCombine XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::Bounciness : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ProjectileXml::ColliderEnableDelay : System.Single XmlElement() DefaultValue(0.02)
 EWL.Modules.ProjectileXml::Colliders : System.Collections.Generic.List`1<Modding.Serialization.ModCollider> XmlArray(Colliders) DefaultValue()
 EWL.Modules.ProjectileXml::CollisionMode : UnityEngine.CollisionDetectionMode XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::DespawnOnHit : System.Boolean XmlElement() DefaultValue(False)
+EWL.Modules.ProjectileXml::DetonationDelay : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.ProjectileXml::DetonationDelayRandomExtra : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ProjectileXml::Drag : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.ProjectileXml::Effect : System.String XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::EntityDamage : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.ProjectileXml::Explosion : EWL.Modules.ExplosionXml XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::Friction : System.Single XmlElement() DefaultValue(0.6)
 EWL.Modules.ProjectileXml::FrictionCombine : UnityEngine.PhysicMaterialCombine XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::Guidance : EWL.Modules.GuidanceXml XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::IgnoreGravity : System.Boolean XmlElement() DefaultValue(False)
+EWL.Modules.ProjectileXml::ImpactForce : System.Single XmlElement() DefaultValue(10)
 EWL.Modules.ProjectileXml::Lifetime : System.Single XmlElement() DefaultValue(20)
 EWL.Modules.ProjectileXml::Mass : System.Single XmlElement() DefaultValue(1)
 EWL.Modules.ProjectileXml::Mesh : Modding.Serialization.MeshReference XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::PoolSize : System.Int32 XmlElement() DefaultValue(50)
-EWL.Modules.ProjectileXml::ShowWhenLoaded : System.Boolean XmlElement() DefaultValue(False)
+EWL.Modules.ProjectileXml::StickOnHit : System.Boolean XmlElement() DefaultValue(False)
 EWL.Modules.ProjectileXml::System.Void .ctor()
 EWL.Modules.ProjectileXml::Texture : Modding.Serialization.ResourceReference XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::TimeFuse : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ProjectileXml::TimeFuseRandomExtra : System.Single XmlElement() DefaultValue(0.05)
+EWL.Modules.ProjectileXml::Trail : System.String XmlElement() DefaultValue()

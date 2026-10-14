@@ -53,12 +53,12 @@ namespace EWL.Weapons
             foreach (var other in GetComponents<WeaponDriver>())
                 if (other != this) index = Mathf.Max(index, other.NetworkIndex + 1);
             NetworkIndex = index;
-            int capacity = spec.Fire.MagazineCapacity;
-            Ammo = spec.Fire.Ammo;
+            int capacity = spec.MagazineCapacity;
+            Ammo = spec.TotalAmmo;
             if (capacity > 0)
             {
-                Ammo = Ammo < 0 ? capacity : Mathf.Min(capacity, spec.Fire.Ammo);
-                ReserveAmmo = spec.Fire.Ammo < 0 ? -1 : spec.Fire.Ammo - Ammo;
+                Ammo = Ammo < 0 ? capacity : Mathf.Min(capacity, spec.TotalAmmo);
+                ReserveAmmo = spec.TotalAmmo < 0 ? -1 : spec.TotalAmmo - Ammo;
             }
             _ownColliders = block.GetComponentsInChildren<Collider>();
             _privatePoolKey = "weapon#" + GetInstanceID();
@@ -75,7 +75,7 @@ namespace EWL.Weapons
 
         private void Update()
         {
-            bool show = Spec.Projectile.ShowWhenLoaded && !IsReloading && HasAmmo()
+            bool show = Spec.ShowLoadedProjectile && !IsReloading && HasAmmo()
                 && (_pendingShots > 0 || (Time.time >= _nextFireTime && !_bursting));
             if (show) UpdateLoadedVisual();
             if (_loadedVisual != null && _loadedVisual.activeSelf != show) _loadedVisual.SetActive(show);
@@ -96,8 +96,8 @@ namespace EWL.Weapons
                 _owned.Add(_loadedVisual);
             }
             var root = _loadedVisual.transform;
-            root.localPosition = Spec.Fire.MuzzlePosition;
-            root.localRotation = Spec.Fire.MuzzleRotation;
+            root.localPosition = Spec.MuzzlePosition;
+            root.localRotation = Quaternion.Euler(Spec.MuzzleRotation);
             var visualTransform = _loadedMeshFilter.transform;
             if (projectile.Mesh != null)
             {
@@ -133,14 +133,14 @@ namespace EWL.Weapons
             }
         }
 
-        private bool UsesMagazine { get { return Spec.Fire.MagazineCapacity > 0; } }
+        private bool UsesMagazine { get { return Spec.MagazineCapacity > 0; } }
 
         internal bool TryFire()
         {
             if (!Simulation.HasAuthority(_block) || Time.time < _nextFireTime || _bursting || IsReloading) return false;
             if (!HasAmmo())
             {
-                if (UsesMagazine && Spec.Fire.AutoReload) TryReload();
+                if (UsesMagazine && Spec.AutoReload) TryReload();
                 return false;
             }
             StartCoroutine(Burst());
@@ -156,18 +156,17 @@ namespace EWL.Weapons
         private IEnumerator Burst()
         {
             _bursting = true;
-            int count = Mathf.Max(1, Spec.Fire.BurstCount);
+            int count = Mathf.Max(1, Spec.BurstCount);
             for (int i = 0; i < count && HasAmmo() && !IsReloading; i++)
             {
-                if (i > 0) yield return new WaitForSeconds(Spec.Fire.BurstInterval);
+                if (i > 0) yield return new WaitForSeconds(Spec.BurstInterval);
                 if (_block == null || !HasAmmo()) break;
                 ConsumeOne();
-                var fire = Spec.Fire;
-                StartCoroutine(Shoot(fire.Delay + UnityEngine.Random.Range(0f, fire.DelayRandomExtra)));
+                StartCoroutine(Shoot(Spec.FireDelay + UnityEngine.Random.Range(0f, Spec.FireDelayRandomExtra)));
             }
-            _nextFireTime = Time.time + Spec.Fire.Interval;
+            _nextFireTime = Time.time + Spec.FireInterval;
             _bursting = false;
-            if (Ammo == 0 && UsesMagazine && Spec.Fire.AutoReload) TryReload();
+            if (Ammo == 0 && UsesMagazine && Spec.AutoReload) TryReload();
         }
 
         private void ConsumeOne()
@@ -182,7 +181,7 @@ namespace EWL.Weapons
         internal bool TryReload()
         {
             if (!Simulation.HasAuthority(_block) || !UsesMagazine || IsReloading || _bursting) return false;
-            if (Ammo >= Spec.Fire.MagazineCapacity || (ReserveAmmo == 0 && !Simulation.IsInfiniteAmmo(_block))) return false;
+            if (Ammo >= Spec.MagazineCapacity || (ReserveAmmo == 0 && !Simulation.IsInfiniteAmmo(_block))) return false;
             StartCoroutine(Reload());
             return true;
         }
@@ -191,10 +190,10 @@ namespace EWL.Weapons
         {
             IsReloading = true;
             if (ReloadStarted != null) ReloadStarted();
-            EffectPlayer.PlaySound(Spec.Effects.ReloadSounds, transform.position, Sounds.FireTemplate);
+            EffectPlayer.PlaySound(Spec.ReloadSounds, transform.position, Sounds.FireTemplate);
             ProjectileSync.WeaponStateChanged(this, WeaponStateFlags.ReloadStarted);
-            yield return new WaitForSeconds(Spec.Fire.ReloadTime);
-            int load = Mathf.Max(0, Spec.Fire.MagazineCapacity - Ammo);
+            yield return new WaitForSeconds(Spec.ReloadTime);
+            int load = Mathf.Max(0, Spec.MagazineCapacity - Ammo);
             if (ReserveAmmo >= 0 && !Simulation.IsInfiniteAmmo(_block))
             {
                 load = Mathf.Min(load, ReserveAmmo);
@@ -213,36 +212,36 @@ namespace EWL.Weapons
             _pendingShots--;
             if (_block == null || !Simulation.HasAuthority(_block) || _block.Rigidbody == null) yield break;
 
-            var fire = Spec.Fire;
-            var projectile = Spec.Projectile;
+            var spec = Spec;
+            var projectile = spec.Projectile;
             var blockTransform = transform;
-            Vector3 pos = blockTransform.TransformPoint(fire.MuzzlePosition);
-            Quaternion rot = blockTransform.rotation * fire.MuzzleRotation;
+            Vector3 pos = blockTransform.TransformPoint(spec.MuzzlePosition);
+            Quaternion rot = blockTransform.rotation * Quaternion.Euler(spec.MuzzleRotation);
             Vector3 dir = rot * Vector3.forward;
-            if (fire.Spread > 0f)
+            if (spec.Spread > 0f)
             {
-                dir = (dir + UnityEngine.Random.insideUnitSphere * Mathf.Tan(fire.Spread * Mathf.Deg2Rad)).normalized;
+                dir = (dir + UnityEngine.Random.insideUnitSphere * Mathf.Tan(spec.Spread * Mathf.Deg2Rad)).normalized;
                 rot = Quaternion.LookRotation(dir, rot * Vector3.up); // 推進する弾は向きの方へ飛ぶ
             }
 
             var rb = _block.Rigidbody;
             var physicMaterial = PhysicMaterialFor(projectile);
             var material = MaterialFor(projectile);
-            var velocity = rb.velocity + dir * fire.Velocity + rot * fire.EjectVelocity;
+            var velocity = rb.velocity + dir * spec.MuzzleVelocity + rot * spec.EjectVelocity;
             var shot = ProjectilePool.Acquire(PoolKey, projectile);
-            shot.Launch(this, Spec, pos, rot, velocity, _ownColliders, physicMaterial, material);
-            rb.AddForce(-dir * (fire.Velocity * projectile.Mass * fire.Recoil), ForceMode.Impulse);
+            shot.Launch(this, projectile, pos, rot, velocity, _ownColliders, physicMaterial, material);
+            rb.AddForce(-dir * (spec.MuzzleVelocity * projectile.Mass * spec.RecoilMultiplier), ForceMode.Impulse);
             PlayShotEffects();
             ProjectileSync.Spawned(this, shot, pos, rot, velocity);
         }
 
         private void PlayShotEffects()
         {
-            var effects = Spec.Effects;
+            var spec = Spec;
             var blockTransform = transform;
-            EffectPlayer.PlayOnce(effects.ShotFlash, blockTransform, effects.ShotFlashPosition, Quaternion.Euler(effects.ShotFlashRotation),
-                effects.ShotFlashScale, Scope, Spec.Projectile.PoolSize);
-            EffectPlayer.PlaySound(effects.FireSounds, blockTransform.TransformPoint(effects.ShotFlashPosition), Sounds.FireTemplate);
+            EffectPlayer.PlayOnce(spec.MuzzleFlash, blockTransform, spec.MuzzleFlashPosition, Quaternion.Euler(spec.MuzzleFlashRotation),
+                spec.MuzzleFlashScale, Scope, spec.Projectile.PoolSize);
+            EffectPlayer.PlaySound(spec.FireSounds, blockTransform.TransformPoint(spec.MuzzleFlashPosition), Sounds.FireTemplate);
         }
 
         /// <summary>エフェクト・弾の持ち主(これが消えたら回収)。シミュの目印が無いピアではこのブロック。</summary>
@@ -261,8 +260,8 @@ namespace EWL.Weapons
         {
             var projectile = Spec.Projectile;
             var proxy = ProjectilePool.Acquire(PoolKey, projectile);
-            proxy.LaunchProxy(this, Spec, position, rotation, velocity, MaterialFor(projectile));
-            _nextFireTime = Time.time + Spec.Fire.Interval; // 待機弾の表示を発射間隔だけ消す
+            proxy.LaunchProxy(this, projectile, position, rotation, velocity, MaterialFor(projectile));
+            _nextFireTime = Time.time + Spec.FireInterval; // 待機弾の表示を発射間隔だけ消す
             PlayShotEffects();
             return proxy;
         }
@@ -276,7 +275,7 @@ namespace EWL.Weapons
             if ((flags & WeaponStateFlags.ReloadStarted) != 0)
             {
                 if (ReloadStarted != null) ReloadStarted();
-                EffectPlayer.PlaySound(Spec.Effects.ReloadSounds, transform.position, Sounds.FireTemplate);
+                EffectPlayer.PlaySound(Spec.ReloadSounds, transform.position, Sounds.FireTemplate);
             }
         }
 

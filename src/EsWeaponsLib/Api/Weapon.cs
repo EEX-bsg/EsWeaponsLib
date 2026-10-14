@@ -38,7 +38,7 @@ namespace EWL.Api
         }
 
         /// <summary>定義。発射のたびに読まれるので、書き換えると次の弾から反映される。
-        /// ただし弾数(Fire.Ammo)と弾倉の初期の詰め方は <see cref="Create"/> の時だけ使う。</summary>
+        /// ただし総弾数(TotalAmmo)と弾倉の初期の詰め方は <see cref="Create"/> の時だけ使う。</summary>
         public WeaponSpec Spec
         {
             get { return _driver.Spec; }

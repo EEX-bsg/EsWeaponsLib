@@ -28,7 +28,15 @@ namespace EWL.Api
         /// <summary>直撃は接触点、爆風は爆発の中心(ワールド座標)。</summary>
         public Vector3 Point { get; internal set; }
 
-        /// <summary>爆風なら true、直撃なら false。</summary>
-        public bool IsExplosion { get; internal set; }
+        /// <summary>直撃か爆風か。今後種類が増えうるので、知らない値は無視する。</summary>
+        public HitKind Kind { get; internal set; }
+    }
+
+    public enum HitKind
+    {
+        /// <summary>弾が直接当たった。</summary>
+        Direct,
+        /// <summary>爆風が当たった。</summary>
+        Explosion,
     }
 }

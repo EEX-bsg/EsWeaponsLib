@@ -79,6 +79,58 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   0 なら発射と同時に有効(負値は 0 扱い)。撃った武装ブロックとはこの値に関係なく衝突しない。
 
 ### Changed
+- [Breaking] 定義の型を「武装」と「弾」の2つを軸に組み直した(C# と XML 共通。挙動は下記の1点を除き変えていない)。
+  飛行中の弾は発射時の `ProjectileSpec` を持つので、`spec.Projectile` を別のインスタンスに差し替えても飛行中の弾には効かない
+  (同じインスタンスの値の書き換えは従来どおり飛行中の弾にも効く)。
+  `WeaponSpec` は発射機の値を直接持ち、撃つ弾は `WeaponSpec.Projectile`(`ProjectileSpec`)にまとめた。
+  `ProjectileSpec` は弾体・命中・信管・見た目と、`Explosion`(新 `ExplosionSpec`)・`Booster`・`Guidance` を持つ。
+  `FireSpec` / `ImpactSpec` / `EffectSpec` は廃止。XML の要素名は C# のフィールド名と同じにした
+  (`EwlWeapon` 直下 = `WeaponSpec`、`EwlWeapon/Projectile` = `ProjectileSpec`、`Projectile/Explosion` = `ExplosionSpec`)。
+  - 発射(旧 `Fire` / `Muzzle` → `WeaponSpec` / `EwlWeapon` 直下): `Muzzle/Position` → `MuzzlePosition`、`Muzzle/Rotation` → `MuzzleRotation`
+    (C# は `Quaternion` からオイラー角 `Vector3` [度] に変更)、`Velocity` → `MuzzleVelocity`、`Interval` → `FireInterval`、
+    `Delay` → `FireDelay`、`DelayRandomExtra` → `FireDelayRandomExtra`、`Recoil` → `RecoilMultiplier`、`Ammo` → `TotalAmmo`、
+    XML `Fire/Hold` → `HoldToFire`。`EjectVelocity` / `Spread` / `BurstCount` / `BurstInterval` / `MagazineCapacity` / `ReloadTime` / `AutoReload` は名前そのまま。
+  - 発射エフェクト(旧 `Effects` → `WeaponSpec` / `EwlWeapon` 直下): `ShotFlash*` → `MuzzleFlash*`、`FireSounds` / `ReloadSounds` はそのまま、
+    XML `Effects/AssetBundle` → `AssetBundle`(全プレハブ共通)。
+  - `Projectile/ShowWhenLoaded` → `WeaponSpec.ShowLoadedProjectile`(XML `EwlWeapon/ShowLoadedProjectile`)。
+  - 命中(旧 `Impact` → `Projectile`): `BlockDamage` / `EntityDamage` / `ImpactForce` / `DespawnOnHit` / `DetonationDelay` / `DetonationDelayRandomExtra` は名前そのまま、
+    `Attach` → `StickOnHit`。
+  - 弾のエフェクト(旧 `Effects` → `Projectile`): `Trail` はそのまま、`Bullet` → `Effect`。
+  - 爆発(旧 `Impact` / `Effects` → `Projectile/Explosion`): `ExplosionRadius` → `Radius`、`ExplosionPower` → `Force`、
+    `ExplosionUpPower` → `UpwardsModifier`、`ExplodesOnlyWithGodTool` → `OnlyWithExplodingCannonballs`、`Effects/Explosion` → `Effect`、
+    `ExplosionFacesNormal` → `FacesHitNormal`、`ExplosionSounds` → `Sounds`。
+  - 推進・誘導: 旧 `WeaponSpec.Booster` / `Guidance`(XML `EwlWeapon/Booster` / `Guidance`)→ `ProjectileSpec.Booster` / `Guidance`(XML `Projectile/Booster` / `Guidance`)。
+  - `ProjectileHit.IsExplosion`(bool)→ `ProjectileHit.Kind`(新 enum `HitKind`: `Direct` / `Explosion`)。
+  - XML の再読込は、キー・トグル・スライダーの参照以外の `EwlWeapon` の全要素が対象になった。
+
+  例(C#): 旧 `spec.Fire.Velocity = 300; spec.Impact.ExplosionRadius = 4; spec.Effects.Trail = trail;`
+  → 新 `spec.MuzzleVelocity = 300; spec.Projectile.Explosion.Radius = 4; spec.Projectile.Trail = trail;`、
+  旧 `spec.Fire.MuzzleRotation = Quaternion.Euler(90, 0, 0);` → 新 `spec.MuzzleRotation = new Vector3(90, 0, 0);`、
+  旧 `if (hit.IsExplosion)` → 新 `if (hit.Kind == HitKind.Explosion)`
+
+  例(XML):
+  ```xml
+  <!-- 旧 -->
+  <Muzzle><Position x="0" y="-5" z="0.5" /></Muzzle>
+  <Fire><Velocity>217</Velocity><Recoil>1.5</Recoil><Ammo>8</Ammo></Fire>
+  <Impact><BlockDamage>10000</BlockDamage><ExplosionRadius>8</ExplosionRadius><ExplosionPower>32000</ExplosionPower></Impact>
+  <Effects><AssetBundle name="fx" /><ShotFlash>flash</ShotFlash><Explosion>boom</Explosion></Effects>
+  <!-- 新 -->
+  <AssetBundle name="fx" />
+  <MuzzlePosition x="0" y="-5" z="0.5" />
+  <MuzzleVelocity>217</MuzzleVelocity>
+  <RecoilMultiplier>1.5</RecoilMultiplier>
+  <TotalAmmo>8</TotalAmmo>
+  <MuzzleFlash>flash</MuzzleFlash>
+  <Projectile>
+      <BlockDamage>10000</BlockDamage>
+      <Explosion>
+          <Radius>8</Radius>
+          <Force>32000</Force>
+          <Effect>boom</Effect>
+      </Explosion>
+  </Projectile>
+  ```
 - [Breaking] 遅延・信管の乱数幅の名前を整理し、時限信管の乱数幅を独立させた(C# と XML 共通。乱数はどれも 0〜値の上乗せ)。
   旧 `Fire.RandomDelay` → 新 `Fire.DelayRandomExtra`、旧 `Impact.FuseDelay` → 新 `Impact.DetonationDelay`、
   旧 `Impact.FuseRandom` → 新 `Impact.DetonationDelayRandomExtra`、旧 `EwlWeapon/DelaySlider` → 新 `EwlWeapon/FireDelaySlider`。

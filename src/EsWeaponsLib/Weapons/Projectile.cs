@@ -33,9 +33,9 @@ namespace EWL.Weapons
 
         private WeaponDriver _owner;
         private Object _simulationScope;
-        private WeaponSpec _spec;
+        private ProjectileSpec _spec;
         private Collider[] _ignored;
-        private PooledEffect _trail, _bullet;
+        private PooledEffect _trail, _effect;
         private MissileGuidance _guidance; // 誘導する弾だけ。弾のオブジェクトと一緒に使い回す
         private float _guidanceGain; // 発射時の値。0 なら誘導しない
         private float _age;
@@ -75,10 +75,9 @@ namespace EWL.Weapons
         }
 
         /// <summary>発射。発射ごとに Spec の値(質量・見た目・物理マテリアル等)を設定し直す。</summary>
-        internal void Launch(WeaponDriver owner, WeaponSpec spec, Vector3 pos, Quaternion rot, Vector3 velocity,
+        internal void Launch(WeaponDriver owner, ProjectileSpec spec, Vector3 pos, Quaternion rot, Vector3 velocity,
             Collider[] ignore, PhysicMaterial physicMaterial, Material material)
         {
-            var projectileSpec = spec.Projectile;
             Begin(owner, spec, pos, rot, material);
             _weapon = owner.Owner;
             _shooterBlock = owner.Block;
@@ -90,11 +89,11 @@ namespace EWL.Weapons
             SetIgnore(true); // 非アクティブ中に呼ぶと効かないことがあるのでアクティブ化の後
             if (_colliderEnableDelay <= 0f) EnableColliders();
             _rb.isKinematic = false;
-            _rb.mass = projectileSpec.Mass;
-            _rb.drag = projectileSpec.Drag;
-            _rb.angularDrag = projectileSpec.AngularDrag;
-            _rb.useGravity = !projectileSpec.IgnoreGravity;
-            _rb.collisionDetectionMode = projectileSpec.CollisionMode;
+            _rb.mass = spec.Mass;
+            _rb.drag = spec.Drag;
+            _rb.angularDrag = spec.AngularDrag;
+            _rb.useGravity = !spec.IgnoreGravity;
+            _rb.collisionDetectionMode = spec.CollisionMode;
             _rb.velocity = velocity;
             _rb.angularVelocity = Vector3.zero;
             if (_guidanceGain > 0f) // 目標は発射時に決めて変えない
@@ -107,7 +106,7 @@ namespace EWL.Weapons
         }
 
         /// <summary>MP クライアント: ホストの弾の見た目だけを出す。当たり判定・物理なし、位置はスナップショットで外挿する。</summary>
-        internal void LaunchProxy(WeaponDriver owner, WeaponSpec spec, Vector3 pos, Quaternion rot, Vector3 velocity, Material material)
+        internal void LaunchProxy(WeaponDriver owner, ProjectileSpec spec, Vector3 pos, Quaternion rot, Vector3 velocity, Material material)
         {
             Begin(owner, spec, pos, rot, material);
             _proxy = true;
@@ -122,15 +121,15 @@ namespace EWL.Weapons
             AttachEffects();
         }
 
-        private void Begin(WeaponDriver owner, WeaponSpec spec, Vector3 pos, Quaternion rot, Material material)
+        private void Begin(WeaponDriver owner, ProjectileSpec spec, Vector3 pos, Quaternion rot, Material material)
         {
             _owner = owner;
             _spec = spec;
             _simulationScope = owner.Scope;
             _age = 0f;
-            _colliderEnableDelay = spec.Projectile.ColliderEnableDelay;
-            _timeFuse = spec.Projectile.TimeFuse > 0f ? spec.Projectile.TimeFuse + Random.Range(0f, spec.Projectile.TimeFuseRandomExtra) : 0f;
-            _godToolExplosion = spec.Impact.ExplodesOnlyWithGodTool && Simulation.IsExplodingCannonballs(owner.Block);
+            _colliderEnableDelay = spec.ColliderEnableDelay;
+            _timeFuse = spec.TimeFuse > 0f ? spec.TimeFuse + Random.Range(0f, spec.TimeFuseRandomExtra) : 0f;
+            _godToolExplosion = spec.Explosion.OnlyWithExplodingCannonballs && Simulation.IsExplodingCannonballs(owner.Block);
             _active = true;
             _guidanceGain = spec.Guidance.Gain;
             _proxy = _collidersOn = _hit = _detonating = false;
@@ -140,14 +139,14 @@ namespace EWL.Weapons
             transform.rotation = rot;
             transform.localScale = Vector3.one;
             foreach (var collider in _colliders) collider.enabled = false;
-            ApplyVisual(spec.Projectile, material);
+            ApplyVisual(spec, material);
         }
 
         private void AttachEffects()
         {
-            int effectLimit = _spec.Projectile.PoolSize;
-            _trail = EffectPlayer.Attach(_spec.Effects.Trail, transform, _simulationScope, effectLimit);
-            _bullet = EffectPlayer.Attach(_spec.Effects.Bullet, transform, _simulationScope, effectLimit);
+            int effectLimit = _spec.PoolSize;
+            _trail = EffectPlayer.Attach(_spec.Trail, transform, _simulationScope, effectLimit);
+            _effect = EffectPlayer.Attach(_spec.Effect, transform, _simulationScope, effectLimit);
         }
 
         internal void ReceiveSnapshot(Vector3 position, Vector3 velocity)
@@ -164,9 +163,9 @@ namespace EWL.Weapons
         {
             if (exploded)
             {
-                var effects = _spec.Effects;
-                EffectPlayer.PlayOnce(effects.Explosion, null, position, effectRotation, Vector3.one, _simulationScope, _spec.Projectile.PoolSize);
-                EffectPlayer.PlaySound(effects.ExplosionSounds, position, Sounds.ExplosionTemplate);
+                var explosion = _spec.Explosion;
+                EffectPlayer.PlayOnce(explosion.Effect, null, position, effectRotation, Vector3.one, _simulationScope, _spec.PoolSize);
+                EffectPlayer.PlaySound(explosion.Sounds, position, Sounds.ExplosionTemplate);
             }
             Despawn();
         }
@@ -176,20 +175,20 @@ namespace EWL.Weapons
             _age += Time.deltaTime;
             float elapsed = Mathf.Min(Time.time - _networkTime, MaxExtrapolation);
             // Unity の Drag は速度の指数減衰とみなせる: 移動量 = v (1 - e^-kt) / k
-            float drag = _spec.Projectile.Drag;
+            float drag = _spec.Drag;
             float travelTime = drag > 0.0001f ? (1f - Mathf.Exp(-drag * elapsed)) / drag : elapsed;
             var predicted = _networkPosition + _networkVelocity * travelTime;
-            if (!_spec.Projectile.IgnoreGravity) predicted += Physics.gravity * (0.5f * elapsed * elapsed);
+            if (!_spec.IgnoreGravity) predicted += Physics.gravity * (0.5f * elapsed * elapsed);
             // 誘導弾は向きが変わるので、受け取った速度の向きへ回す(スナップショットに向きは無い)
             if (_guidanceGain > 0f && _networkVelocity.sqrMagnitude > 0.01f)
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(_networkVelocity), 1f - Mathf.Exp(-CorrectionRate * Time.deltaTime));
             var booster = _spec.Booster;
-            if (booster.Thrust > 0f && (booster.BurnTime <= 0f || _age < booster.BurnTime) && _spec.Projectile.Mass > 0f)
-                predicted += transform.forward * (booster.Thrust / _spec.Projectile.Mass * 0.5f * elapsed * elapsed);
+            if (booster.Thrust > 0f && (booster.BurnTime <= 0f || _age < booster.BurnTime) && _spec.Mass > 0f)
+                predicted += transform.forward * (booster.Thrust / _spec.Mass * 0.5f * elapsed * elapsed);
             _correction *= Mathf.Exp(-CorrectionRate * Time.deltaTime);
             transform.position = predicted + _correction;
             // 取りこぼし対策の上限(通常は Despawn か生存一覧で消える)
-            if (_age >= _spec.Projectile.Lifetime + 2f) Despawn();
+            if (_age >= _spec.Lifetime + 2f) Despawn();
         }
 
         private static Collider[] BuildColliders(Transform root, ProjectileSpec spec)
@@ -283,10 +282,10 @@ namespace EWL.Weapons
             if (_proxy) { UpdateProxy(); return; }
             _age += Time.deltaTime;
             if (!_collidersOn && _age >= _colliderEnableDelay) EnableColliders();
-            var projectileSpec = _spec.Projectile;
+            float lifetime = _spec.Lifetime; // 遅延 0 の起爆はこの場で Despawn まで進み _spec が消える
             if (!_detonating && _timeFuse > 0f && _age >= _timeFuse)
                 Detonate(0f, transform.rotation);
-            if (_age >= projectileSpec.Lifetime) Despawn();
+            if (_age >= lifetime) Despawn();
         }
 
         private void FixedUpdate()
@@ -312,23 +311,23 @@ namespace EWL.Weapons
             if (other != null && ReferenceEquals(other._owner, _owner)) return;
             _hit = true;
 
-            var impact = _spec.Impact;
-            var attachTo = Damage.ApplyHit(collision.collider, _rb.velocity, impact.ImpactForce, impact.BlockDamage, impact.EntityDamage, impact.Attach, _shooter);
+            var spec = _spec;
+            var attachTo = Damage.ApplyHit(collision.collider, _rb.velocity, spec.ImpactForce, spec.BlockDamage, spec.EntityDamage, spec.StickOnHit, _shooter);
             if (Weapon.HasHitListeners(_weapon))
             {
                 var point = collision.contacts.Length > 0 ? collision.contacts[0].point : transform.position;
-                RaiseHit(Damage.BlockOf(collision.collider), collision.collider, point, false);
+                RaiseHit(Damage.BlockOf(collision.collider), collision.collider, point, HitKind.Direct);
             }
-            if (impact.Attach) Stick(attachTo);
+            if (spec.StickOnHit) Stick(attachTo);
             EffectPlayer.Fade(_trail);
             _trail = null;
 
             if (Explodes)
             {
                 var normal = collision.contacts.Length > 0 ? collision.contacts[0].normal : -transform.forward;
-                Detonate(Random.Range(impact.DetonationDelay, impact.DetonationDelay + impact.DetonationDelayRandomExtra), Quaternion.FromToRotation(Vector3.forward, normal));
+                Detonate(Random.Range(spec.DetonationDelay, spec.DetonationDelay + spec.DetonationDelayRandomExtra), Quaternion.FromToRotation(Vector3.forward, normal));
             }
-            else if (impact.DespawnOnHit) Despawn();
+            else if (spec.DespawnOnHit) Despawn();
             else StartCoroutine(DespawnAfter(RemoveAfterHit));
         }
 
@@ -350,8 +349,8 @@ namespace EWL.Weapons
         {
             get
             {
-                var impact = _spec.Impact;
-                return impact.ExplosionRadius > 0f && (!impact.ExplodesOnlyWithGodTool || _godToolExplosion);
+                var explosion = _spec.Explosion;
+                return explosion.Radius > 0f && (!explosion.OnlyWithExplodingCannonballs || _godToolExplosion);
             }
         }
 
@@ -364,25 +363,24 @@ namespace EWL.Weapons
         private IEnumerator DetonateAfter(float delay, Quaternion effectRotation)
         {
             if (delay > 0f) yield return new WaitForSeconds(delay);
-            var impact = _spec.Impact;
-            var effects = _spec.Effects;
+            var explosion = _spec.Explosion;
             var pos = transform.position;
             if (Explodes)
             {
                 if (_godToolExplosion) Simulation.MarkGodToolUsed();
                 var affected = Weapon.HasHitListeners(_weapon) ? new List<Rigidbody>() : null;
-                Damage.Explode(pos, impact.ExplosionRadius, impact.ExplosionPower, impact.ExplosionUpPower, affected, _shooter);
+                Damage.Explode(pos, explosion.Radius, explosion.Force, explosion.UpwardsModifier, affected, _shooter);
                 if (affected != null)
-                    foreach (var body in affected) RaiseHit(body.GetComponent<BlockBehaviour>(), null, pos, true);
-                var rotation = effects.ExplosionFacesNormal ? effectRotation : Quaternion.identity;
-                EffectPlayer.PlayOnce(effects.Explosion, null, pos, rotation, Vector3.one, _simulationScope, _spec.Projectile.PoolSize);
-                EffectPlayer.PlaySound(effects.ExplosionSounds, pos, Sounds.ExplosionTemplate);
+                    foreach (var body in affected) RaiseHit(body.GetComponent<BlockBehaviour>(), null, pos, HitKind.Explosion);
+                var rotation = explosion.FacesHitNormal ? effectRotation : Quaternion.identity;
+                EffectPlayer.PlayOnce(explosion.Effect, null, pos, rotation, Vector3.one, _simulationScope, _spec.PoolSize);
+                EffectPlayer.PlaySound(explosion.Sounds, pos, Sounds.ExplosionTemplate);
                 if (NetworkId != 0) ProjectileSync.Despawned(this, true, pos, rotation);
                 Despawn();
             }
             else
             {
-                if (!impact.DespawnOnHit) yield return new WaitForSeconds(RemoveAfterHit);
+                if (!_spec.DespawnOnHit) yield return new WaitForSeconds(RemoveAfterHit);
                 Despawn();
             }
         }
@@ -393,7 +391,7 @@ namespace EWL.Weapons
             Despawn();
         }
 
-        private void RaiseHit(BlockBehaviour block, Collider collider, Vector3 point, bool isExplosion)
+        private void RaiseHit(BlockBehaviour block, Collider collider, Vector3 point, HitKind kind)
         {
             Weapon.RaiseHit(new ProjectileHit
             {
@@ -403,7 +401,7 @@ namespace EWL.Weapons
                 Block = block,
                 Collider = collider,
                 Point = point,
-                IsExplosion = isExplosion,
+                Kind = kind,
             });
         }
 
@@ -415,8 +413,8 @@ namespace EWL.Weapons
             NotifyNetworkRemoved();
             StopAllCoroutines();
             EffectPlayer.Fade(_trail);
-            EffectPlayer.Return(_bullet);
-            _trail = _bullet = null;
+            EffectPlayer.Return(_effect);
+            _trail = _effect = null;
             if (_guidance != null) _guidance.End();
             SetIgnore(false);
             _ignored = null;

@@ -41,7 +41,7 @@ namespace EWL.Modules
         {
             _autoFire = _fireHeldBefore = _reloadHeldBefore = false;
             _weapon = Weapon.Create(BlockBehaviour, BuildSpec());
-            _effectBundle = ResolveBundle(Module.Effects.AssetBundle);
+            _effectBundle = ResolveBundle(Module.AssetBundle);
             // 本体はバンドルを非同期で読む。未読込なら読込完了で差し込む(読込済みで購読すると本体が全アセットを読み直すので、そのときは購読しない)
             if (_effectBundle != null && !_effectBundle.Loaded) _effectBundle.OnLoad += SetEffectPrefabs;
             else SetEffectPrefabs();
@@ -58,7 +58,7 @@ namespace EWL.Modules
         public override void SimulateUpdateHost()
         {
             if (_weapon == null) return;
-            bool hold = _holdToggle != null ? _holdToggle.IsActive : Module.Fire.Hold;
+            bool hold = _holdToggle != null ? _holdToggle.IsActive : Module.HoldToFire;
             bool fireHeld = IsHeld(_fireKey);
             bool firePressed = fireHeld && !_fireHeldBefore;
             _fireHeldBefore = fireHeld;
@@ -85,35 +85,36 @@ namespace EWL.Modules
 
         private WeaponSpec BuildSpec()
         {
-            var spec = new WeaponSpec();
+            var module = Module;
+            var spec = new WeaponSpec
+            {
+                MuzzlePosition = module.MuzzlePosition,
+                MuzzleRotation = module.MuzzleRotation,
+                MuzzleVelocity = module.MuzzleVelocity,
+                EjectVelocity = module.EjectVelocity,
+                FireInterval = module.FireInterval,
+                FireDelay = module.FireDelay,
+                FireDelayRandomExtra = module.FireDelayRandomExtra,
+                Spread = module.Spread,
+                RecoilMultiplier = module.RecoilMultiplier,
+                BurstCount = module.BurstCount,
+                BurstInterval = module.BurstInterval,
+                TotalAmmo = module.TotalAmmo,
+                // 弾倉は武装の生成時に詰めるので、容量はシミュ開始時だけ読む(発射ごとの ApplySliders には入れない)
+                MagazineCapacity = _magazineCapacitySlider != null
+                    ? Mathf.RoundToInt(_magazineCapacitySlider.Value)
+                    : module.MagazineCapacity,
+                ReloadTime = module.ReloadTime,
+                AutoReload = _autoReloadToggle != null ? _autoReloadToggle.IsActive : module.AutoReload,
+                ShowLoadedProjectile = module.ShowLoadedProjectile,
+                MuzzleFlashPosition = module.MuzzleFlashPosition,
+                MuzzleFlashRotation = module.MuzzleFlashRotation,
+                MuzzleFlashScale = module.MuzzleFlashScale,
+            };
+            AddClips(module.FireSounds, spec.FireSounds, "FireSounds");
+            AddClips(module.ReloadSounds, spec.ReloadSounds, "ReloadSounds");
 
-            var fire = spec.Fire;
-            fire.MuzzlePosition = Module.Muzzle.Position;
-            fire.MuzzleRotation = Quaternion.Euler(Module.Muzzle.Rotation);
-            fire.Velocity = Module.Fire.Velocity;
-            fire.Interval = Module.Fire.Interval;
-            fire.Spread = Module.Fire.Spread;
-            fire.Delay = Module.Fire.Delay;
-            fire.DelayRandomExtra = Module.Fire.DelayRandomExtra;
-            fire.Recoil = Module.Fire.Recoil;
-            fire.Ammo = Module.Fire.Ammo;
-            fire.BurstCount = Module.Fire.BurstCount;
-            fire.BurstInterval = Module.Fire.BurstInterval;
-            // 弾倉は武装の生成時に詰めるので、容量はシミュ開始時だけ読む(発射ごとの ApplySliders には入れない)
-            fire.MagazineCapacity = _magazineCapacitySlider != null
-                ? Mathf.RoundToInt(_magazineCapacitySlider.Value)
-                : Module.Fire.MagazineCapacity;
-            fire.ReloadTime = Module.Fire.ReloadTime;
-            fire.AutoReload = _autoReloadToggle != null ? _autoReloadToggle.IsActive : Module.Fire.AutoReload;
-            fire.EjectVelocity = Module.Fire.EjectVelocity;
-
-            var boosterXml = Module.Booster;
-            spec.Booster.Thrust = boosterXml.Thrust;
-            spec.Booster.BurnTime = boosterXml.BurnTime;
-            spec.Booster.LateralDrag = boosterXml.LateralDrag;
-            spec.Guidance.Gain = Module.Guidance.Gain;
-
-            var projectileXml = Module.Projectile;
+            var projectileXml = module.Projectile;
             var projectile = spec.Projectile;
             projectile.Mass = projectileXml.Mass;
             projectile.Drag = projectileXml.Drag;
@@ -121,18 +122,15 @@ namespace EWL.Modules
             projectile.IgnoreGravity = projectileXml.IgnoreGravity;
             projectile.CollisionMode = projectileXml.CollisionMode;
             projectile.Lifetime = projectileXml.Lifetime;
-            projectile.TimeFuse = projectileXml.TimeFuse;
-            projectile.TimeFuseRandomExtra = projectileXml.TimeFuseRandomExtra;
             projectile.ColliderEnableDelay = projectileXml.ColliderEnableDelay;
-            projectile.PoolSize = projectileXml.PoolSize;
-            projectile.PoolKey = PoolKeyFor(Module);
+            if (projectileXml.Colliders != null)
+                foreach (var collider in projectileXml.Colliders) projectile.Colliders.Add(ToShape(collider));
             projectile.Friction = projectileXml.Friction;
             projectile.Bounciness = projectileXml.Bounciness;
             projectile.FrictionCombine = projectileXml.FrictionCombine;
             projectile.BounceCombine = projectileXml.BounceCombine;
-            projectile.ShowWhenLoaded = projectileXml.ShowWhenLoaded;
-            if (projectileXml.Colliders != null)
-                foreach (var collider in projectileXml.Colliders) projectile.Colliders.Add(ToShape(collider));
+            projectile.PoolSize = projectileXml.PoolSize;
+            projectile.PoolKey = PoolKeyFor(module);
             if (projectileXml.Mesh != null)
             {
                 var mesh = Resolve<ModMesh>(projectileXml.Mesh, "Projectile/Mesh");
@@ -141,32 +139,33 @@ namespace EWL.Modules
                 projectile.MeshRotation = projectileXml.Mesh.Rotation;
                 projectile.MeshScale = projectileXml.Mesh.Scale;
             }
-            var tex = Resolve<ModTexture>(projectileXml.Texture, "Projectile/Texture");
-            projectile.Texture = tex != null ? tex.Texture : null;
+            var texture = Resolve<ModTexture>(projectileXml.Texture, "Projectile/Texture");
+            projectile.Texture = texture != null ? texture.Texture : null;
+            projectile.ImpactForce = projectileXml.ImpactForce;
+            projectile.BlockDamage = projectileXml.BlockDamage;
+            projectile.EntityDamage = projectileXml.EntityDamage;
+            projectile.StickOnHit = projectileXml.StickOnHit;
+            projectile.DespawnOnHit = projectileXml.DespawnOnHit;
+            projectile.TimeFuse = projectileXml.TimeFuse;
+            projectile.TimeFuseRandomExtra = projectileXml.TimeFuseRandomExtra;
+            projectile.DetonationDelay = projectileXml.DetonationDelay;
+            projectile.DetonationDelayRandomExtra = projectileXml.DetonationDelayRandomExtra;
 
-            var impactXml = Module.Impact;
-            var impact = spec.Impact;
-            impact.BlockDamage = impactXml.BlockDamage;
-            impact.EntityDamage = impactXml.EntityDamage;
-            impact.ImpactForce = impactXml.ImpactForce;
-            impact.Attach = impactXml.Attach;
-            impact.ExplosionRadius = impactXml.ExplosionRadius;
-            impact.ExplodesOnlyWithGodTool = impactXml.ExplodesOnlyWithGodTool;
-            impact.ExplosionPower = impactXml.ExplosionPower;
-            impact.ExplosionUpPower = impactXml.ExplosionUpPower;
-            impact.DetonationDelay = impactXml.DetonationDelay;
-            impact.DetonationDelayRandomExtra = impactXml.DetonationDelayRandomExtra;
-            impact.DespawnOnHit = impactXml.DespawnOnHit;
+            var explosionXml = projectileXml.Explosion;
+            var explosion = projectile.Explosion;
+            explosion.Radius = explosionXml.Radius;
+            explosion.Force = explosionXml.Force;
+            explosion.UpwardsModifier = explosionXml.UpwardsModifier;
+            explosion.OnlyWithExplodingCannonballs = explosionXml.OnlyWithExplodingCannonballs;
+            explosion.FacesHitNormal = explosionXml.FacesHitNormal;
+            AddClips(explosionXml.Sounds, explosion.Sounds, "Projectile/Explosion/Sounds");
 
-            var effectsXml = Module.Effects;
-            var effects = spec.Effects;
-            effects.ShotFlashPosition = effectsXml.ShotFlashPosition;
-            effects.ShotFlashRotation = effectsXml.ShotFlashRotation;
-            effects.ShotFlashScale = effectsXml.ShotFlashScale;
-            effects.ExplosionFacesNormal = effectsXml.ExplosionFacesNormal;
-            AddClips(effectsXml.FireSounds, effects.FireSounds, "Effects/FireSounds");
-            AddClips(effectsXml.ExplosionSounds, effects.ExplosionSounds, "Effects/ExplosionSounds");
-            AddClips(effectsXml.ReloadSounds, effects.ReloadSounds, "Effects/ReloadSounds");
+            var boosterXml = projectileXml.Booster;
+            projectile.Booster.Thrust = boosterXml.Thrust;
+            projectile.Booster.BurnTime = boosterXml.BurnTime;
+            projectile.Booster.LateralDrag = boosterXml.LateralDrag;
+            projectile.Guidance.Gain = projectileXml.Guidance.Gain;
+
             ApplySliders(spec);
             return spec;
         }
@@ -174,8 +173,8 @@ namespace EWL.Modules
         // スライダーはシミュ中に他のモジュールが動かすことがある(キーで信管時間を変える等)ので、発射ごとに読み直す。
         private void ApplySliders(WeaponSpec spec)
         {
-            if (_fireRateSlider != null && _fireRateSlider.Value > 0f) spec.Fire.Interval = 1f / _fireRateSlider.Value;
-            if (_fireDelaySlider != null) spec.Fire.Delay = Module.Fire.Delay + _fireDelaySlider.Value;
+            if (_fireRateSlider != null && _fireRateSlider.Value > 0f) spec.FireInterval = 1f / _fireRateSlider.Value;
+            if (_fireDelaySlider != null) spec.FireDelay = Module.FireDelay + _fireDelaySlider.Value;
             if (_timeFuseSlider != null) spec.Projectile.TimeFuse = _timeFuseSlider.Value;
         }
 
@@ -183,12 +182,12 @@ namespace EWL.Modules
         private void SetEffectPrefabs()
         {
             if (this == null || _weapon == null) return; // OnSimulateStop を経ずに破棄された後の OnLoad
-            var effectsXml = Module.Effects;
-            var effects = _weapon.Spec.Effects;
-            effects.ShotFlash = Prefab(effectsXml.ShotFlash);
-            effects.Trail = Prefab(effectsXml.Trail);
-            effects.Bullet = Prefab(effectsXml.Bullet);
-            effects.Explosion = Prefab(effectsXml.Explosion);
+            var module = Module;
+            var spec = _weapon.Spec;
+            spec.MuzzleFlash = Prefab(module.MuzzleFlash);
+            spec.Projectile.Trail = Prefab(module.Projectile.Trail);
+            spec.Projectile.Effect = Prefab(module.Projectile.Effect);
+            spec.Projectile.Explosion.Effect = Prefab(module.Projectile.Explosion.Effect);
         }
 
         // モジュールのインスタンスはブロック定義ごとに1つなので、同じブロック種別の武装は弾のプールを共有する。
@@ -246,16 +245,16 @@ namespace EWL.Modules
                 var mac = GetResource(new ResourceReference { Name = r.Name + "Mac" }) as ModAssetBundle;
                 if (mac != null) return mac;
             }
-            return Resolve<ModAssetBundle>(r, "Effects/AssetBundle");
+            return Resolve<ModAssetBundle>(r, "AssetBundle");
         }
 
         private GameObject Prefab(string name)
         {
             if (string.IsNullOrEmpty(name) || name == "none") return null;
-            if (_effectBundle == null) { LogMissing("Effects", "AssetBundle (needed for '" + name + "')"); return null; }
-            if (_effectBundle.HasError) { LogMissing("Effects", "AssetBundle (load error: " + _effectBundle.Error + ")"); return null; }
+            if (_effectBundle == null) { LogMissing("AssetBundle", "AssetBundle (needed for '" + name + "')"); return null; }
+            if (_effectBundle.HasError) { LogMissing("AssetBundle", "AssetBundle (load error: " + _effectBundle.Error + ")"); return null; }
             var prefab = BundleAssets.Load<GameObject>(_effectBundle, name);
-            if (prefab == null) LogMissing("Effects", "prefab '" + name + "' in the AssetBundle");
+            if (prefab == null) LogMissing("AssetBundle", "prefab '" + name + "' in the AssetBundle");
             return prefab;
         }
 
