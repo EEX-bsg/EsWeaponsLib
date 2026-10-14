@@ -63,6 +63,7 @@ EWL.Api.ProjectileHit::Shooter : EWL.Api.Attacker {get}
 EWL.Api.ProjectileHit::ShooterBlock : BlockBehaviour {get}
 EWL.Api.ProjectileHit::Weapon : EWL.Api.Weapon {get}
 EWL.Api.ProjectileSpec::AngularDrag : System.Single
+EWL.Api.ProjectileSpec::AttachedEffect : UnityEngine.GameObject
 EWL.Api.ProjectileSpec::BlockDamage : System.Single
 EWL.Api.ProjectileSpec::Booster : EWL.Api.BoosterSpec
 EWL.Api.ProjectileSpec::BounceCombine : UnityEngine.PhysicMaterialCombine
@@ -74,7 +75,6 @@ EWL.Api.ProjectileSpec::DespawnOnHit : System.Boolean
 EWL.Api.ProjectileSpec::DetonationDelay : System.Single
 EWL.Api.ProjectileSpec::DetonationDelayRandomExtra : System.Single
 EWL.Api.ProjectileSpec::Drag : System.Single
-EWL.Api.ProjectileSpec::Effect : UnityEngine.GameObject
 EWL.Api.ProjectileSpec::EntityDamage : System.Single
 EWL.Api.ProjectileSpec::Explosion : EWL.Api.ExplosionSpec
 EWL.Api.ProjectileSpec::Friction : System.Single
@@ -214,6 +214,7 @@ EWL.Modules.JointRotationXml::Limit : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.JointRotationXml::Spring : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.JointRotationXml::System.Void .ctor()
 EWL.Modules.ProjectileXml::AngularDrag : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.ProjectileXml::AttachedEffect : System.String XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::BlockDamage : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ProjectileXml::Booster : EWL.Modules.BoosterXml XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::BounceCombine : UnityEngine.PhysicMaterialCombine XmlElement() DefaultValue()
@@ -225,7 +226,6 @@ EWL.Modules.ProjectileXml::DespawnOnHit : System.Boolean XmlElement() DefaultVal
 EWL.Modules.ProjectileXml::DetonationDelay : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ProjectileXml::DetonationDelayRandomExtra : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ProjectileXml::Drag : System.Single XmlElement() DefaultValue(0)
-EWL.Modules.ProjectileXml::Effect : System.String XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::EntityDamage : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ProjectileXml::Explosion : EWL.Modules.ExplosionXml XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::Friction : System.Single XmlElement() DefaultValue(0.6)

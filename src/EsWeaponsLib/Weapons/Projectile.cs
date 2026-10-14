@@ -35,7 +35,7 @@ namespace EWL.Weapons
         private Object _simulationScope;
         private ProjectileSpec _spec;
         private Collider[] _ignored;
-        private PooledEffect _trail, _effect;
+        private PooledEffect _trail, _attachedEffect;
         private MissileGuidance _guidance; // 誘導する弾だけ。弾のオブジェクトと一緒に使い回す
         private float _guidanceGain; // 発射時の値。0 なら誘導しない
         private float _age;
@@ -146,7 +146,7 @@ namespace EWL.Weapons
         {
             int effectLimit = _spec.PoolSize;
             _trail = EffectPlayer.Attach(_spec.Trail, transform, _simulationScope, effectLimit);
-            _effect = EffectPlayer.Attach(_spec.Effect, transform, _simulationScope, effectLimit);
+            _attachedEffect = EffectPlayer.Attach(_spec.AttachedEffect, transform, _simulationScope, effectLimit);
         }
 
         internal void ReceiveSnapshot(Vector3 position, Vector3 velocity)
@@ -413,8 +413,8 @@ namespace EWL.Weapons
             NotifyNetworkRemoved();
             StopAllCoroutines();
             EffectPlayer.Fade(_trail);
-            EffectPlayer.Return(_effect);
-            _trail = _effect = null;
+            EffectPlayer.Return(_attachedEffect);
+            _trail = _attachedEffect = null;
             if (_guidance != null) _guidance.End();
             SetIgnore(false);
             _ignored = null;

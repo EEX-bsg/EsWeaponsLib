@@ -102,7 +102,7 @@ namespace EWL.Api
         /// <summary>弾に追従し、命中・消滅で切り離されてフェードするエフェクトのプレハブ。</summary>
         public GameObject Trail;
         /// <summary>弾に追従し、弾と一緒に消えるエフェクトのプレハブ(弾の光・炎など)。</summary>
-        public GameObject Effect;
+        public GameObject AttachedEffect;
 
         /// <summary>命中した剛体に「弾の速度 × この値」の力 [N/(m/s)] を与える。ダメージ・力は最初の命中で1回だけ。</summary>
         public float ImpactForce = 10f;

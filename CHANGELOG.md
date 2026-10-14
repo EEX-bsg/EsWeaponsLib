@@ -95,7 +95,7 @@ E'sWeaponsLib の利用者(Mod 開発者・AI エージェント)向け変更履
   - `Projectile/ShowWhenLoaded` → `WeaponSpec.ShowLoadedProjectile`(XML `EwlWeapon/ShowLoadedProjectile`)。
   - 命中(旧 `Impact` → `Projectile`): `BlockDamage` / `EntityDamage` / `ImpactForce` / `DespawnOnHit` / `DetonationDelay` / `DetonationDelayRandomExtra` は名前そのまま、
     `Attach` → `StickOnHit`。
-  - 弾のエフェクト(旧 `Effects` → `Projectile`): `Trail` はそのまま、`Bullet` → `Effect`。
+  - 弾のエフェクト(旧 `Effects` → `Projectile`): `Trail` はそのまま、`Bullet` → `AttachedEffect`(弾に付き、弾と一緒に消える)。
   - 爆発(旧 `Impact` / `Effects` → `Projectile/Explosion`): `ExplosionRadius` → `Radius`、`ExplosionPower` → `Force`、
     `ExplosionUpPower` → `UpwardsModifier`、`ExplodesOnlyWithGodTool` → `OnlyWithExplodingCannonballs`、`Effects/Explosion` → `Effect`、
     `ExplosionFacesNormal` → `FacesHitNormal`、`ExplosionSounds` → `Sounds`。

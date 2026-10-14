@@ -52,7 +52,7 @@ namespace EWL.Modules
         /// <summary>HoldToFireToggle が無いときの発射方式。true: 押している間連射 / false: 押すたびに連射の開始・停止を切り替え。</summary>
         [XmlElement, DefaultValue(true), Reloadable] public bool HoldToFire = true;
 
-        /// <summary>エフェクトのプレハブ(MuzzleFlash・Projectile/Trail・Projectile/Effect・Projectile/Explosion/Effect)を探す AssetBundle。
+        /// <summary>エフェクトのプレハブ(MuzzleFlash・Projectile/Trail・Projectile/AttachedEffect・Projectile/Explosion/Effect)を探す AssetBundle。
         /// Mac/Linux では「バンドル名+Mac」があればそちらを使う。</summary>
         [XmlElement, DefaultValue(null), Reloadable] public ResourceReference AssetBundle;
 
@@ -120,7 +120,7 @@ namespace EWL.Modules
         /// <summary>AssetBundle 内のプレハブ名。</summary>
         [XmlElement, DefaultValue(null)] public string Trail;
         /// <summary>AssetBundle 内のプレハブ名。</summary>
-        [XmlElement, DefaultValue(null)] public string Effect;
+        [XmlElement, DefaultValue(null)] public string AttachedEffect;
 
         [XmlElement, DefaultValue(10f)] public float ImpactForce = 10f;
         [XmlElement, DefaultValue(0f)] public float BlockDamage = 0f;

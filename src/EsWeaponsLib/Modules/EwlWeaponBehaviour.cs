@@ -186,7 +186,7 @@ namespace EWL.Modules
             var spec = _weapon.Spec;
             spec.MuzzleFlash = Prefab(module.MuzzleFlash);
             spec.Projectile.Trail = Prefab(module.Projectile.Trail);
-            spec.Projectile.Effect = Prefab(module.Projectile.Effect);
+            spec.Projectile.AttachedEffect = Prefab(module.Projectile.AttachedEffect);
             spec.Projectile.Explosion.Effect = Prefab(module.Projectile.Explosion.Effect);
         }
 
