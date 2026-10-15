@@ -395,6 +395,7 @@ namespace EWL.Weapons
         {
             Weapon.RaiseHit(new ProjectileHit
             {
+                Source = HitSource.Ewl,
                 Weapon = _weapon,
                 ShooterBlock = _shooterBlock,
                 Shooter = _shooter,

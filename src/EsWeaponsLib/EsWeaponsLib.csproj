@@ -70,7 +70,13 @@
     <Compile Include="Besiege\MachineTargets.cs" />
     <Compile Include="Besiege\Simulation.cs" />
     <Compile Include="Besiege\Sounds.cs" />
+    <Compile Include="Besiege\VanillaArrowWatch.cs" />
+    <Compile Include="Besiege\VanillaBlastWatch.cs" />
+    <Compile Include="Besiege\VanillaCannonballWatch.cs" />
+    <Compile Include="Besiege\VanillaFireballWatch.cs" />
+    <Compile Include="Besiege\VanillaProjectiles.cs" />
     <Compile Include="Effects\EffectPlayer.cs" />
+    <Compile Include="HitLog.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="ModRoot.cs" />
     <Compile Include="SceneRoot.cs" />

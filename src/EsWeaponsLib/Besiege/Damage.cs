@@ -102,6 +102,13 @@ namespace EWL.Besiege
             return child != null ? child : block;
         }
 
+        /// <summary>本体の爆風(爆弾・砲弾)が力を与える剛体か。</summary>
+        internal static bool IsExplosionTarget(Rigidbody rb)
+        {
+            return rb != null && rb.gameObject.layer != IgnoreLayerA && rb.gameObject.layer != IgnoreLayerB
+                && !rb.CompareTag("KeepConstraintsAlways");
+        }
+
         // 本体の爆弾(ExplodeOnCollide)と同じく、剛体ごとに1回だけ力と OnExplode を与える。処理中は攻撃者のタグを掲げる。
         // affected: null でなければ、力を与えた剛体を足す(命中イベント用)。
         internal static void Explode(Vector3 pos, float radius, float power, float upPower, List<Rigidbody> affected, Attacker attacker)
@@ -113,8 +120,7 @@ namespace EWL.Besiege
                 foreach (var collider in Physics.OverlapSphere(pos, radius))
                 {
                     var rb = collider.attachedRigidbody;
-                    if (rb == null || rb.gameObject.layer == IgnoreLayerA || rb.gameObject.layer == IgnoreLayerB
-                        || rb.CompareTag("KeepConstraintsAlways") || !pushed.Add(rb)) continue;
+                    if (!IsExplosionTarget(rb) || !pushed.Add(rb)) continue;
                     if (affected != null) affected.Add(rb);
                     rb.WakeUp();
                     rb.constraints = RigidbodyConstraints.None;

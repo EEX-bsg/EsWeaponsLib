@@ -16,6 +16,12 @@ namespace EWL.Besiege
 
         internal static bool IsLevelSimulating { get { return StatMaster.levelSimulating; } }
 
+        /// <summary>バニラの弾の命中を本体が処理する側か(SP・MP ホスト・ローカルシミュ中のクライアント)。本体の弾の判定と同じ条件。</summary>
+        internal static bool SimulatesVanillaProjectiles
+        {
+            get { return StatMaster.levelSimulating && (!StatMaster.isClient || StatMaster.isLocalSim); }
+        }
+
         /// <summary>MP ホストのグローバルシミュ。ここで出た弾だけをクライアントへ配信する(ローカルシミュの弾は共有しない)。
         /// 配信役の判定であって、武装の実行権威の判定ではない(権威は <see cref="HasAuthority"/>)。</summary>
         internal static bool PublishesProjectiles

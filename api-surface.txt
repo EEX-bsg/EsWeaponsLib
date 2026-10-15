@@ -23,6 +23,7 @@ class EWL.Modules.JointRotationXml : Modding.Serialization.Element
 class EWL.Modules.ProjectileXml : Modding.Serialization.Element
 enum EWL.Api.ColliderKind : System.Enum
 enum EWL.Api.HitKind : System.Enum
+enum EWL.Api.HitSource : System.Enum
 EWL.Api.Attacker::Player : Modding.Common.Player {get}
 EWL.Api.Attacker::PlayerId : System.UInt16 {get}
 EWL.Api.Attacker::static EWL.Api.Attacker GetDetonator(BlockBehaviour)
@@ -55,12 +56,17 @@ EWL.Api.GuidanceSpec::Gain : System.Single
 EWL.Api.GuidanceSpec::System.Void .ctor()
 EWL.Api.HitKind::Direct : EWL.Api.HitKind
 EWL.Api.HitKind::Explosion : EWL.Api.HitKind
+EWL.Api.HitSource::Ewl : EWL.Api.HitSource
+EWL.Api.HitSource::VanillaCannon : EWL.Api.HitSource
+EWL.Api.HitSource::VanillaCrossbow : EWL.Api.HitSource
+EWL.Api.HitSource::VanillaFuelCannon : EWL.Api.HitSource
 EWL.Api.ProjectileHit::Block : BlockBehaviour {get}
 EWL.Api.ProjectileHit::Collider : UnityEngine.Collider {get}
 EWL.Api.ProjectileHit::Kind : EWL.Api.HitKind {get}
 EWL.Api.ProjectileHit::Point : UnityEngine.Vector3 {get}
 EWL.Api.ProjectileHit::Shooter : EWL.Api.Attacker {get}
 EWL.Api.ProjectileHit::ShooterBlock : BlockBehaviour {get}
+EWL.Api.ProjectileHit::Source : EWL.Api.HitSource {get}
 EWL.Api.ProjectileHit::Weapon : EWL.Api.Weapon {get}
 EWL.Api.ProjectileSpec::AngularDrag : System.Single
 EWL.Api.ProjectileSpec::AttachedEffect : UnityEngine.GameObject

@@ -88,7 +88,9 @@ namespace EWL.Api
         public event Action<ProjectileHit> Hit;
 
         /// <summary>
-        /// EWL の弾が当たるたびに、撃った武装を問わず発火する(EWL を使う他 Mod の武装を含む。EWL を使わない武装の弾は対象外)。被弾した側が撃った相手を知るために使う。
+        /// 弾が当たるたびに、撃った武装を問わず発火する。被弾した側が撃った相手を知るために使う。
+        /// 対象は EWL の弾(EWL を使う他 Mod の武装を含む)と、一部のバニラ武装の弾(大砲・クロスボウ・FuelCannon。ゴッドツール「爆発する砲弾」の爆風を含む)。
+        /// どれかは <see cref="ProjectileHit.Source"/> で分かる。それ以外のバニラ武装(散弾砲・火炎放射器等)は今後対応することがある。他の仕組みの Mod の弾は対象外。
         /// 実行権威側でだけ発火する。静的イベントなので、購読したら必ず解除する。
         /// </summary>
         public static event Action<ProjectileHit> AnyHit;

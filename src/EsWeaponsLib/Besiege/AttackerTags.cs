@@ -47,16 +47,23 @@ namespace EWL.Besiege
             var body = rb != null ? rb.gameObject : collider.gameObject;
             var ewlProjectile = body.GetComponent<Projectile>();
             if (ewlProjectile != null) return ewlProjectile.Shooter;
-            var arrow = body.GetComponent<ProjectileScript>();
-            var pooled = body.GetComponent<NetworkProjectile>();
-            if (arrow == null && pooled == null && body.GetComponent<CannonBallDamage>() == null) return null;
+            if (body.GetComponent<ProjectileScript>() == null && body.GetComponent<NetworkProjectile>() == null
+                && body.GetComponent<CannonBallDamage>() == null && body.GetComponent<FireBallDamage>() == null) return null;
+            return OfVanillaProjectile(body);
+        }
+
+        /// <summary>バニラの弾の持ち主。分からなければ null(MP ホストの散弾、NPC の矢)。</summary>
+        internal static Attacker OfVanillaProjectile(GameObject projectile)
+        {
             // SP・ローカルシミュで物理を持つのは自分の機体だけ。MP のグローバルシミュでは弾が持ち主を記録している
             if (!StatMaster.isMP || StatMaster.isLocalSim) return LocalPlayer();
-            if (arrow != null) return OfPlayerId((ushort)arrow.ownerID);
+            var arrow = projectile.GetComponent<ProjectileScript>();
+            if (arrow != null) return arrow.ownerID == ushort.MaxValue ? null : OfPlayerId((ushort)arrow.ownerID); // MaxValue は NPC の矢
+            var pooled = projectile.GetComponent<NetworkProjectile>();
             return pooled != null ? OfPlayerId(pooled.playerId) : null; // プール外の弾(散弾)は持ち主の記録がない
         }
 
-        private static Attacker LocalPlayer()
+        internal static Attacker LocalPlayer()
         {
             var player = StatMaster.isMP ? Modding.Common.Player.GetLocalPlayer() : null;
             return player != null ? new Attacker(player.NetworkId, player.Team, player) : new Attacker(0, MPTeam.None, null);

@@ -15,7 +15,9 @@ namespace EWL
             ProjectileSync.Initialize();
             // ゲーム終了まで購読したまま(Mod はアンロードされない)
             Events.OnBlockInit += ExplosiveTag.OnBlockInit;
+            Events.OnBlockInit += VanillaProjectiles.OnBlockInit;
             ModConsole.RegisterCommand("ewl_detonations", ExplosiveTag.LogDetonations, "Lists bombs exploded in this simulation and who detonated them (EWL attacker tags).");
+            ModConsole.RegisterCommand("ewl_hits", HitLog.Command, "Logs every projectile hit reported by Weapon.AnyHit (EWL and vanilla) to output_log.txt. Usage: ewl_hits [on|off].");
         }
     }
 }

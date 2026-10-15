@@ -9,6 +9,7 @@ namespace EWL.Besiege
     // 爆発済みでまだ有効なボム = 爆発処理の最中。あるボムが爆発し終えた時点で他に処理中のボムがあれば、それは同じ連鎖(呼び出しの入れ子)。
     // 連鎖の根本は最後に非表示になる(最も外側の)ボムで、その起爆のきっかけが連鎖全体のタグになる。
     // グレネード・ロケット・燃料樽は爆発が非同期でこの関係が成り立たないので、その爆風で起爆したボムは不明になる。
+    // バニラの爆発する砲弾・矢の爆風は、爆風処理の最中かを VanillaBlastWatch が判定する。
     internal sealed class ExplosiveTag : MonoBehaviour
     {
         private sealed class DetonationChain
@@ -132,7 +133,9 @@ namespace EWL.Besiege
             foreach (var other in Enabled)
                 if (other.IsDetonating && other._chain == null) other._chain = chain;
             _chain = chain;
-            if (chain.Attacker == null) chain.Attacker = AttackerTags.Current;
+            // バニラの爆発する砲弾・矢の爆風の最中なら、その撃ち手(爆風が直接起爆させたのは連鎖の外側のボム)
+            var blastShooter = VanillaBlastWatch.NoteDetonation(outermost ? _bomb.Rigidbody : null);
+            if (chain.Attacker == null) chain.Attacker = AttackerTags.Current ?? blastShooter;
             if (outermost) chain.Root = this;
         }
 
@@ -155,7 +158,7 @@ namespace EWL.Besiege
         {
             var detonator = _chain.Resolve();
             string via;
-            if (_chain.Attacker != null) via = "EWL attack in progress";
+            if (_chain.Attacker != null) via = "EWL attack or vanilla blast in progress";
             else if (_chain.Root == null) via = "chain without root";
             else if (_chain.Root == this) via = OwnCauseName();
             else via = "chain from bomb #" + _chain.Root._bomb.BuildIndex + " (" + _chain.Root.OwnCauseName() + ")";

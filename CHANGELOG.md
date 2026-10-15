@@ -25,6 +25,7 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
   状態(`Ammo` / `ReserveAmmo` / `IsReloading`)とイベント(`Fired` / `ReloadStarted` / `Hit`)を持ち、`GetAll` でブロック上の武装を列挙できる。
   `CreateLoadedProjectilePreview` でビルド中のブロックに待機弾の見た目を置ける。
 - `Weapon.AnyHit` / `ProjectileHit` / `Attacker`: 誰の弾がどこに当たったか、バニラのボムを誰が起爆させたか。
+  `AnyHit` はBesiege標準の大砲(「爆発する砲弾」の爆風を含む)・クロスボウ・FuelCannonの弾も通知し、`ProjectileHit.Source`(`HitSource`)で武器の種類が分かる。
 - `BundleAssets`: AssetBundleからアセットを取り出して覚える。
 
 ### マルチプレイ

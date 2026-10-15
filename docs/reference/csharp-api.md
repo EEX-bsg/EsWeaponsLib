@@ -13,10 +13,11 @@
 - [GuidanceSpec](#guidancespec) — 誘導(仮実装)。
 - [ColliderShape](#collidershape) — 弾のコライダー1個。
 - [ColliderKind](#colliderkind) — 弾のコライダーの形。
-- [ProjectileHit](#projectilehit) — EWLの弾の命中1回分(`Weapon.Hit` / `Weapon.AnyHit` の引数)。
+- [ProjectileHit](#projectilehit) — 弾の命中1回分(`Weapon.Hit` / `Weapon.AnyHit` の引数)。
 - [HitKind](#hitkind) — 命中の種類。
 - [Attacker](#attacker) — 攻撃者のタグ(誰の弾か・誰が起爆させたか)。
 - [BundleAssets](#bundleassets) — `ModAssetBundle` からアセットを取り出す。
+- [HitSource](#hitsource) — どの武器の弾か。
 
 ## Weapon
 
@@ -41,7 +42,7 @@
 | `event Action Fired` | 1発撃つ(弾数を消費する)たび。バーストでは弾ごと。弾の生成は遅延の後。 |
 | `event Action ReloadStarted` | リロードを始めたとき。弾倉はリロード時間の後に満たされる。 |
 | `event Action<ProjectileHit> Hit` | この武装の弾が何かに当たった(直撃・爆風)。実行権威側(SP・MP ホスト・ローカルシミュ)でだけ発火する。 |
-| `static event Action<ProjectileHit> AnyHit` | EWL の弾が当たるたびに、撃った武装を問わず発火する(EWL を使う他 Mod の武装を含む。EWL を使わない武装の弾は対象外)。被弾した側が撃った相手を知るために使う。実行権威側でだけ発火する。静的イベントなので、購読したら必ず解除する。 |
+| `static event Action<ProjectileHit> AnyHit` | 弾が当たるたびに、撃った武装を問わず発火する。被弾した側が撃った相手を知るために使う。対象は EWL の弾(EWL を使う他 Mod の武装を含む)と、一部のバニラ武装の弾(大砲・クロスボウ・FuelCannon。ゴッドツール「爆発する砲弾」の爆風を含む)。どれかは `ProjectileHit.Source` で分かる。それ以外のバニラ武装(散弾砲・火炎放射器等)は今後対応することがある。他の仕組みの Mod の弾は対象外。実行権威側でだけ発火する。静的イベントなので、購読したら必ず解除する。 |
 
 ## WeaponSpec
 
@@ -187,15 +188,16 @@
 
 `public sealed class EWL.Api.ProjectileHit`
 
-EWLの弾の命中1回分(`Weapon.Hit` / `Weapon.AnyHit` の引数)。直撃は1回、爆風は剛体ごとに1回。撃った側の情報は発射時点のもの。
+弾の命中1回分(`Weapon.Hit` / `Weapon.AnyHit` の引数)。直撃は1回、爆風は剛体ごとに1回。撃った側の情報は発射時点のもの。どの武器の弾かは `ProjectileHit.Source`(`Weapon.AnyHit` はバニラの一部の武装も含む)。
 
 | メンバー | 説明 |
 |---|---|
-| `Weapon Weapon { get; }` | 撃った武装。弾が飛んでいる間に破棄されていれば `Weapon.IsAlive` がfalse。 |
-| `BlockBehaviour ShooterBlock { get; }` | 撃ったブロック(シミュ用)。壊れた・シミュが終わった後はnull。 |
-| `Attacker Shooter { get; }` | 撃った人(発射時点の値。撃ったブロックが消えても残る)。 |
+| `HitSource Source { get; }` | どの武器の弾か。今後種類が増えうるので、知らない値は無視する。 |
+| `Weapon Weapon { get; }` | 撃った武装(EWLの弾だけ。バニラの弾はnull)。弾が飛んでいる間に破棄されていれば `Weapon.IsAlive` がfalse。 |
+| `BlockBehaviour ShooterBlock { get; }` | 撃ったブロック(シミュ用。EWLの弾だけで、バニラの弾はnull)。壊れた・シミュが終わった後はnull。 |
+| `Attacker Shooter { get; }` | 撃った人(発射時点の値。撃ったブロックが消えても残る)。バニラの弾で分からないときはnull。 |
 | `BlockBehaviour Block { get; }` | 当たったブロック(子ブロックを持つブロックは当たった子)。地形・エンティティ等はnull。 |
-| `Collider Collider { get; }` | 当たったコライダー(直撃のみ。爆風はnull)。 |
+| `Collider Collider { get; }` | 当たったコライダー(直撃のみ。爆風と、当たったコライダーが分からないバニラの弾はnull)。 |
 | `Vector3 Point { get; }` | 直撃は接触点、爆風は爆発の中心(ワールド座標)。 |
 | `HitKind Kind { get; }` | 直撃か爆風か。今後種類が増えうるので、知らない値は無視する。 |
 
@@ -218,7 +220,7 @@ EWLの弾の命中1回分(`Weapon.Hit` / `Weapon.AnyHit` の引数)。直撃は1
 
 | メンバー | 説明 |
 |---|---|
-| `static Attacker GetDetonator(BlockBehaviour explosive)` | 爆発済みのバニラのボムを起爆させた人。分からない・まだ爆発していない・ボム以外・実行権威側でないときはnull。誘爆の連鎖は根本の原因までたどる。EWLの弾の直撃・爆風(その中で起きた誘爆を含む)はその撃ち手、バニラの矢・砲弾の直撃と発射済みロケットの衝突はその持ち主、落下・体当たり等のブロック衝突はボムの持ち主(自爆)。位置では推定しないので、グレネード・ロケット・燃料樽の爆風、着火、他Modの弾で起爆したものは不明。 |
+| `static Attacker GetDetonator(BlockBehaviour explosive)` | 爆発済みのバニラのボムを起爆させた人。分からない・まだ爆発していない・ボム以外・実行権威側でないときはnull。誘爆の連鎖は根本の原因までたどる。EWLの弾の直撃・爆風(その中で起きた誘爆を含む)はその撃ち手、バニラの矢・砲弾の直撃、ゴッドツール「爆発する砲弾」の爆風、発射済みロケットの衝突はその持ち主、落下・体当たり等のブロック衝突はボムの持ち主(自爆)。位置では推定しないので、グレネード・ロケット・燃料樽の爆風、着火、他Modの弾で起爆したものは不明(一部は今後対応することがある)。 |
 | `ushort PlayerId { get; }` | プレイヤーのNetworkId。SPは0。退出した人の番号は後から参加した人に再利用されうる(同一人物かは `Attacker.Player` で比べる)。 |
 | `MPTeam Team { get; }` | チーム。撃ったブロックが分かればそのブロックのチーム(シミュ開始時の値)、分からなければその時点のプレイヤーのチーム。SPは `MPTeam.None`。 |
 | `Player Player { get; }` | MPのプレイヤー。接続ごとに別の参照なので、番号が再利用されても `Equals` で別人と分かる。退出後も `Name` は読める。SPはnull。 |
@@ -234,3 +236,16 @@ EWLの弾の命中1回分(`Weapon.Hit` / `Weapon.AnyHit` の引数)。直撃は1
 | メンバー | 説明 |
 |---|---|
 | `static T Load<T>(ModAssetBundle bundle, string name)` | 未読込・読込エラー・見つからないときはnull。メインスレッドから呼ぶ。シミュ開始時などに取り出して持っておき、毎フレームは呼ばない。 |
+
+## HitSource
+
+`public enum EWL.Api.HitSource`
+
+どの武器の弾か。
+
+| 値 | 説明 |
+|---|---|
+| `Ewl` | EWLの武装(XMLカスタムモジュール・C# API。EWLを使う他Modのものを含む)。 |
+| `VanillaCannon` | Besiege標準の大砲の砲弾(散弾砲は含まない)。ゴッドツール「爆発する砲弾」の爆風を含む。 |
+| `VanillaCrossbow` | Besiege標準のクロスボウの矢。 |
+| `VanillaFuelCannon` | Besiege標準のFuelCannonの火球。当たった相手はEWLが本体と同じ判定をやり直して求めるので、まれに本体とずれることがある。 |
