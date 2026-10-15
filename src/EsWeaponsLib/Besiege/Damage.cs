@@ -103,7 +103,7 @@ namespace EWL.Besiege
         }
 
         // 本体の爆弾(ExplodeOnCollide)と同じく、剛体ごとに1回だけ力と OnExplode を与える。処理中は攻撃者のタグを掲げる。
-        /// <param name="affected">null でなければ、力を与えた剛体を足す(命中イベント用)。</param>
+        // affected: null でなければ、力を与えた剛体を足す(命中イベント用)。
         internal static void Explode(Vector3 pos, float radius, float power, float upPower, List<Rigidbody> affected, Attacker attacker)
         {
             var previous = AttackerTags.Begin(attacker);

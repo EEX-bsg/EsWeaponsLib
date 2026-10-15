@@ -1,0 +1,30 @@
+<Mod>
+    <!-- EWL の Weapon を自分の C# モジュールから使うサンプル(形態 C)。EWL が先にロードされている前提。
+         ビルド: src/EwlSampleCSharp.csproj(README.md 参照)。 -->
+    <Name>EWL Sample CSharp</Name>
+    <Author>EEX-slime</Author>
+    <Version>0.0.1</Version>
+    <Description>Sample block that drives E'sWeaponsLib's Weapon from its own C# module.</Description>
+    <Debug>true</Debug>
+    <MultiplayerCompatible>true</MultiplayerCompatible>
+
+    <Assemblies>
+        <Assembly path="EwlSampleCSharp.dll" />
+    </Assemblies>
+
+    <Blocks>
+        <Block path="Blocks/SampleCannon.xml" />
+    </Blocks>
+
+    <Entities />
+    <Triggers />
+    <Events />
+    <Keys />
+
+    <Resources>
+        <Mesh name="box" path="box.obj" />
+        <Texture name="olive" path="olive.png" />
+    </Resources>
+
+    <ID>14ba817d-320c-4b0e-8d9c-50f7c6531a00</ID>
+</Mod>

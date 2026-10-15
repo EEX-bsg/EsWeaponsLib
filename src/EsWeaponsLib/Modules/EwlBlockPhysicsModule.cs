@@ -13,6 +13,7 @@ namespace EWL.Modules
     // DefaultValue は「省略可」の目印(本体は値を読まず、省略時は初期化子の値)。float・int・bool・enum は初期化子と同じ値を書く(enum に null は例外になる)。
     // Reloadable: Debug の Mod で XML を保存すると、その要素を丸ごと差し替える。シミュ用ブロックの生成時に適用されるので次のシミュから反映。
     // AdditionalColliders はビルドブロックに足して複製するものなので付けない。
+    /// <summary>ブロック自体の物理(接合強度・物理マテリアル・接合の回転軸・追加コライダー)を設定する XML カスタムモジュール。全要素を省略でき、省略した項目は Besiege 本体の値のまま変えない。</summary>
     [XmlRoot("EwlBlockPhysics")]
     public class EwlBlockPhysicsModule : BlockModule
     {
@@ -49,9 +50,13 @@ namespace EWL.Modules
     [Serializable]
     public class BlockMaterialXml : Element
     {
+        /// <summary>摩擦係数(静止・動摩擦とも)。</summary>
         [XmlElement, DefaultValue(0.6f)] public float Friction = 0.6f;
+        /// <summary>反発係数(0〜1)。</summary>
         [XmlElement, DefaultValue(0f)] public float Bounciness = 0f;
+        /// <summary>相手の摩擦との合成方法。</summary>
         [XmlElement, DefaultValue(PhysicMaterialCombine.Average)] public PhysicMaterialCombine FrictionCombine = PhysicMaterialCombine.Average;
+        /// <summary>相手の反発との合成方法。</summary>
         [XmlElement, DefaultValue(PhysicMaterialCombine.Average)] public PhysicMaterialCombine BounceCombine = PhysicMaterialCombine.Average;
     }
 
@@ -59,11 +64,17 @@ namespace EWL.Modules
     [Serializable]
     public class JointRotationXml : Element
     {
+        /// <summary>X 軸まわりの回転(Locked = 固定 / Limited = Limit まで / Free = 自由)。</summary>
         [XmlElement, DefaultValue(ConfigurableJointMotion.Locked)] public ConfigurableJointMotion AxisX = ConfigurableJointMotion.Locked;
+        /// <summary>Y 軸まわりの回転。</summary>
         [XmlElement, DefaultValue(ConfigurableJointMotion.Locked)] public ConfigurableJointMotion AxisY = ConfigurableJointMotion.Locked;
+        /// <summary>Z 軸まわりの回転。</summary>
         [XmlElement, DefaultValue(ConfigurableJointMotion.Locked)] public ConfigurableJointMotion AxisZ = ConfigurableJointMotion.Locked;
+        /// <summary>元の向きへ戻すばねの強さ。0 なら戻さない。</summary>
         [XmlElement, DefaultValue(0f)] public float Spring = 0f;
+        /// <summary>ばねの減衰。</summary>
         [XmlElement, DefaultValue(0f)] public float Damper = 0f;
+        /// <summary>Limited の軸の可動角 [度]。</summary>
         [XmlElement, DefaultValue(0f)] public float Limit = 0f;
     }
 }

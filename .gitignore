@@ -4,6 +4,8 @@
 /src/.vs/
 /src/**/bin/
 /src/**/obj/
+/EwlSampleCSharp/src/bin/
+/EwlSampleCSharp/src/obj/
 **/*.dll
 *.pdb
 *.user

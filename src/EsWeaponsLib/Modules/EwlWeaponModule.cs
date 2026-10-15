@@ -15,9 +15,11 @@ namespace EWL.Modules
     // DefaultValue は「省略可」の目印(本体は値を読まず、省略時は初期化子の値)。float・int・bool・enum は初期化子と同じ値を書く(enum に null は例外になる)。
     // Reloadable: Debug の Mod で XML を保存すると、その要素の値を差し替える(Element 型は要素ごと)。次のシミュ開始から反映。
     // キー・トグル・スライダーはブロック生成時にしか読まないので付けない。
+    /// <summary>ブロックを武装にする XML カスタムモジュール。1ブロックに複数書ける(それぞれが別の武装になる)。FireKey 以外は省略でき、省略した要素は既定値になる。</summary>
     [XmlRoot("EwlWeapon")]
     public class EwlWeaponModule : BlockModule
     {
+        /// <summary>発射キー(必須)。ブロックの ModuleMapperTypes に定義したキーの名前を key 属性で書く。</summary>
         [XmlElement, RequireToValidate]
         public MKeyReference FireKey;
 

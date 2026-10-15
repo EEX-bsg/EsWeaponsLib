@@ -32,6 +32,7 @@ namespace EWL.Api
         public HitKind Kind { get; internal set; }
     }
 
+    /// <summary>命中の種類。</summary>
     public enum HitKind
     {
         /// <summary>弾が直接当たった。</summary>

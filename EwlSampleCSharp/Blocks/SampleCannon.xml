@@ -1,0 +1,46 @@
+<Block>
+    <Debug>false</Debug>
+    <ID>1</ID>
+    <Name>EWL Sample Scripted Cannon</Name>
+    <Mass>1.0</Mass>
+    <Fallback>Cannon</Fallback>
+
+    <ModuleMapperTypes>
+        <Key displayName="Fire" key="fire" default="V" />
+        <Slider displayName="Power" key="power" min="50" max="300" default="150" />
+    </ModuleMapperTypes>
+    <Modules>
+        <!-- このサンプル自身のモジュール(src/SampleCannonModule.cs)。自分の Mod のモジュールなので modid は要らない -->
+        <SampleCannon>
+            <FireKey key="fire" />
+            <PowerSlider key="power" />
+            <Interval>0.5</Interval>
+        </SampleCannon>
+    </Modules>
+
+    <Mesh name="box">
+        <Position x="0" y="0" z="0.5" />
+        <Rotation x="0" y="0" z="0" />
+        <Scale x="0.5" y="0.5" z="1.5" />
+    </Mesh>
+    <Texture name="olive" />
+    <Icon>
+        <Position x="0" y="0" z="0" />
+        <Rotation x="30" y="30" z="0" />
+        <Scale x="0.4" y="0.4" z="0.4" />
+    </Icon>
+
+    <Colliders>
+        <BoxCollider>
+            <Position x="0" y="0" z="0.5" />
+            <Rotation x="0" y="0" z="0" />
+            <Scale x="0.5" y="0.5" z="1.5" />
+        </BoxCollider>
+    </Colliders>
+
+    <BasePoint hasAddingPoint="false">
+        <Stickiness enabled="true" radius="0.6" />
+        <Motion x="false" y="false" z="false" />
+    </BasePoint>
+    <AddingPoints />
+</Block>

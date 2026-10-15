@@ -50,8 +50,11 @@ namespace EWL.Api
 
         /// <summary>発射エフェクトのプレハブ(AssetBundle 等から取得)。null なら無し。</summary>
         public GameObject MuzzleFlash;
+        /// <summary>発射エフェクトの位置(ブロックローカル)。発射音もここで鳴る。</summary>
         public Vector3 MuzzleFlashPosition = Vector3.zero;
+        /// <summary>発射エフェクトの向き(オイラー角 [度]、ブロックローカル)。</summary>
         public Vector3 MuzzleFlashRotation = Vector3.zero;
+        /// <summary>発射エフェクトの拡大率。</summary>
         public Vector3 MuzzleFlashScale = Vector3.one;
         /// <summary>発射音(ランダムに1つ。MuzzleFlashPosition で鳴る)。</summary>
         public List<AudioClip> FireSounds = new List<AudioClip>();
@@ -70,10 +73,15 @@ namespace EWL.Api
     /// </summary>
     public sealed class ProjectileSpec
     {
+        /// <summary>弾の質量 [kg]。反動・推進の加速度と、物理的な衝突に効く(命中時に与える力は ImpactForce で決まる)。</summary>
         public float Mass = 1f;
+        /// <summary>空気抵抗(Rigidbody.drag)。</summary>
         public float Drag = 0f;
+        /// <summary>回転の抵抗(Rigidbody.angularDrag)。</summary>
         public float AngularDrag = 0f;
+        /// <summary>true なら重力を受けない。</summary>
         public bool IgnoreGravity = false;
+        /// <summary>衝突検出の方式。速い弾がすり抜けないよう、既定は ContinuousDynamic。</summary>
         public CollisionDetectionMode CollisionMode = CollisionDetectionMode.ContinuousDynamic;
         /// <summary>寿命 [s]。着弾しなくてもこの時間で消える。</summary>
         public float Lifetime = 20f;
@@ -82,9 +90,13 @@ namespace EWL.Api
         public float ColliderEnableDelay = 0.02f;
         /// <summary>コライダー(弾ローカル)。空なら半径 0.1 の球。</summary>
         public List<ColliderShape> Colliders = new List<ColliderShape>();
+        /// <summary>弾の摩擦係数(静止・動摩擦とも)。</summary>
         public float Friction = 0.6f;
+        /// <summary>弾の反発係数(0〜1)。</summary>
         public float Bounciness = 0f;
+        /// <summary>相手の摩擦との合成方法。</summary>
         public PhysicMaterialCombine FrictionCombine = PhysicMaterialCombine.Average;
+        /// <summary>相手の反発との合成方法。</summary>
         public PhysicMaterialCombine BounceCombine = PhysicMaterialCombine.Average;
         /// <summary>同時に飛べる弾の上限。武装の生成時にこの数まで弾を事前生成し、上限に達したら最古の弾を回収して撃つ。
         /// エフェクトもプレハブごとにこの数まで(超えた分は表示しない)。1〜1000 に丸める。</summary>
@@ -95,9 +107,13 @@ namespace EWL.Api
 
         /// <summary>見た目。null なら球を表示。</summary>
         public Mesh Mesh;
+        /// <summary>見た目のテクスチャ。null ならテクスチャなし(白)。</summary>
         public Texture Texture;
+        /// <summary>見た目の位置(弾ローカル)。Mesh が null のときは使わない。</summary>
         public Vector3 MeshPosition = Vector3.zero;
+        /// <summary>見た目の向き(オイラー角 [度]、弾ローカル)。Mesh が null のときは使わない。</summary>
         public Vector3 MeshRotation = Vector3.zero;
+        /// <summary>見た目の拡大率。Mesh が null のときは使わない。</summary>
         public Vector3 MeshScale = Vector3.one;
         /// <summary>弾に追従し、命中・消滅で切り離されてフェードするエフェクトのプレハブ。</summary>
         public GameObject Trail;
@@ -106,7 +122,9 @@ namespace EWL.Api
 
         /// <summary>命中した剛体に「弾の速度 × この値」の力 [N/(m/s)] を与える。ダメージ・力は最初の命中で1回だけ。</summary>
         public float ImpactForce = 10f;
+        /// <summary>直撃したとき、HP を持つブロックに与えるダメージ(爆風では使わない)。</summary>
         public float BlockDamage = 0f;
+        /// <summary>直撃したとき、レベルのエンティティ(人・動物など)に与えるダメージ(爆風では使わない)。</summary>
         public float EntityDamage = 0f;
         /// <summary>命中物に刺さって止まる。</summary>
         public bool StickOnHit = false;
@@ -172,17 +190,25 @@ namespace EWL.Api
         public float Gain = 0f;
     }
 
+    /// <summary>弾のコライダーの形。</summary>
     public enum ColliderKind { Sphere, Capsule, Box }
 
-    /// <summary>弾のコライダー1個。Size は Box の大きさ、Radius/Height/Direction(0=X,1=Y,2=Z)は Sphere/Capsule 用。</summary>
+    /// <summary>弾のコライダー1個。Size は Box の大きさ、Radius は Sphere/Capsule 用、Height/Direction(0=X,1=Y,2=Z)は Capsule 用。</summary>
     public sealed class ColliderShape
     {
+        /// <summary>形。</summary>
         public ColliderKind Kind = ColliderKind.Sphere;
+        /// <summary>位置(弾ローカル)。</summary>
         public Vector3 Position = Vector3.zero;
+        /// <summary>向き(オイラー角 [度]、弾ローカル)。</summary>
         public Vector3 Rotation = Vector3.zero;
+        /// <summary>Box の大きさ [m]。</summary>
         public Vector3 Size = Vector3.one;
+        /// <summary>Sphere・Capsule の半径 [m]。</summary>
         public float Radius = 0.1f;
+        /// <summary>Capsule の高さ [m]。</summary>
         public float Height = 1f;
+        /// <summary>Capsule の向きの軸(0 = X、1 = Y、2 = Z)。</summary>
         public int Direction = 2;
     }
 }

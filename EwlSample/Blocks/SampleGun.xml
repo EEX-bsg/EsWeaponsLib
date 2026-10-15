@@ -9,7 +9,7 @@
         <Key displayName="Fire" key="fire" default="C" />
     </ModuleMapperTypes>
     <Modules>
-        <!-- 省略した要素は既定値。全要素は src/EsWeaponsLib/Modules/EwlWeaponModule.cs を参照。 -->
+        <!-- 省略した要素は既定値。全要素は docs/reference/xml-modules.md を参照。 -->
         <EwlWeapon modid="0d219960-b202-4906-b29d-8d90a61a89b8">
             <FireKey key="fire" />
             <HoldToFire>true</HoldToFire>
