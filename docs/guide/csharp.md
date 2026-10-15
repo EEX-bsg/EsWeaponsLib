@@ -1,7 +1,7 @@
 # C# で使う
 
-C# から EWL を使う方法です。API の全メンバーは [C# API リファレンス](../reference/csharp-api.md)、
-動く例はリポジトリの `EwlSampleCSharp/` にあります。先に [基本の考え方](concepts.md) を読んでください。
+C# から EWL を使う方法です。API の全メンバーは [C# API リファレンス](../reference/csharp-api.md) にあります。
+先に [基本の考え方](concepts.md) を読んでください。
 
 ## 準備
 

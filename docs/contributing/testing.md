@@ -11,12 +11,11 @@ EWL には自動テストがありません。ゲームの外で確かめられ�
 | 公開面 | `powershell -File tools/api-surface.ps1` の後に `git diff api-surface.txt` | 意図した差分だけ。壊れる変更は CHANGELOG に記載済み |
 | リファレンス | `powershell -File tools/gen-reference.ps1` の後に `git diff docs/reference` | 意図した差分だけ |
 | 公開してはいけない情報 | `powershell -File tools/check-public.ps1` | `check-public OK` |
-| サンプル | `EwlSample/` と `EwlSampleCSharp/` が今の公開面で書けているか(C# 版はビルドが通るか) | 通る |
 | 規約 | [conventions.md](conventions.md) を差分に対して読む | 違反なし |
 
 ## ゲームの中(SP)
 
-挙動に関わる変更では、サンプル Mod か自分のブロックで次を確かめます。
+挙動に関わる変更では、テスト用のブロックで次を確かめます。
 
 - `output_log.txt` に `[EWL]` のエラー・例外が出ていない。XML の読み込み警告が出ていない。
 - 発射: 弾が出て、ブロックが反動で動く(弾の数より、反動と標的への効果で判断するほうが確実)。

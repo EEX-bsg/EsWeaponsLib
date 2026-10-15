@@ -29,7 +29,3 @@ Key rules for using EWL: add modid="0d219960-b202-4906-b29d-8d90a61a89b8" to EWL
 - [Testing](contributing/testing.md)
 - [Writing docs](contributing/documentation.md)
 
-## Samples
-
-- EwlSample/: XML-only sample block (EwlWeapon)
-- EwlSampleCSharp/: C# sample module driving Weapon (usage level C)
