@@ -1,14 +1,14 @@
 # 確認とテスト
 
-EWL には自動テストがありません。ゲームの外で確かめられることを機械的に確かめ、残りをゲームの中で確かめます。
+EWLには自動テストがありません。ゲームの外で確かめられることを機械的に確かめ、残りをゲームの中で確かめます。
 
 ## ゲームの外(変更のたびに)
 
 | 確認 | 方法 | 通過の条件 |
 |---|---|---|
 | ビルド | [CONTRIBUTING.md](../../CONTRIBUTING.md) のビルドコマンド | エラーなし |
-| 禁止 API | `powershell -File tools/ilscan.ps1` | `IL scan OK` |
-| 公開面 | `powershell -File tools/api-surface.ps1` の後に `git diff api-surface.txt` | 意図した差分だけ。壊れる変更は CHANGELOG に記載済み |
+| 禁止API | `powershell -File tools/ilscan.ps1` | `IL scan OK` |
+| 公開面 | `powershell -File tools/api-surface.ps1` の後に `git diff api-surface.txt` | 意図した差分だけ。壊れる変更はCHANGELOGに記載済み |
 | リファレンス | `powershell -File tools/gen-reference.ps1` の後に `git diff docs/reference` | 意図した差分だけ |
 | 公開してはいけない情報 | `powershell -File tools/check-public.ps1` | `check-public OK` |
 | ドキュメントのサイト(docs/ を変えたとき) | `npm run docs:build` | 成功する(リンク切れがあると失敗する) |
@@ -18,7 +18,7 @@ EWL には自動テストがありません。ゲームの外で確かめられ�
 
 挙動に関わる変更では、テスト用のブロックで次を確かめます。
 
-- `output_log.txt` に `[EWL]` のエラー・例外が出ていない。XML の読み込み警告が出ていない。
+- `output_log.txt` に `[EWL]` のエラー・例外が出ていない。XMLの読み込み警告が出ていない。
 - 発射: 弾が出て、ブロックが反動で動く(弾の数より、反動と標的への効果で判断するほうが確実)。
 - 変更した機能の挙動(弾倉・リロード・爆発・推進など)。
 - シミュレーションを止めて再開しても同じように動く。止めたときに弾・エフェクトが残らない。
@@ -32,4 +32,4 @@ EWL には自動テストがありません。ゲームの外で確かめられ�
 - 残弾・リロードの状態がクライアントにも反映される。
 - ローカルシミュレーション中の弾が他のプレイヤーに見えない。
 
-MP の確認ができない場合は、PR にそう書いてください。メンテナーが確認します。
+MPの確認ができない場合は、PRにそう書いてください。メンテナーが確認します。

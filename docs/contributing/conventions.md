@@ -1,48 +1,48 @@
 # コーディング規約
 
-EWL のコードを書くときの決まりです。人も AI エージェントもこのページに従います。
+EWLのコードを書くときの決まりです。人もAIエージェントもこのページに従います。
 
 ## 実行環境の制約
 
-- C# 6、.NET 3.5 のサブセット、Unity 5.4 を前提にする。`Task`・`async`/`await`・C# 7 以降の構文は使わない。
-- Besiege は Mod の DLL を読み込むときに、使っている API を検査し、禁止された API があると読み込みません。
-  `System.Reflection`、禁止された `System.IO` / `System.Net` / `System.Xml` の API を使わない。ファイル I/O は `Modding.ModIO` を使う。
+- C# 6、.NET 3.5のサブセット、Unity 5.4を前提にする。`Task`・`async`/`await`・C# 7以降の構文は使わない。
+- BesiegeはModのDLLを読み込むときに、使っているAPIを検査し、禁止されたAPIがあると読み込みません。
+  `System.Reflection`、禁止された `System.IO` / `System.Net` / `System.Xml` のAPIを使わない。ファイルI/Oは `Modding.ModIO` を使う。
   ビルド後に `tools/ilscan.ps1` で確認する(`IL scan OK` と出れば通過)。
-- Unity API はメインスレッドからだけ呼ぶ。
+- Unity APIはメインスレッドからだけ呼ぶ。
 - `Update` / `FixedUpdate` で不要なメモリ割り当てをしない。毎フレームのログを出さない。
 
 ## 書き方
 
 - `.cs` と `.xml` のインデントはスペース4つ。タブは使わない(`.editorconfig`)。
 - イベントの購読と解除、生成と破棄、開始と停止を必ず対にする。
-- 例外を `catch` したら必ずログを出す。握りつぶさない。EWL のログは `[EWL]` で始める。
-- SP、MP ホスト、MP クライアント、MP ローカルシミュレーションを区別する。武装・物理を処理するかどうかは
+- 例外を `catch` したら必ずログを出す。握りつぶさない。EWLのログは `[EWL]` で始める。
+- SP、MPホスト、MPクライアント、MPローカルシミュレーションを区別する。武装・物理を処理するかどうかは
   実行権威(シミュレーションの物理を担当しているか)で判定し、`IsHost` で代用しない([architecture.md](architecture.md))。
 
 ## 構成
 
-- フォルダと namespace を一致させる(`Weapons/` → `EWL.Weapons`)。
-- 依存の向き・公開範囲は [architecture.md](architecture.md) のとおり。特に、`Modules/` は EWL の namespace のうち `EWL.Api` だけを使う。
+- フォルダとnamespaceを一致させる(`Weapons/` → `EWL.Weapons`)。
+- 依存の向き・公開範囲は [architecture.md](architecture.md) のとおり。特に、`Modules/` はEWLのnamespaceのうち `EWL.Api` だけを使う。
 - 拡張は合成とイベントだけ。継承用の基底クラス・フックの連鎖・レジストリを作らない。
-- インターフェースは実装が2つ以上あるときだけ作る。DI・Null 実装を作らない。
-- 落とし穴がある、または複数箇所で使う Besiege 本体の操作は `Besiege/` のヘルパーにまとめる。それ以外は直接使ってよい。
-- XML スキーマの新要素は既定値付き・省略可にする([compatibility.md](compatibility.md))。
+- インターフェースは実装が2つ以上あるときだけ作る。DI・Null実装を作らない。
+- 落とし穴がある、または複数箇所で使うBesiege本体の操作は `Besiege/` のヘルパーにまとめる。それ以外は直接使ってよい。
+- XMLスキーマの新要素は既定値付き・省略可にする([compatibility.md](compatibility.md))。
 
 ## 命名
 
-- 一般的な C# の慣例に従い、読んで役割が分かる名前にする。型・メソッドは PascalCase の完全な英単語。
+- 一般的なC#の慣例に従い、読んで役割が分かる名前にする。型・メソッドはPascalCaseの完全な英単語。
 - 略さない。`Fx` `Sim` `Hits` のような略称や、仕様・部品を指す1文字の別名(`var f = spec.Fire`)は使わない。
   ループの添字や `rb`(Rigidbody)・`go`(GameObject)のような定番の略はよい。むやみに長くする必要もない。
-- 他 Mod 由来の名前(ACM の `Ad*Prop` など)や、特定の利用 Mod の固有名を EWL に入れない。
+- 他Mod由来の名前(ACMの `Ad*Prop` など)や、特定の利用Modの固有名をEWLに入れない。
 
 ## 他者の権利物
 
-- 他 Mod のコードや素材は、利用条件を確認せずに持ち込まない。
-- Besiege 本体のデコンパイル結果やそれを写したものをリポジトリに含めない。Besiege の挙動をコメントや文書に書くときは、
+- 他Modのコードや素材は、利用条件を確認せずに持ち込まない。
+- Besiege本体のデコンパイル結果やそれを写したものをリポジトリに含めない。Besiegeの挙動をコメントや文書に書くときは、
   観測できる挙動として自分の言葉で書く。
 
 ## コメント
 
 - 公開する型・メンバー(`Api/` と `Modules/`)には `///` で説明を書く。単位(`[m/s]`・`[s]`・`[度]`)、既定値の意味、
-  「0 なら無効」などの約束を含める。リファレンス(`docs/reference/`)はここから作られる。
+  「0なら無効」などの約束を含める。リファレンス(`docs/reference/`)はここから作られる。
 - 内部のコメントは「なぜそうしているか」を書く。コードを読めば分かることは書かない。

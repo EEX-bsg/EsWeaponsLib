@@ -1,7 +1,7 @@
 # ブロックの物理(EwlBlockPhysics)
 
-`EwlBlockPhysics` は、武装ではなくブロック自体の物理を設定する XML カスタムモジュールです。
-全要素を省略でき、書かなかった項目は Besiege の値のまま変わりません。全要素は [XML リファレンス](../reference/xml-modules.md#ewlblockphysics) にあります。
+`EwlBlockPhysics` は、武装ではなくブロック自体の物理を設定するXMLカスタムモジュールです。
+全要素を省略でき、書かなかった項目はBesiegeの値のまま変わりません。全要素は [XMLリファレンス](../reference/xml-modules.md#ewlblockphysics) にあります。
 
 ```xml
 <Modules>
@@ -54,5 +54,5 @@
 
 - `layer="12"` にすると、そこに他のブロックを置けるようになり、シミュレーション開始時にそのブロックがこのブロックへ接続します(ブロックを載せる台など)。
 - `BoxCollider` は6面のどこにでも置け、クリックした点を面の中心から1マス単位に丸めた位置に置かれます。
-- `SphereCollider` / `CapsuleCollider` は、Besiege の標準と同じく「コライダーの位置 + 当たった面の向き × 0.5」に置かれます。
-- `AdditionalColliders` を変えたときは Besiege の再起動が必要です。
+- `SphereCollider` / `CapsuleCollider` は、Besiegeの標準と同じく「コライダーの位置 + 当たった面の向き × 0.5」に置かれます。
+- `AdditionalColliders` を変えたときはBesiegeの再起動が必要です。

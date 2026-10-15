@@ -1,6 +1,6 @@
-# XML の使い方
+# XMLの使い方
 
-`EwlWeapon` でよく使う組み合わせです。ここに無い要素と既定値は [XML リファレンス](../reference/xml-modules.md) を見てください。
+`EwlWeapon` でよく使う組み合わせです。ここに無い要素と既定値は [XMLリファレンス](../reference/xml-modules.md) を見てください。
 例では `modid` と `FireKey` などの共通部分を省いています。
 
 ## 撃ち方
@@ -80,7 +80,7 @@
 
 ## スライダーで値を変える
 
-キーやトグルと同じく `ModuleMapperTypes` に定義し、`key` で参照します。スライダーの値は XML の値より優先されます。
+キーやトグルと同じく `ModuleMapperTypes` に定義し、`key` で参照します。スライダーの値はXMLの値より優先されます。
 
 ```xml
 <ModuleMapperTypes>
@@ -116,8 +116,8 @@
 
 ### 見た目とコライダー
 
-`Mesh` と `Texture` には、ブロックを定義した Mod の `Mod.xml` の `Resources` に書いた名前を使います。コライダーはブロックの `Colliders` と同じ書式です。
-コライダーを書かなければ半径 0.1 の球になります。
+`Mesh` と `Texture` には、ブロックを定義したModの `Mod.xml` の `Resources` に書いた名前を使います。コライダーはブロックの `Colliders` と同じ書式です。
+コライダーを書かなければ半径0.1の球になります。
 
 ```xml
 <Projectile>
@@ -165,7 +165,7 @@
 
 ## エフェクトと音
 
-エフェクトは AssetBundle 内のプレハブ名で指定します。`AssetBundle` は武装ごとに1つで、すべてのエフェクトをそこから探します。
+エフェクトはAssetBundle内のプレハブ名で指定します。`AssetBundle` は武装ごとに1つで、すべてのエフェクトをそこから探します。
 音は `Resources` の `AudioClip` の名前で指定し、複数書くと毎回ランダムに1つ鳴ります。
 
 ```xml
@@ -197,7 +197,7 @@
 </Projectile>
 ```
 
-Mac・Linux では、「バンドル名 + `Mac`」の AssetBundle があればそちらを使います。
+Mac・Linuxでは、「バンドル名 + `Mac`」のAssetBundleがあればそちらを使います。
 
 ## 待機弾の表示
 
@@ -209,7 +209,7 @@ Mac・Linux では、「バンドル名 + `Mac`」の AssetBundle があれば�
 
 ## ロケット
 
-推進(`Booster`)を付けると、弾が自分で加速します。発射筒から押し出すだけなら初速を 0 にして `EjectVelocity` を使います。
+推進(`Booster`)を付けると、弾が自分で加速します。発射筒から押し出すだけなら初速を0にして `EjectVelocity` を使います。
 
 ```xml
 <MuzzleVelocity>0</MuzzleVelocity>
@@ -226,12 +226,12 @@ Mac・Linux では、「バンドル名 + `Mac`」の AssetBundle があれば�
 
 ## 誘導(仮実装)
 
-`Projectile/Guidance/Gain` を 0 より大きくすると、発射の瞬間に前方の敵マシンを1つ選んで曲がっていきます。推進と組み合わせて使います。
+`Projectile/Guidance/Gain` を0より大きくすると、発射の瞬間に前方の敵マシンを1つ選んで曲がっていきます。推進と組み合わせて使います。
 
 > [!WARNING]
 > **誘導は仮実装です。** 目標の選び方・操舵とも、要素ごと作り直す予定です(破壊的変更になります)。
 
 ## 弾の数が多い武装
 
-同時に飛べる弾の数は `Projectile/PoolSize`(既定 50)までです。上限に達すると最も古い弾を消して撃ちます。
+同時に飛べる弾の数は `Projectile/PoolSize`(既定50)までです。上限に達すると最も古い弾を消して撃ちます。
 連射の速い武装や寿命の長い弾では増やしてください(弾はシミュレーション開始時にこの数だけ作られます)。

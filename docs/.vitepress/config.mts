@@ -16,15 +16,15 @@ const sidebar = [
     items: [
       { text: '基本の考え方', link: '/guide/concepts' },
       { text: '最初の武装を作る(XML)', link: '/guide/xml-first-weapon' },
-      { text: 'XML の使い方', link: '/guide/xml-recipes' },
+      { text: 'XMLの使い方', link: '/guide/xml-recipes' },
       { text: 'ブロックの物理', link: '/guide/xml-block-physics' },
-      { text: 'C# で使う', link: '/guide/csharp' },
+      { text: 'C#で使う', link: '/guide/csharp' },
     ],
   },
   {
     text: 'リファレンス',
     items: [
-      { text: 'XML カスタムモジュール', link: '/reference/xml-modules' },
+      { text: 'XMLカスタムモジュール', link: '/reference/xml-modules' },
       { text: 'C# API', link: '/reference/csharp-api' },
     ],
   },
@@ -49,6 +49,18 @@ const tokenize = (text: string): string[] =>
     .filter((part) => part.isWordLike)
     .map((part) => part.segment.toLowerCase())
 
+// 見出しの ID。VitePress 標準は文字を NFKD に分解するため「ジ」「で」などの ID がリンク(NFC)と一致しない。
+// 分解せずに、記号の並びを - にして小文字にする(tools/gen-reference.ps1 の Get-Anchor も同じ規則)
+function slugify(text: string): string {
+  return text
+    .normalize('NFC')
+    .replace(/[\u0000-\u001f]/g, '')
+    .replace(/[\s~`!@#$%^&*()\-_+=[\]{}|\\;:"'“”‘’<>,.?/]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/^(\d)/, '_$1')
+    .toLowerCase()
+}
+
 // AI が生の Markdown を読めるよう、docs/ の .md と llms.txt を出力先にもそのまま置く(/guide/csharp.md など)
 function copyMarkdown(srcDir: string, outDir: string) {
   const walk = (dir: string) => {
@@ -65,7 +77,7 @@ function copyMarkdown(srcDir: string, outDir: string) {
 export default defineConfig({
   lang: 'ja',
   title: "E'sWeaponsLib",
-  description: 'Besiege の武装 Mod 向け前提ライブラリ(XML カスタムモジュールと C# API)',
+  description: 'Besiegeの武装Mod向け前提ライブラリ(XMLカスタムモジュールとC# API)',
   // GitHub Pages のプロジェクトサイトでは /<リポジトリ名>/ の下に置かれる(ワークフローが DOCS_BASE で渡す)
   base: process.env.DOCS_BASE || '/',
   cleanUrls: true,
@@ -82,6 +94,7 @@ export default defineConfig({
   ],
   markdown: {
     theme: { light: 'github-light', dark: 'github-dark' },
+    anchor: { slugify },
   },
   themeConfig: {
     nav: [

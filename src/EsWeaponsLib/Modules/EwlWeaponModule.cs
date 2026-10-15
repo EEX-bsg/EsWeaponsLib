@@ -15,47 +15,47 @@ namespace EWL.Modules
     // DefaultValue は「省略可」の目印(本体は値を読まず、省略時は初期化子の値)。float・int・bool・enum は初期化子と同じ値を書く(enum に null は例外になる)。
     // Reloadable: Debug の Mod で XML を保存すると、その要素の値を差し替える(Element 型は要素ごと)。次のシミュ開始から反映。
     // キー・トグル・スライダーはブロック生成時にしか読まないので付けない。
-    /// <summary>ブロックを武装にする XML カスタムモジュール。1ブロックに複数書ける(それぞれが別の武装になる)。FireKey 以外は省略でき、省略した要素は既定値になる。</summary>
+    /// <summary>ブロックを武装にするXMLカスタムモジュール。1ブロックに複数書ける(それぞれが別の武装になる)。FireKey以外は省略でき、省略した要素は既定値になる。</summary>
     [XmlRoot("EwlWeapon")]
     public class EwlWeaponModule : BlockModule
     {
-        /// <summary>発射キー(必須)。ブロックの ModuleMapperTypes に定義したキーの名前を key 属性で書く。</summary>
+        /// <summary>発射キー(必須)。ブロックのModuleMapperTypesに定義したキーの名前をkey属性で書く。</summary>
         [XmlElement, RequireToValidate]
         public MKeyReference FireKey;
 
-        /// <summary>ON: 押している間連射 / OFF: 押すたびに連射の開始・停止を切り替え。省略時は HoldToFire。</summary>
+        /// <summary>ON: 押している間連射 / OFF: 押すたびに連射の開始・停止を切り替え。省略時はHoldToFire。</summary>
         [XmlElement, DefaultValue(null)]
         public MToggleReference HoldToFireToggle;
 
-        /// <summary>押すとリロード(MagazineCapacity が 1 以上のとき)。</summary>
+        /// <summary>押すとリロード(MagazineCapacityが1以上のとき)。</summary>
         [XmlElement, DefaultValue(null)]
         public MKeyReference ReloadKey;
 
-        /// <summary>ON で弾倉が空になったら自動リロード。省略時は AutoReload。</summary>
+        /// <summary>ONで弾倉が空になったら自動リロード。省略時はAutoReload。</summary>
         [XmlElement, DefaultValue(null)]
         public MToggleReference AutoReloadToggle;
 
-        /// <summary>値 [発/s] の逆数を FireInterval に使う(XML の値より優先。0 以下なら撃たない)。発射ごとに読む。</summary>
+        /// <summary>値 [発/s] の逆数をFireIntervalに使う(XMLの値より優先。0以下なら撃たない)。発射ごとに読む。</summary>
         [XmlElement, DefaultValue(null)]
         public MSliderReference FireRateSlider;
 
-        /// <summary>値 [s] を FireDelay に加える。発射ごとに読む。</summary>
+        /// <summary>値 [s] をFireDelayに加える。発射ごとに読む。</summary>
         [XmlElement, DefaultValue(null)]
         public MSliderReference FireDelaySlider;
 
-        /// <summary>値 [s] を Projectile/TimeFuse に使う(XML の値より優先)。Projectile/TimeFuseRandomExtra の乱数は別に加わる。発射ごとに読み、飛行中の弾は変えない。</summary>
+        /// <summary>値 [s] をProjectile/TimeFuseに使う(XMLの値より優先)。Projectile/TimeFuseRandomExtraの乱数は別に加わる。発射ごとに読み、飛行中の弾は変えない。</summary>
         [XmlElement, DefaultValue(null)]
         public MSliderReference TimeFuseSlider;
 
-        /// <summary>値を四捨五入して MagazineCapacity に使う(XML の値より優先)。シミュ開始時に読む。</summary>
+        /// <summary>値を四捨五入してMagazineCapacityに使う(XMLの値より優先)。シミュ開始時に読む。</summary>
         [XmlElement, DefaultValue(null)]
         public MSliderReference MagazineCapacitySlider;
 
-        /// <summary>HoldToFireToggle が無いときの発射方式。true: 押している間連射 / false: 押すたびに連射の開始・停止を切り替え。</summary>
+        /// <summary>HoldToFireToggleが無いときの発射方式。true: 押している間連射 / false: 押すたびに連射の開始・停止を切り替え。</summary>
         [XmlElement, DefaultValue(true), Reloadable] public bool HoldToFire = true;
 
-        /// <summary>エフェクトのプレハブ(MuzzleFlash・Projectile/Trail・Projectile/AttachedEffect・Projectile/Explosion/Effect)を探す AssetBundle。
-        /// Mac/Linux では「バンドル名+Mac」があればそちらを使う。</summary>
+        /// <summary>エフェクトのプレハブ(MuzzleFlash・Projectile/Trail・Projectile/AttachedEffect・Projectile/Explosion/Effect)を探すAssetBundle。
+        /// Mac/Linuxでは「バンドル名+Mac」があればそちらを使う。</summary>
         [XmlElement, DefaultValue(null), Reloadable] public ResourceReference AssetBundle;
 
         [XmlElement, DefaultValue(null), Reloadable] public Vector3 MuzzlePosition = UnityEngine.Vector3.zero;
@@ -77,7 +77,7 @@ namespace EWL.Modules
 
         [XmlElement, DefaultValue(false), Reloadable] public bool ShowLoadedProjectile = false;
 
-        /// <summary>AssetBundle 内のプレハブ名。</summary>
+        /// <summary>AssetBundle内のプレハブ名。</summary>
         [XmlElement, DefaultValue(null), Reloadable] public string MuzzleFlash;
         [XmlElement, DefaultValue(null), Reloadable] public Vector3 MuzzleFlashPosition = UnityEngine.Vector3.zero;
         [XmlElement, DefaultValue(null), Reloadable] public Vector3 MuzzleFlashRotation = UnityEngine.Vector3.zero;
@@ -103,7 +103,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(20f)] public float Lifetime = 20f;
         [XmlElement, DefaultValue(0.02f)] public float ColliderEnableDelay = 0.02f;
 
-        /// <summary>ブロックの Colliders と同じ書式(SphereCollider / CapsuleCollider / BoxCollider)。</summary>
+        /// <summary>ブロックのCollidersと同じ書式(SphereCollider / CapsuleCollider / BoxCollider)。</summary>
         [XmlArray("Colliders"), DefaultValue(null), CanBeEmpty]
         [XmlArrayItem("SphereCollider", typeof(SphereModCollider))]
         [XmlArrayItem("CapsuleCollider", typeof(CapsuleModCollider))]
@@ -116,12 +116,12 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(PhysicMaterialCombine.Average)] public PhysicMaterialCombine BounceCombine = PhysicMaterialCombine.Average;
         [XmlElement, DefaultValue(50)] public int PoolSize = 50;
 
-        /// <summary>ブロックを定義した Mod のリソース名(Position/Rotation/Scale が ProjectileSpec の MeshPosition/MeshRotation/MeshScale)。</summary>
+        /// <summary>ブロックを定義したModのリソース名(Position/Rotation/ScaleがProjectileSpecのMeshPosition/MeshRotation/MeshScale)。</summary>
         [XmlElement, DefaultValue(null)] public MeshReference Mesh;
         [XmlElement, DefaultValue(null)] public ResourceReference Texture;
-        /// <summary>AssetBundle 内のプレハブ名。</summary>
+        /// <summary>AssetBundle内のプレハブ名。</summary>
         [XmlElement, DefaultValue(null)] public string Trail;
-        /// <summary>AssetBundle 内のプレハブ名。</summary>
+        /// <summary>AssetBundle内のプレハブ名。</summary>
         [XmlElement, DefaultValue(null)] public string AttachedEffect;
 
         [XmlElement, DefaultValue(10f)] public float ImpactForce = 10f;
@@ -148,7 +148,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(0f)] public float Force = 0f;
         [XmlElement, DefaultValue(0f)] public float UpwardsModifier = 0f;
         [XmlElement, DefaultValue(false)] public bool OnlyWithExplodingCannonballs = false;
-        /// <summary>AssetBundle 内のプレハブ名。</summary>
+        /// <summary>AssetBundle内のプレハブ名。</summary>
         [XmlElement, DefaultValue(null)] public string Effect;
         [XmlElement, DefaultValue(false)] public bool FacesHitNormal = false;
 

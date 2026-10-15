@@ -151,7 +151,10 @@ function Format-Default($field, $raw) {
   return '`' + $raw + '`'
 }
 
-function Get-Anchor([string]$heading) { return ($heading.ToLowerInvariant() -replace '[^\w\- ]', '' -replace ' ', '-') }
+# サイト(docs/.vitepress/config.mts の slugify)と同じ規則: 記号と空白の並びを - にして小文字にする
+function Get-Anchor([string]$heading) {
+  return ($heading -replace '[\s~`!@#$%^&*()\-_+=\[\]{}|\\;:"''“”‘’<>,.?/]+', '-' -replace '^-+|-+$', '').ToLowerInvariant()
+}
 
 function Test-Element($type) {
   $current = $type
@@ -200,7 +203,7 @@ function Write-XmlSection($type, [string]$path, [bool]$parentReloadable) {
   $xmlLines.Add('')
   $summary = Get-Doc ('T:' + $type.FullName) $false
   if (-not $summary -and $specOf.ContainsKey($type.Name)) { $summary = Get-Doc ('T:EWL.Api.' + $specOf[$type.Name]) $false }
-  if ($specOf.ContainsKey($type.Name)) { $summary = ($summary + "`n`nC# では ``" + $specOf[$type.Name] + '` に当たります。').Trim() }
+  if ($specOf.ContainsKey($type.Name)) { $summary = ($summary + "`n`nC#では ``" + $specOf[$type.Name] + '` に当たります。').Trim() }
   if ($summary) { $xmlLines.Add($summary); $xmlLines.Add('') }
   $xmlLines.Add('| 要素 | 書き方 | 既定値 | 再読込 | 説明 |')
   $xmlLines.Add('|---|---|---|---|---|')
@@ -236,17 +239,17 @@ function Write-XmlSection($type, [string]$path, [bool]$parentReloadable) {
   foreach ($child in $children) { Write-XmlSection $child[0] $child[1] $child[2] }
 }
 
-$xmlLines.Add('# XML カスタムモジュール リファレンス')
+$xmlLines.Add('# XMLカスタムモジュール リファレンス')
 $xmlLines.Add('')
 $xmlLines.Add($generatedNote)
 $xmlLines.Add('')
-$xmlLines.Add('EWL の XML カスタムモジュールの全要素です。使い方は [XML の使い方](../guide/xml-recipes.md) を参照してください。')
+$xmlLines.Add('EWLのXMLカスタムモジュールの全要素です。使い方は [XMLの使い方](../guide/xml-recipes.md) を参照してください。')
 $xmlLines.Add('')
-$xmlLines.Add('- ブロック XML の `<Modules>` に、`modid="0d219960-b202-4906-b29d-8d90a61a89b8"`(EWL の Mod ID)を付けて書きます。')
-$xmlLines.Add('- **必須** と書いた要素以外は省略でき、省略した要素は既定値になります。単位は C# 側と同じです(`[m/s]`・`[s]`・`[度]`)。')
+$xmlLines.Add('- ブロックXMLの `<Modules>` に、`modid="0d219960-b202-4906-b29d-8d90a61a89b8"`(EWLのMod ID)を付けて書きます。')
+$xmlLines.Add('- **必須** と書いた要素以外は省略でき、省略した要素は既定値になります。単位はC#側と同じです(`[m/s]`・`[s]`・`[度]`)。')
 $xmlLines.Add('- 位置・回転はブロックローカル、回転はオイラー角 [度] です。')
-$xmlLines.Add('- 「書き方」の見方: ベクトル = `<要素名 x="0" y="0" z="1" />`、キー参照・トグル参照・スライダー参照 = `<要素名 key="…" />`(`key` はブロックの `ModuleMapperTypes` に定義した名前)、リソース名 = `<要素名 name="…" />`(ブロックを定義した Mod の `Resources` の名前)、メッシュ = リソース名に `Position` / `Rotation` / `Scale` を足したもの、`<AudioClip />` の並び = `<AudioClip name="…" />` を並べる、コライダーの並び = ブロックの `Colliders` と同じ書式。')
-$xmlLines.Add('- 再読込 ○: ブロックを定義した Mod の `Mod.xml` が `<Debug>true</Debug>` のとき、ゲーム中に XML を保存すると次のシミュレーション開始から反映されます。空欄の要素は Besiege の再起動が必要です。')
+$xmlLines.Add('- 「書き方」の見方: ベクトル = `<要素名 x="0" y="0" z="1" />`、キー参照・トグル参照・スライダー参照 = `<要素名 key="…" />`(`key` はブロックの `ModuleMapperTypes` に定義した名前)、リソース名 = `<要素名 name="…" />`(ブロックを定義したModの `Resources` の名前)、メッシュ = リソース名に `Position` / `Rotation` / `Scale` を足したもの、`<AudioClip />` の並び = `<AudioClip name="…" />` を並べる、コライダーの並び = ブロックの `Colliders` と同じ書式。')
+$xmlLines.Add('- 再読込 ○: ブロックを定義したModの `Mod.xml` が `<Debug>true</Debug>` のとき、ゲーム中にXMLを保存すると次のシミュレーション開始から反映されます。空欄の要素はBesiegeの再起動が必要です。')
 $moduleTypes = $types.Values | Where-Object { $_.Namespace -eq 'EWL.Modules' -and (Get-Attribute $_ 'XmlRootAttribute') -ne $null } | Sort-Object { if ($_.Name -eq 'EwlWeaponModule') { 0 } else { 1 } }
 foreach ($moduleType in $moduleTypes) {
   Write-XmlSection $moduleType (Get-Attribute $moduleType 'XmlRootAttribute').ConstructorArguments[0].Value $false
@@ -258,11 +261,11 @@ $apiLines = New-Object System.Collections.Generic.List[string]
 $apiTypes = @($types.Values | Where-Object { $_.Namespace -eq 'EWL.Api' -and $_.IsPublic } |
   Sort-Object @{ Expression = { $index = [array]::IndexOf($apiOrder, $_.Name); if ($index -lt 0) { 999 } else { $index } } }, Name)
 
-$apiLines.Add('# C# API リファレンス')
+$apiLines.Add('# C# APIリファレンス')
 $apiLines.Add('')
 $apiLines.Add($generatedNote)
 $apiLines.Add('')
-$apiLines.Add('名前空間 `EWL.Api` の公開型です。使い方は [C# で使う](../guide/csharp.md) を参照してください。')
+$apiLines.Add('名前空間 `EWL.Api` の公開型です。使い方は [C#で使う](../guide/csharp.md) を参照してください。')
 $apiLines.Add('')
 foreach ($type in $apiTypes) {
   $line = '- [' + $type.Name + '](#' + (Get-Anchor $type.Name) + ')'
