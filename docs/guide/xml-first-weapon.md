@@ -7,6 +7,7 @@ C#を書かずに、XMLだけで撃てるブロックを作ります。
 ## 1. Modを用意する
 
 普通のModと同じです。EWLのC#を使わないので `Assemblies` は空のままで構いません。
+EWLより後に読み込まれるよう、`LoadOrder` を1以上にします([依存のしかた](concepts.md#依存のしかた))。
 
 ```xml
 <Mod>
@@ -16,6 +17,7 @@ C#を書かずに、XMLだけで撃てるブロックを作ります。
     <Description>Weapons built on E'sWeaponsLib.</Description>
     <Debug>true</Debug>
     <MultiplayerCompatible>true</MultiplayerCompatible>
+    <LoadOrder>1</LoadOrder>
 
     <Assemblies />
     <Blocks>

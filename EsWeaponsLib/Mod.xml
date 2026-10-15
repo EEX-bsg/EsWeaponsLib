@@ -54,9 +54,8 @@ Weapon library for Besiege mods (projectile weapons, magazines, explosions, bloc
          Only use this if there is a good reason for it!
          Mods that are immediately loaded when starting the game are significantly
          less user-friendly, whenever the mod is disabled the game needs to be restarted.-->
-    <!-- EWL: loaded in the title screen so that dependent mods never load before it (design-policy.md 3.4). -->
-    <LoadInTitleScreen />
-    
+    <!-- EWL: not loaded in the title screen. LoadOrder stays at the default 0; dependent mods use LoadOrder 1 or higher. -->
+
     <!-- Note on IDs -->
     <!-- Many elements of your mod need to have an ID assigned that will identify them.
          This includes blocks, entities, triggers and events.

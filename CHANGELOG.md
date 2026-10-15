@@ -30,6 +30,10 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 
 - EWLのモジュール・`Weapon` で作った武装は、利用者が何もしなくても同期される(弾はホストが処理し、クライアントには見た目を出す)。
 
+### 読み込み
+
+- EWLはタイトル画面では読み込まれない(無効にしても再起動は不要)。EWLを使うModは `Mod.xml` の `LoadOrder` を1以上にする。
+
 ### 既知の制限
 
 - 誘導(`ProjectileSpec.Guidance` / XML `Projectile/Guidance`)は仮実装で、今後まとめて作り直す予定です(破壊的変更になります)。
