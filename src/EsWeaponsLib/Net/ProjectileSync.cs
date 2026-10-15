@@ -21,7 +21,6 @@ namespace EWL.Net
     // 弾の MP 同期。MP ホストのグローバルシミュで出た弾だけを配信し、クライアントは同じ武装の定義から見た目だけのプロキシを出す。
     // 武装は (ブロック, ブロック上の並び順) で対応付ける(Weapon は全ピアで同じ順に生成される契約)。
     // ModNetworking は Reliable 固定なので、位置は 10Hz に抑え、スナップショットを生存一覧として兼用する。
-    // 設計: .internal-docs/project/notes/mp-sync.md
     internal sealed class ProjectileSync : MonoBehaviour
     {
         private const float SnapshotInterval = 0.1f; // 本体の sendRate 既定と同じ 10Hz

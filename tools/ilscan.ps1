@@ -1,5 +1,5 @@
 # Copied from BesiegeDevBridge Project/tools/ilscan.ps1 (default DLL path changed for EsWeaponsLib).
-# IL check equivalent to Besiege 1.9.1-25490 InternalModding.Assemblies.AssemblyScanner.
+# Mirrors the API check that Besiege 1.9.1-25490 applies when it loads mod assemblies (as observed: a mod DLL using these is rejected).
 # Usage: powershell -File tools/ilscan.ps1 [-Dll path] ; exit 1 and a list of violations when rejected.
 param([string]$Dll = (Join-Path $PSScriptRoot "..\EsWeaponsLib\EsWeaponsLib.dll"), [string]$Cecil = (Join-Path $PSScriptRoot "..\..\..\Managed\Mono.Cecil.dll"))
 Add-Type -Path $Cecil
