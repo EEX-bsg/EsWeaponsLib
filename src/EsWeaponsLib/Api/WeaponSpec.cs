@@ -45,7 +45,8 @@ namespace EWL.Api
         public bool AutoReload = true;
 
         /// <summary>撃てる状態の間、次の弾の見た目を発射位置に表示する(迫撃砲・爆弾など)。発射の瞬間に消え、発射間隔の後に戻る。
-        /// 弾切れ・リロード中は表示しない。見た目だけでコライダーは持たない。</summary>
+        /// 弾切れ・リロード中は表示しない。見た目だけでコライダーは持たない。
+        /// EwlWeapon モジュールでは、総弾数が 0 でなければビルド中も表示する(C# から武装を作る場合は <see cref="Weapon.CreateLoadedProjectilePreview"/>)。</summary>
         public bool ShowLoadedProjectile = false;
 
         /// <summary>発射エフェクトのプレハブ(AssetBundle等から取得)。nullなら無し。</summary>
@@ -126,8 +127,8 @@ namespace EWL.Api
         public float BlockDamage = 0f;
         /// <summary>直撃したとき、レベルのエンティティ(人・動物など)に与えるダメージ(爆風では使わない)。</summary>
         public float EntityDamage = 0f;
-        /// <summary>命中物に刺さって止まる。</summary>
-        public bool StickOnHit = false;
+        /// <summary>命中物にくっついて止まり、以後は命中物と一緒に動く(矢など)。地形では、その場で止まる。</summary>
+        public bool AttachOnHit = false;
         /// <summary>爆発しない弾を命中時に即消す。falseなら命中の1秒後に消える。</summary>
         public bool DespawnOnHit = false;
 

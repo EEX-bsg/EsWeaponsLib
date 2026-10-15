@@ -37,6 +37,13 @@ namespace EWL.Modules
             if (Module.MagazineCapacitySlider != null) _magazineCapacitySlider = GetSlider(Module.MagazineCapacitySlider);
         }
 
+        // ビルド中のブロック(読込・配置)だけで呼ばれる。弾が無い武装は装填中の弾を出さない(シミュ中と同じ)。
+        public override void OnBlockPlaced()
+        {
+            if (!Module.ShowLoadedProjectile || Module.TotalAmmo == 0) return;
+            Weapon.CreateLoadedProjectilePreview(BlockBehaviour, BuildSpec());
+        }
+
         public override void OnSimulateStart()
         {
             _autoFire = _fireHeldBefore = _reloadHeldBefore = false;
@@ -144,7 +151,7 @@ namespace EWL.Modules
             projectile.ImpactForce = projectileXml.ImpactForce;
             projectile.BlockDamage = projectileXml.BlockDamage;
             projectile.EntityDamage = projectileXml.EntityDamage;
-            projectile.StickOnHit = projectileXml.StickOnHit;
+            projectile.AttachOnHit = projectileXml.AttachOnHit;
             projectile.DespawnOnHit = projectileXml.DespawnOnHit;
             projectile.TimeFuse = projectileXml.TimeFuse;
             projectile.TimeFuseRandomExtra = projectileXml.TimeFuseRandomExtra;

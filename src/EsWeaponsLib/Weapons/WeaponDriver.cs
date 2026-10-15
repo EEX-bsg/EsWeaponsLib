@@ -25,9 +25,7 @@ namespace EWL.Weapons
         private float _nextFireTime;
         private bool _bursting;
         private int _pendingShots; // 遅延待ちで、まだ弾が出ていない発射
-        private GameObject _loadedVisual;
-        private MeshFilter _loadedMeshFilter;
-        private MeshRenderer _loadedRenderer;
+        private LoadedProjectileVisual _loadedVisual;
         private string _privatePoolKey;
         private readonly List<UnityEngine.Object> _owned = new List<UnityEngine.Object>();
 
@@ -77,43 +75,16 @@ namespace EWL.Weapons
         {
             bool show = Spec.ShowLoadedProjectile && !IsReloading && HasAmmo()
                 && (_pendingShots > 0 || (Time.time >= _nextFireTime && !_bursting));
-            if (show) UpdateLoadedVisual();
-            if (_loadedVisual != null && _loadedVisual.activeSelf != show) _loadedVisual.SetActive(show);
-        }
-
-        // 発射位置に置く次の弾の見た目。Spec は書き換えられうるので表示中は毎フレーム合わせる(割り当てなし)。
-        private void UpdateLoadedVisual()
-        {
-            var projectile = Spec.Projectile;
-            if (_loadedVisual == null)
+            if (show)
             {
-                _loadedVisual = new GameObject("EwlLoadedProjectile");
-                _loadedVisual.transform.SetParent(transform, false);
-                var visual = new GameObject("Vis");
-                visual.transform.SetParent(_loadedVisual.transform, false);
-                _loadedMeshFilter = visual.AddComponent<MeshFilter>();
-                _loadedRenderer = visual.AddComponent<MeshRenderer>();
-                _owned.Add(_loadedVisual);
+                if (_loadedVisual == null)
+                {
+                    _loadedVisual = LoadedProjectileVisual.Create(transform, false);
+                    _owned.Add(_loadedVisual.gameObject);
+                }
+                _loadedVisual.Apply(Spec); // Spec は書き換えられうるので表示中は毎フレーム合わせる
             }
-            var root = _loadedVisual.transform;
-            root.localPosition = Spec.MuzzlePosition;
-            root.localRotation = Quaternion.Euler(Spec.MuzzleRotation);
-            var visualTransform = _loadedMeshFilter.transform;
-            if (projectile.Mesh != null)
-            {
-                visualTransform.localPosition = projectile.MeshPosition;
-                visualTransform.localRotation = Quaternion.Euler(projectile.MeshRotation);
-                visualTransform.localScale = projectile.MeshScale;
-                _loadedMeshFilter.sharedMesh = projectile.Mesh;
-            }
-            else
-            {
-                visualTransform.localPosition = Vector3.zero;
-                visualTransform.localRotation = Quaternion.identity;
-                visualTransform.localScale = Vector3.one * (Projectile.DefaultRadius * 2f);
-                _loadedMeshFilter.sharedMesh = Projectile.SphereMesh();
-            }
-            _loadedRenderer.sharedMaterial = MaterialFor(projectile);
+            if (_loadedVisual != null && _loadedVisual.gameObject.activeSelf != show) _loadedVisual.gameObject.SetActive(show);
         }
 
         private void OnDestroy()

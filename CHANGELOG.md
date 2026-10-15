@@ -14,8 +14,8 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 ### XMLカスタムモジュール
 
 - `EwlWeapon`: ブロックを武装にする。発射キー、連射・切替式、発射間隔・遅延・拡散・反動、バースト、総弾数・弾倉・リロード、
-  弾の物理・コライダー・見た目、ダメージ・衝撃力・刺さる弾、時限信管・起爆遅延、爆発、推進(ロケット)、
-  発射・弾・爆発のエフェクトと音、待機弾の表示。発射レート・遅延・時限信管・弾倉容量はスライダーで変えられる。1ブロックに複数書ける。
+  弾の物理・コライダー・見た目、ダメージ・衝撃力・命中物にくっつく弾、時限信管・起爆遅延、爆発、推進(ロケット)、
+  発射・弾・爆発のエフェクトと音、待機弾の表示(ビルド中も)。発射レート・遅延・時限信管・弾倉容量はスライダーで変えられる。1ブロックに複数書ける。
 - `EwlBlockPhysics`: ブロックの接合強度・物理マテリアル・接合の回転軸を設定し、コライダー(ブロックを置ける面を含む)を足す。
 
 ### C# API(`EWL.Api`)
@@ -23,6 +23,7 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 - `WeaponSpec` / `ProjectileSpec` / `ExplosionSpec` / `BoosterSpec`: 武装・弾・爆発・推進の定義(純データ)。
 - `Weapon`: 自分のモジュールやブロックスクリプトから武装を作って駆動する部品(`Create` / `TryFire` / `TryReload` / `Destroy`)。
   状態(`Ammo` / `ReserveAmmo` / `IsReloading`)とイベント(`Fired` / `ReloadStarted` / `Hit`)を持ち、`GetAll` でブロック上の武装を列挙できる。
+  `CreateLoadedProjectilePreview` でビルド中のブロックに待機弾の見た目を置ける。
 - `Weapon.AnyHit` / `ProjectileHit` / `Attacker`: 誰の弾がどこに当たったか、バニラのボムを誰が起爆させたか。
 - `BundleAssets`: AssetBundleからアセットを取り出して覚える。
 

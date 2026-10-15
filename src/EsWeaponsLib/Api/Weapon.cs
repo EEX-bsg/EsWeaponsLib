@@ -37,6 +37,20 @@ namespace EWL.Api
             return result;
         }
 
+        /// <summary>
+        /// ビルド中のブロックに、装填中の弾の見た目(<see cref="WeaponSpec.ShowLoadedProjectile"/> と同じもの)を置く。見た目だけで当たり判定はない。
+        /// 表示するかは呼び出し側が決める(Spec の ShowLoadedProjectile は見ない)。位置・弾の形はこの時の Spec で決まり、後から Spec を書き換えても追従しない。
+        /// シミュ中は表示されない(シミュ側で見せるのは <see cref="WeaponSpec.ShowLoadedProjectile"/>)。ブロックと一緒に消え、途中で消すときは戻り値を Destroy する。
+        /// </summary>
+        public static GameObject CreateLoadedProjectilePreview(BlockBehaviour block, WeaponSpec spec)
+        {
+            if (block == null) throw new ArgumentNullException("block");
+            if (spec == null) throw new ArgumentNullException("spec");
+            var preview = LoadedProjectileVisual.Create(block.transform, true);
+            preview.Apply(spec);
+            return preview.gameObject;
+        }
+
         /// <summary>定義。発射のたびに読まれるので、書き換えると次の弾から反映される。
         /// ただし総弾数(TotalAmmo)と弾倉の初期の詰め方は <see cref="Create"/> の時だけ使う。</summary>
         public WeaponSpec Spec
@@ -56,7 +70,7 @@ namespace EWL.Api
 
         /// <summary>
         /// この武装が使う弾のプールのキー。<see cref="ProjectileSpec.PoolKey"/> が空ならこの武装専用のキー。破棄済みなら null。
-        /// プールの置き場はシーン直下の "EsWeaponsLib (Scene)/ProjectilePool/(キー)" で、待機中・飛行中の弾はその子(刺さった弾は刺さった先の子)。
+        /// プールの置き場はシーン直下の "EsWeaponsLib (Scene)/ProjectilePool/(キー)" で、待機中・飛行中の弾はその子(命中物にくっついた弾はその命中物の子)。
         /// 弾に直接触るのは推奨しない(足りない操作は API への追加を提案してほしい)。置き場の構成は 1.0 まで変わりうる。
         /// </summary>
         public string PoolKey { get { return _driver != null ? _driver.PoolKey : null; } }
@@ -74,7 +88,7 @@ namespace EWL.Api
         public event Action<ProjectileHit> Hit;
 
         /// <summary>
-        /// どの武装の弾が当たっても発火する(他 Mod の武装を含む)。被弾した側が撃った相手を知るために使う。
+        /// EWL の弾が当たるたびに、撃った武装を問わず発火する(EWL を使う他 Mod の武装を含む。EWL を使わない武装の弾は対象外)。被弾した側が撃った相手を知るために使う。
         /// 実行権威側でだけ発火する。静的イベントなので、購読したら必ず解除する。
         /// </summary>
         public static event Action<ProjectileHit> AnyHit;

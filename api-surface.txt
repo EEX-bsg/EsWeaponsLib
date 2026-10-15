@@ -64,6 +64,7 @@ EWL.Api.ProjectileHit::ShooterBlock : BlockBehaviour {get}
 EWL.Api.ProjectileHit::Weapon : EWL.Api.Weapon {get}
 EWL.Api.ProjectileSpec::AngularDrag : System.Single
 EWL.Api.ProjectileSpec::AttachedEffect : UnityEngine.GameObject
+EWL.Api.ProjectileSpec::AttachOnHit : System.Boolean
 EWL.Api.ProjectileSpec::BlockDamage : System.Single
 EWL.Api.ProjectileSpec::Booster : EWL.Api.BoosterSpec
 EWL.Api.ProjectileSpec::BounceCombine : UnityEngine.PhysicMaterialCombine
@@ -90,7 +91,6 @@ EWL.Api.ProjectileSpec::MeshRotation : UnityEngine.Vector3
 EWL.Api.ProjectileSpec::MeshScale : UnityEngine.Vector3
 EWL.Api.ProjectileSpec::PoolKey : System.String
 EWL.Api.ProjectileSpec::PoolSize : System.Int32
-EWL.Api.ProjectileSpec::StickOnHit : System.Boolean
 EWL.Api.ProjectileSpec::System.Void .ctor()
 EWL.Api.ProjectileSpec::Texture : UnityEngine.Texture
 EWL.Api.ProjectileSpec::TimeFuse : System.Single
@@ -108,6 +108,7 @@ EWL.Api.Weapon::ReserveAmmo : System.Int32 {get}
 EWL.Api.Weapon::Spec : EWL.Api.WeaponSpec {get;set}
 EWL.Api.Weapon::static EWL.Api.Weapon Create(BlockBehaviour, EWL.Api.WeaponSpec)
 EWL.Api.Weapon::static EWL.Api.Weapon[] GetAll(UnityEngine.GameObject)
+EWL.Api.Weapon::static UnityEngine.GameObject CreateLoadedProjectilePreview(BlockBehaviour, EWL.Api.WeaponSpec)
 EWL.Api.Weapon::System.Boolean TryFire()
 EWL.Api.Weapon::System.Boolean TryReload()
 EWL.Api.Weapon::System.Void Destroy()
@@ -157,6 +158,7 @@ EWL.Modules.EwlBlockPhysicsModule::Material : EWL.Modules.BlockMaterialXml XmlEl
 EWL.Modules.EwlBlockPhysicsModule::Rotation : EWL.Modules.JointRotationXml XmlElement() DefaultValue() Reloadable()
 EWL.Modules.EwlBlockPhysicsModule::System.Void .ctor()
 EWL.Modules.EwlWeaponBehaviour::System.Void .ctor()
+EWL.Modules.EwlWeaponBehaviour::virtual System.Void OnBlockPlaced()
 EWL.Modules.EwlWeaponBehaviour::virtual System.Void OnSimulateStart()
 EWL.Modules.EwlWeaponBehaviour::virtual System.Void OnSimulateStop()
 EWL.Modules.EwlWeaponBehaviour::virtual System.Void SafeAwake()
@@ -215,6 +217,7 @@ EWL.Modules.JointRotationXml::Spring : System.Single XmlElement() DefaultValue(0
 EWL.Modules.JointRotationXml::System.Void .ctor()
 EWL.Modules.ProjectileXml::AngularDrag : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ProjectileXml::AttachedEffect : System.String XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::AttachOnHit : System.Boolean XmlElement() DefaultValue(False)
 EWL.Modules.ProjectileXml::BlockDamage : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ProjectileXml::Booster : EWL.Modules.BoosterXml XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::BounceCombine : UnityEngine.PhysicMaterialCombine XmlElement() DefaultValue()
@@ -237,7 +240,6 @@ EWL.Modules.ProjectileXml::Lifetime : System.Single XmlElement() DefaultValue(20
 EWL.Modules.ProjectileXml::Mass : System.Single XmlElement() DefaultValue(1)
 EWL.Modules.ProjectileXml::Mesh : Modding.Serialization.MeshReference XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::PoolSize : System.Int32 XmlElement() DefaultValue(50)
-EWL.Modules.ProjectileXml::StickOnHit : System.Boolean XmlElement() DefaultValue(False)
 EWL.Modules.ProjectileXml::System.Void .ctor()
 EWL.Modules.ProjectileXml::Texture : Modding.Serialization.ResourceReference XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::TimeFuse : System.Single XmlElement() DefaultValue(0)

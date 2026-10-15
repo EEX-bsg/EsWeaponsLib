@@ -54,7 +54,9 @@ foreach (var weapon in Weapon.GetAll(block.gameObject))
 
 ### 誰の弾が当たったか
 
-`Weapon.AnyHit` は、どの武装の弾が当たっても発火する静的イベントです(他Modの武装を含む)。
+`Weapon.AnyHit` は、EWL の弾が当たるたびに、撃った武装を問わず発火する静的イベントです。
+対象は EWL の弾だけです。EWL の XML カスタムモジュールのブロックと、EWL の API(`Weapon`)で作った武装は、EWL を使う他の Mod のものも含まれます。
+EWL を使わない武装の弾(Besiege 標準の武器や、他の仕組みの Mod の弾)は通知されません。
 
 ```csharp
 void OnEnable()  { Weapon.AnyHit += OnAnyHit; }
@@ -140,6 +142,21 @@ _weapon.TryFire();
 - `TotalAmmo` と弾倉の初期の詰め方だけは `Weapon.Create` の時にしか読みません。
 - 飛んでいる弾は発射時の `ProjectileSpec` を使い続けます。`Spec.Projectile` を別のインスタンスに差し替えると次の弾から効きます
   (同じインスタンスの値を書き換えると、飛んでいる弾にも効きます)。
+
+### ビルド中に待機弾を見せる
+
+`ShowLoadedProjectile` はシミュレーション中だけ効きます。ビルド中も発射位置に弾を見せるには、`OnBlockPlaced` で `Weapon.CreateLoadedProjectilePreview` を呼びます。
+
+```csharp
+public override void OnBlockPlaced()
+{
+    Weapon.CreateLoadedProjectilePreview(BlockBehaviour, BuildMySpec());
+}
+```
+
+- 見た目だけで、当たり判定はありません。表示する条件(弾が無い武装は出さない等)は、あなたのModが決めます。
+- 位置と弾の形は、呼んだ時の Spec で決まります。後から Spec を書き換えても変わりません。
+- シミュレーション中は表示されません。ブロックを消せば一緒に消えます。途中で消すときは、戻り値の GameObject を `Destroy` します。
 
 ### エフェクトとアセット
 

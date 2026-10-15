@@ -28,6 +28,7 @@
 |---|---|
 | `static Weapon Create(BlockBehaviour block, WeaponSpec spec)` | ブロックに武装を付ける。1ブロックに複数付けてよい。 |
 | `static Weapon[] GetAll(GameObject block)` | ブロックに付いている EWL の武装(他 Mod が付けたものを含む)。 |
+| `static GameObject CreateLoadedProjectilePreview(BlockBehaviour block, WeaponSpec spec)` | ビルド中のブロックに、装填中の弾の見た目(`WeaponSpec.ShowLoadedProjectile` と同じもの)を置く。見た目だけで当たり判定はない。表示するかは呼び出し側が決める(Spec の ShowLoadedProjectile は見ない)。位置・弾の形はこの時の Spec で決まり、後から Spec を書き換えても追従しない。シミュ中は表示されない(シミュ側で見せるのは `WeaponSpec.ShowLoadedProjectile`)。ブロックと一緒に消え、途中で消すときは戻り値を Destroy する。 |
 | `bool TryFire()` | 発射を要求する。実行権威側(SP・MP Host・MP Client ローカルシミュ)で、間隔・弾数・リロード中でないことが許すときだけ受け付けて true。BurstCount が 2 以上なら、この1回でバーストを撃つ。 |
 | `bool TryReload()` | リロードを要求する。実行権威側で、弾倉を使い、弾倉に空きがあり、予備弾があり、リロード中でないときだけ受け付けて true。 |
 | `void Destroy()` | 武装を外す。飛んでいる弾はシミュ終了まで残る。 |
@@ -35,12 +36,12 @@
 | `int Ammo { get; }` | すぐ撃てる残弾(弾倉を使う武装は弾倉内の弾)。負値は無制限。 |
 | `int ReserveAmmo { get; }` | 弾倉の外の予備弾。負値は無制限。弾倉を使わない武装は 0。 |
 | `bool IsReloading { get; }` | リロード中なら true(撃てない)。 |
-| `string PoolKey { get; }` | この武装が使う弾のプールのキー。`ProjectileSpec.PoolKey` が空ならこの武装専用のキー。破棄済みなら null。プールの置き場はシーン直下の "EsWeaponsLib (Scene)/ProjectilePool/(キー)" で、待機中・飛行中の弾はその子(刺さった弾は刺さった先の子)。弾に直接触るのは推奨しない(足りない操作は API への追加を提案してほしい)。置き場の構成は 1.0 まで変わりうる。 |
+| `string PoolKey { get; }` | この武装が使う弾のプールのキー。`ProjectileSpec.PoolKey` が空ならこの武装専用のキー。破棄済みなら null。プールの置き場はシーン直下の "EsWeaponsLib (Scene)/ProjectilePool/(キー)" で、待機中・飛行中の弾はその子(命中物にくっついた弾はその命中物の子)。弾に直接触るのは推奨しない(足りない操作は API への追加を提案してほしい)。置き場の構成は 1.0 まで変わりうる。 |
 | `bool IsAlive { get; }` | 破棄済みなら false。 |
 | `event Action Fired` | 1発撃つ(弾数を消費する)たび。バーストでは弾ごと。弾の生成は遅延の後。 |
 | `event Action ReloadStarted` | リロードを始めたとき。弾倉はリロード時間の後に満たされる。 |
 | `event Action<ProjectileHit> Hit` | この武装の弾が何かに当たった(直撃・爆風)。実行権威側(SP・MP ホスト・ローカルシミュ)でだけ発火する。 |
-| `static event Action<ProjectileHit> AnyHit` | どの武装の弾が当たっても発火する(他 Mod の武装を含む)。被弾した側が撃った相手を知るために使う。実行権威側でだけ発火する。静的イベントなので、購読したら必ず解除する。 |
+| `static event Action<ProjectileHit> AnyHit` | EWL の弾が当たるたびに、撃った武装を問わず発火する(EWL を使う他 Mod の武装を含む。EWL を使わない武装の弾は対象外)。被弾した側が撃った相手を知るために使う。実行権威側でだけ発火する。静的イベントなので、購読したら必ず解除する。 |
 
 ## WeaponSpec
 
@@ -65,7 +66,7 @@
 | `MagazineCapacity` | `int` | `0` | 弾倉の容量。0以下なら弾倉なし。武装の生成時にTotalAmmoから弾倉を満たし、残りを予備弾にする。 |
 | `ReloadTime` | `float` | `1` | リロード時間 \[s]。リロード中は撃てない。 |
 | `AutoReload` | `bool` | `true` | 弾倉が空になったら自動でリロードする。 |
-| `ShowLoadedProjectile` | `bool` | `false` | 撃てる状態の間、次の弾の見た目を発射位置に表示する(迫撃砲・爆弾など)。発射の瞬間に消え、発射間隔の後に戻る。弾切れ・リロード中は表示しない。見た目だけでコライダーは持たない。 |
+| `ShowLoadedProjectile` | `bool` | `false` | 撃てる状態の間、次の弾の見た目を発射位置に表示する(迫撃砲・爆弾など)。発射の瞬間に消え、発射間隔の後に戻る。弾切れ・リロード中は表示しない。見た目だけでコライダーは持たない。EwlWeapon モジュールでは、総弾数が 0 でなければビルド中も表示する(C# から武装を作る場合は `Weapon.CreateLoadedProjectilePreview`)。 |
 | `MuzzleFlash` | `GameObject` | なし | 発射エフェクトのプレハブ(AssetBundle等から取得)。nullなら無し。 |
 | `MuzzleFlashPosition` | `Vector3` | `(0, 0, 0)` | 発射エフェクトの位置(ブロックローカル)。発射音もここで鳴る。 |
 | `MuzzleFlashRotation` | `Vector3` | `(0, 0, 0)` | 発射エフェクトの向き(オイラー角 \[度]、ブロックローカル)。 |
@@ -106,7 +107,7 @@
 | `ImpactForce` | `float` | `10` | 命中した剛体に「弾の速度 × この値」の力 \[N/(m/s)] を与える。ダメージ・力は最初の命中で1回だけ。 |
 | `BlockDamage` | `float` | `0` | 直撃したとき、HPを持つブロックに与えるダメージ(爆風では使わない)。 |
 | `EntityDamage` | `float` | `0` | 直撃したとき、レベルのエンティティ(人・動物など)に与えるダメージ(爆風では使わない)。 |
-| `StickOnHit` | `bool` | `false` | 命中物に刺さって止まる。 |
+| `AttachOnHit` | `bool` | `false` | 命中物にくっついて止まり、以後は命中物と一緒に動く(矢など)。地形では、その場で止まる。 |
 | `DespawnOnHit` | `bool` | `false` | 爆発しない弾を命中時に即消す。falseなら命中の1秒後に消える。 |
 | `TimeFuse` | `float` | `0` | 時限信管 \[s]。0なら無効。経過で起爆(爆発しない弾は消える)。 |
 | `TimeFuseRandomExtra` | `float` | `0.05` | 時限信管に加える乱数 \[s](0〜この値)。発射時に決める。TimeFuseが0のときは使わない。 |

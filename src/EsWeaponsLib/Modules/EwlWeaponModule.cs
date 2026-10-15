@@ -127,7 +127,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(10f)] public float ImpactForce = 10f;
         [XmlElement, DefaultValue(0f)] public float BlockDamage = 0f;
         [XmlElement, DefaultValue(0f)] public float EntityDamage = 0f;
-        [XmlElement, DefaultValue(false)] public bool StickOnHit = false;
+        [XmlElement, DefaultValue(false)] public bool AttachOnHit = false;
         [XmlElement, DefaultValue(false)] public bool DespawnOnHit = false;
 
         [XmlElement, DefaultValue(0f)] public float TimeFuse = 0f;

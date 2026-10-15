@@ -312,13 +312,13 @@ namespace EWL.Weapons
             _hit = true;
 
             var spec = _spec;
-            var attachTo = Damage.ApplyHit(collision.collider, _rb.velocity, spec.ImpactForce, spec.BlockDamage, spec.EntityDamage, spec.StickOnHit, _shooter);
+            var attachTo = Damage.ApplyHit(collision.collider, _rb.velocity, spec.ImpactForce, spec.BlockDamage, spec.EntityDamage, spec.AttachOnHit, _shooter);
             if (Weapon.HasHitListeners(_weapon))
             {
                 var point = collision.contacts.Length > 0 ? collision.contacts[0].point : transform.position;
                 RaiseHit(Damage.BlockOf(collision.collider), collision.collider, point, HitKind.Direct);
             }
-            if (spec.StickOnHit) Stick(attachTo);
+            if (spec.AttachOnHit) AttachTo(attachTo);
             EffectPlayer.Fade(_trail);
             _trail = null;
 
@@ -331,7 +331,7 @@ namespace EWL.Weapons
             else StartCoroutine(DespawnAfter(RemoveAfterHit));
         }
 
-        private void Stick(Transform target)
+        private void AttachTo(Transform target)
         {
             _rb.velocity = Vector3.zero;
             _rb.angularVelocity = Vector3.zero;

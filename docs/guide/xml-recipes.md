@@ -136,12 +136,12 @@
 </Projectile>
 ```
 
-### ダメージ・刺さる弾・消える弾
+### ダメージ・くっつく弾・消える弾
 
 ```xml
 <BlockDamage>1</BlockDamage>     <!-- HP を持つブロックへのダメージ -->
 <EntityDamage>50</EntityDamage>  <!-- 人・動物などへのダメージ -->
-<StickOnHit>true</StickOnHit>    <!-- 命中物に刺さって止まる(矢など) -->
+<AttachOnHit>true</AttachOnHit>  <!-- 命中物にくっついて一緒に動く(矢など) -->
 <DespawnOnHit>true</DespawnOnHit> <!-- 爆発しない弾を命中で即消す。既定は命中の1秒後に消える -->
 ```
 
@@ -201,7 +201,7 @@ Mac・Linuxでは、「バンドル名 + `Mac`」のAssetBundleがあればそ�
 
 ## 待機弾の表示
 
-迫撃砲や爆弾のように、撃つ前の弾を発射位置に見せます。発射の瞬間に消え、次に撃てるようになると戻ります。
+迫撃砲や爆弾のように、撃つ前の弾を発射位置に見せます。発射の瞬間に消え、次に撃てるようになると戻ります。ビルド中も、発射位置に弾を表示します(`TotalAmmo` が 0 の武装を除く)。
 
 ```xml
 <ShowLoadedProjectile>true</ShowLoadedProjectile>
