@@ -28,6 +28,17 @@ powershell -File tools/gen-reference.ps1
 - XML 要素の説明が無いときは、対応する C# のフィールド(`EwlWeapon` 直下 → `WeaponSpec`、`Projectile` → `ProjectileSpec` など)の説明が使われる。
   モジュールにしかない要素(キー・スライダー・リソース名で書く項目)には、XML 定義クラスに `///` を書く。
 
+## Web での見え方を確かめる
+
+`docs/` は GitHub Pages(`main` ブランチの `/docs`)で公開されます。公開前の見え方は Docker で確かめられます。
+
+```powershell
+powershell -File tools/preview-docs.ps1   # http://localhost:4000 。止めるときは docker stop ewl-docs-preview
+```
+
+- `docs/` の外(リポジトリ直下の `CHANGELOG.md` など)へは相対リンクでは辿れません。GitHub 上の URL で書きます。
+- Web に出したくないページは `docs/_config.yml` の `exclude` に書きます(リポジトリ上では読めます)。
+
 ## 書くときの注意
 
 - 公開してはいけない情報を書かない: Besiege 本体のデコンパイル結果やそこから分かる内部実装名、他 Mod のソースから分かる情報。
