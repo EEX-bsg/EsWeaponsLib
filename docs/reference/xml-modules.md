@@ -1,5 +1,6 @@
 # XML カスタムモジュール リファレンス
 
+> [!NOTE]
 > このページは生成物です(`tools/gen-reference.ps1`)。手で編集せず、`src/` の `///` コメントを直して作り直してください。
 
 EWL の XML カスタムモジュールの全要素です。使い方は [XML の使い方](../guide/xml-recipes.md) を参照してください。
@@ -7,6 +8,7 @@ EWL の XML カスタムモジュールの全要素です。使い方は [XML �
 - ブロック XML の `<Modules>` に、`modid="0d219960-b202-4906-b29d-8d90a61a89b8"`(EWL の Mod ID)を付けて書きます。
 - **必須** と書いた要素以外は省略でき、省略した要素は既定値になります。単位は C# 側と同じです(`[m/s]`・`[s]`・`[度]`)。
 - 位置・回転はブロックローカル、回転はオイラー角 [度] です。
+- 「書き方」の見方: ベクトル = `<要素名 x="0" y="0" z="1" />`、キー参照・トグル参照・スライダー参照 = `<要素名 key="…" />`(`key` はブロックの `ModuleMapperTypes` に定義した名前)、リソース名 = `<要素名 name="…" />`(ブロックを定義した Mod の `Resources` の名前)、メッシュ = リソース名に `Position` / `Rotation` / `Scale` を足したもの、`<AudioClip />` の並び = `<AudioClip name="…" />` を並べる、コライダーの並び = ブロックの `Colliders` と同じ書式。
 - 再読込 ○: ブロックを定義した Mod の `Mod.xml` が `<Debug>true</Debug>` のとき、ゲーム中に XML を保存すると次のシミュレーション開始から反映されます。空欄の要素は Besiege の再起動が必要です。
 
 ## EwlWeapon
@@ -17,20 +19,20 @@ C# では `WeaponSpec` に当たります。
 
 | 要素 | 書き方 | 既定値 | 再読込 | 説明 |
 |---|---|---|---|---|
-| `FireKey` **必須** | キー(`key` 属性 = ModuleMapperTypes のキー名) | — |  | 発射キー(必須)。ブロックの ModuleMapperTypes に定義したキーの名前を key 属性で書く。 |
-| `HoldToFireToggle` | トグル(`key` 属性 = ModuleMapperTypes のトグル名) | なし |  | ON: 押している間連射 / OFF: 押すたびに連射の開始・停止を切り替え。省略時は HoldToFire。 |
-| `ReloadKey` | キー(`key` 属性 = ModuleMapperTypes のキー名) | なし |  | 押すとリロード(MagazineCapacity が 1 以上のとき)。 |
-| `AutoReloadToggle` | トグル(`key` 属性 = ModuleMapperTypes のトグル名) | なし |  | ON で弾倉が空になったら自動リロード。省略時は AutoReload。 |
-| `FireRateSlider` | スライダー(`key` 属性 = ModuleMapperTypes のスライダー名) | なし |  | 値 \[発/s] の逆数を FireInterval に使う(XML の値より優先。0 以下なら撃たない)。発射ごとに読む。 |
-| `FireDelaySlider` | スライダー(`key` 属性 = ModuleMapperTypes のスライダー名) | なし |  | 値 \[s] を FireDelay に加える。発射ごとに読む。 |
-| `TimeFuseSlider` | スライダー(`key` 属性 = ModuleMapperTypes のスライダー名) | なし |  | 値 \[s] を Projectile/TimeFuse に使う(XML の値より優先)。Projectile/TimeFuseRandomExtra の乱数は別に加わる。発射ごとに読み、飛行中の弾は変えない。 |
-| `MagazineCapacitySlider` | スライダー(`key` 属性 = ModuleMapperTypes のスライダー名) | なし |  | 値を四捨五入して MagazineCapacity に使う(XML の値より優先)。シミュ開始時に読む。 |
+| `FireKey` **必須** | キー参照 | — |  | 発射キー(必須)。ブロックの ModuleMapperTypes に定義したキーの名前を key 属性で書く。 |
+| `HoldToFireToggle` | トグル参照 | なし |  | ON: 押している間連射 / OFF: 押すたびに連射の開始・停止を切り替え。省略時は HoldToFire。 |
+| `ReloadKey` | キー参照 | なし |  | 押すとリロード(MagazineCapacity が 1 以上のとき)。 |
+| `AutoReloadToggle` | トグル参照 | なし |  | ON で弾倉が空になったら自動リロード。省略時は AutoReload。 |
+| `FireRateSlider` | スライダー参照 | なし |  | 値 \[発/s] の逆数を FireInterval に使う(XML の値より優先。0 以下なら撃たない)。発射ごとに読む。 |
+| `FireDelaySlider` | スライダー参照 | なし |  | 値 \[s] を FireDelay に加える。発射ごとに読む。 |
+| `TimeFuseSlider` | スライダー参照 | なし |  | 値 \[s] を Projectile/TimeFuse に使う(XML の値より優先)。Projectile/TimeFuseRandomExtra の乱数は別に加わる。発射ごとに読み、飛行中の弾は変えない。 |
+| `MagazineCapacitySlider` | スライダー参照 | なし |  | 値を四捨五入して MagazineCapacity に使う(XML の値より優先)。シミュ開始時に読む。 |
 | `HoldToFire` | `true` / `false` | `true` | ○ | HoldToFireToggle が無いときの発射方式。true: 押している間連射 / false: 押すたびに連射の開始・停止を切り替え。 |
-| `AssetBundle` | リソース名(`name` 属性) | なし | ○ | エフェクトのプレハブ(MuzzleFlash・Projectile/Trail・Projectile/AttachedEffect・Projectile/Explosion/Effect)を探す AssetBundle。Mac/Linux では「バンドル名+Mac」があればそちらを使う。 |
-| `MuzzlePosition` | `x` `y` `z` 属性 | `(0, 0, 0)` | ○ | 発射位置。 |
-| `MuzzleRotation` | `x` `y` `z` 属性 | `(0, 0, 0)` | ○ | 発射向き(オイラー角 \[度])。弾はこの回転の +Z へ飛ぶ。 |
+| `AssetBundle` | リソース名 | なし | ○ | エフェクトのプレハブ(MuzzleFlash・Projectile/Trail・Projectile/AttachedEffect・Projectile/Explosion/Effect)を探す AssetBundle。Mac/Linux では「バンドル名+Mac」があればそちらを使う。 |
+| `MuzzlePosition` | ベクトル | `(0, 0, 0)` | ○ | 発射位置。 |
+| `MuzzleRotation` | ベクトル | `(0, 0, 0)` | ○ | 発射向き(オイラー角 \[度])。弾はこの回転の +Z へ飛ぶ。 |
 | `MuzzleVelocity` | 数値 | `100` | ○ | 初速 \[m/s]。ブロックの速度に加算される。 |
-| `EjectVelocity` | `x` `y` `z` 属性 | `(0, 0, 0)` | ○ | 発射時に弾のローカル軸で足す速度 \[m/s](ロケットを発射筒から押し出す等)。反動には含めない。 |
+| `EjectVelocity` | ベクトル | `(0, 0, 0)` | ○ | 発射時に弾のローカル軸で足す速度 \[m/s](ロケットを発射筒から押し出す等)。反動には含めない。 |
 | `FireInterval` | 数値 | `0.5` | ○ | 最短発射間隔 \[s]。 |
 | `FireDelay` | 数値 | `0` | ○ | 発射要求から弾が出るまでの固定遅延 \[s]。 |
 | `FireDelayRandomExtra` | 数値 | `0` | ○ | 遅延に加える乱数幅 \[s](0〜この値)。 |
@@ -44,11 +46,11 @@ C# では `WeaponSpec` に当たります。
 | `AutoReload` | `true` / `false` | `true` | ○ | 弾倉が空になったら自動でリロードする。 |
 | `ShowLoadedProjectile` | `true` / `false` | `false` | ○ | 撃てる状態の間、次の弾の見た目を発射位置に表示する(迫撃砲・爆弾など)。発射の瞬間に消え、発射間隔の後に戻る。弾切れ・リロード中は表示しない。見た目だけでコライダーは持たない。 |
 | `MuzzleFlash` | 文字列 | なし | ○ | AssetBundle 内のプレハブ名。 |
-| `MuzzleFlashPosition` | `x` `y` `z` 属性 | `(0, 0, 0)` | ○ | 発射エフェクトの位置(ブロックローカル)。発射音もここで鳴る。 |
-| `MuzzleFlashRotation` | `x` `y` `z` 属性 | `(0, 0, 0)` | ○ | 発射エフェクトの向き(オイラー角 \[度]、ブロックローカル)。 |
-| `MuzzleFlashScale` | `x` `y` `z` 属性 | `(1, 1, 1)` | ○ | 発射エフェクトの拡大率。 |
-| `FireSounds` | `<AudioClip name="…" />` の並び(リソース名) | 空 | ○ | 発射音(ランダムに1つ。MuzzleFlashPosition で鳴る)。 |
-| `ReloadSounds` | `<AudioClip name="…" />` の並び(リソース名) | 空 | ○ | リロード開始時の音(ランダムに1つ)。 |
+| `MuzzleFlashPosition` | ベクトル | `(0, 0, 0)` | ○ | 発射エフェクトの位置(ブロックローカル)。発射音もここで鳴る。 |
+| `MuzzleFlashRotation` | ベクトル | `(0, 0, 0)` | ○ | 発射エフェクトの向き(オイラー角 \[度]、ブロックローカル)。 |
+| `MuzzleFlashScale` | ベクトル | `(1, 1, 1)` | ○ | 発射エフェクトの拡大率。 |
+| `FireSounds` | `<AudioClip />` の並び | 空 | ○ | 発射音(ランダムに1つ。MuzzleFlashPosition で鳴る)。 |
+| `ReloadSounds` | `<AudioClip />` の並び | 空 | ○ | リロード開始時の音(ランダムに1つ)。 |
 | `Projectile` | 子要素([EwlWeapon/Projectile](#ewlweaponprojectile)) | — | ○ | 撃つ弾。飛行中の弾は発射時の ProjectileSpec を使い続けるので、差し替えは次の弾から効く(同じインスタンスの値を書き換えた場合は飛行中の弾にも効く)。弾の形は `ProjectileSpec.PoolKey` ごとに固定され、差し替えた先の弾は事前生成されず最初の発射時に作られる。 |
 
 ## EwlWeapon/Projectile
@@ -66,14 +68,14 @@ C# では `ProjectileSpec` に当たります。
 | `CollisionMode` | `Discrete` / `Continuous` / `ContinuousDynamic` | `ContinuousDynamic` | ○ | 衝突検出の方式。速い弾がすり抜けないよう、既定は ContinuousDynamic。 |
 | `Lifetime` | 数値 | `20` | ○ | 寿命 \[s]。着弾しなくてもこの時間で消える。 |
 | `ColliderEnableDelay` | 数値 | `0.02` | ○ | 発射後、弾のコライダーを有効にするまでの時間 \[s]。自機との干渉を防ぐ。初速の遅い弾(ロケット・ミサイル・爆弾等)は長めにする。0 なら発射と同時に有効(負値は 0 扱い)。撃った武装ブロックとはこの値に関係なく衝突しない。 |
-| `Colliders` | `<SphereCollider>` / `<CapsuleCollider>` / `<BoxCollider>` の並び(ブロックの Colliders と同じ書式) | 空 | ○ | ブロックの Colliders と同じ書式(SphereCollider / CapsuleCollider / BoxCollider)。 |
+| `Colliders` | `<SphereCollider>` / `<CapsuleCollider>` / `<BoxCollider>` の並び | 空 | ○ | ブロックの Colliders と同じ書式(SphereCollider / CapsuleCollider / BoxCollider)。 |
 | `Friction` | 数値 | `0.6` | ○ | 弾の摩擦係数(静止・動摩擦とも)。 |
 | `Bounciness` | 数値 | `0` | ○ | 弾の反発係数(0〜1)。 |
 | `FrictionCombine` | `Average` / `Minimum` / `Multiply` / `Maximum` | `Average` | ○ | 相手の摩擦との合成方法。 |
 | `BounceCombine` | `Average` / `Minimum` / `Multiply` / `Maximum` | `Average` | ○ | 相手の反発との合成方法。 |
 | `PoolSize` | 整数 | `50` | ○ | 同時に飛べる弾の上限。武装の生成時にこの数まで弾を事前生成し、上限に達したら最古の弾を回収して撃つ。エフェクトもプレハブごとにこの数まで(超えた分は表示しない)。1〜1000 に丸める。 |
-| `Mesh` | メッシュ(`name` 属性と `Position` / `Rotation` / `Scale`) | なし | ○ | ブロックを定義した Mod のリソース名(Position/Rotation/Scale が ProjectileSpec の MeshPosition/MeshRotation/MeshScale)。 |
-| `Texture` | リソース名(`name` 属性) | なし | ○ | 見た目のテクスチャ。null ならテクスチャなし(白)。 |
+| `Mesh` | メッシュ | なし | ○ | ブロックを定義した Mod のリソース名(Position/Rotation/Scale が ProjectileSpec の MeshPosition/MeshRotation/MeshScale)。 |
+| `Texture` | リソース名 | なし | ○ | 見た目のテクスチャ。null ならテクスチャなし(白)。 |
 | `Trail` | 文字列 | なし | ○ | AssetBundle 内のプレハブ名。 |
 | `AttachedEffect` | 文字列 | なし | ○ | AssetBundle 内のプレハブ名。 |
 | `ImpactForce` | 数値 | `10` | ○ | 命中した剛体に「弾の速度 × この値」の力 \[N/(m/s)] を与える。ダメージ・力は最初の命中で1回だけ。 |
@@ -103,7 +105,7 @@ C# では `ExplosionSpec` に当たります。
 | `OnlyWithExplodingCannonballs` | `true` / `false` | `false` | ○ | 通常は爆発しない弾として扱い、ゴッドツール「爆発する砲弾」が有効なときだけ爆発する。 |
 | `Effect` | 文字列 | なし | ○ | AssetBundle 内のプレハブ名。 |
 | `FacesHitNormal` | `true` / `false` | `false` | ○ | 爆発エフェクトを命中面の法線へ向ける。 |
-| `Sounds` | `<AudioClip name="…" />` の並び(リソース名) | 空 | ○ | 爆発音(ランダムに1つ)。 |
+| `Sounds` | `<AudioClip />` の並び | 空 | ○ | 爆発音(ランダムに1つ)。 |
 
 ## EwlWeapon/Projectile/Booster
 
@@ -136,7 +138,7 @@ C# では `GuidanceSpec` に当たります。
 | `JointStrength` | 数値 | `0` | ○ | 親ブロックとの接合の破断力・破断トルク。0 = 変えない。壊れない接合は INF。 |
 | `Material` | 子要素([EwlBlockPhysics/Material](#ewlblockphysicsmaterial)) | — | ○ | 書けばブロックのコライダー全部に物理マテリアルを設定する。 |
 | `Rotation` | 子要素([EwlBlockPhysics/Rotation](#ewlblockphysicsrotation)) | — | ○ | 書けば接合の回転軸を設定する。 |
-| `AdditionalColliders` | `<SphereCollider>` / `<CapsuleCollider>` / `<BoxCollider>` の並び(ブロックの Colliders と同じ書式) | 空 |  | ブロックに足すコライダー。ブロックの Colliders と同じ書式(layer・trigger 属性も同じ)で、BoxCollider は Center も書ける。layer="12" にすると、他のブロックをそこに置け、シミュ開始時に置いたブロックがこのブロックへ接続する面になる。BoxCollider は6面のどこでも置け、クリックした点を面の中心から1マス単位に丸めた位置に置かれる。Sphere/Capsule はバニラと同じく、コライダーの Position + 当たった面の法線 × 0.5 に置かれる(当たった点ではない)。Material を書けば、これらにも適用する。 |
+| `AdditionalColliders` | `<SphereCollider>` / `<CapsuleCollider>` / `<BoxCollider>` の並び | 空 |  | ブロックに足すコライダー。ブロックの Colliders と同じ書式(layer・trigger 属性も同じ)で、BoxCollider は Center も書ける。layer="12" にすると、他のブロックをそこに置け、シミュ開始時に置いたブロックがこのブロックへ接続する面になる。BoxCollider は6面のどこでも置け、クリックした点を面の中心から1マス単位に丸めた位置に置かれる。Sphere/Capsule はバニラと同じく、コライダーの Position + 当たった面の法線 × 0.5 に置かれる(当たった点ではない)。Material を書けば、これらにも適用する。 |
 
 ## EwlBlockPhysics/Material
 

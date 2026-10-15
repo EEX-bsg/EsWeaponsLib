@@ -1,4 +1,0 @@
-# Local preview of the GitHub Pages site (docs/). Same gem set as GitHub Pages. Used by tools/preview-docs.ps1 inside Docker.
-source "https://rubygems.org"
-gem "github-pages", group: :jekyll_plugins
-gem "webrick"

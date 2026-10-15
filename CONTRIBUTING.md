@@ -20,6 +20,7 @@ AI エージェントで作業するときは、リポジトリ直下の [AGENTS
 - Besiege 1.9.1(Steam 版)
 - Visual Studio 2022 または Build Tools for Visual Studio 2022(MSBuild。.NET Framework 3.5 の参照アセンブリは NuGet で取得されます)
 - Windows PowerShell 5.1(`tools/` のスクリプト用)
+- ドキュメントのサイトを手元で見るときだけ: Node.js(LTS)。手順は [docs/contributing/documentation.md](docs/contributing/documentation.md#web-サイト)
 
 リポジトリは **`Besiege/Besiege_Data/Mods/` の下に clone してください**。
 ビルドとツールが、Besiege 本体の DLL(`Besiege_Data/Managed/`)を相対パスで探します。

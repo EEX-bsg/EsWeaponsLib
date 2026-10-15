@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "Documentation site for E'sWeaponsLib (docs/, built with VitePress). Not part of the mod.",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.4"
+  }
+}

@@ -28,16 +28,24 @@ powershell -File tools/gen-reference.ps1
 - XML 要素の説明が無いときは、対応する C# のフィールド(`EwlWeapon` 直下 → `WeaponSpec`、`Projectile` → `ProjectileSpec` など)の説明が使われる。
   モジュールにしかない要素(キー・スライダー・リソース名で書く項目)には、XML 定義クラスに `///` を書く。
 
-## Web での見え方を確かめる
+## Web サイト
 
-`docs/` は GitHub Pages(`main` ブランチの `/docs`)で公開されます。公開前の見え方は Docker で確かめられます。
+`docs/` は VitePress でサイトにし、`main` への push で GitHub Pages に公開されます(`.github/workflows/docs.yml`。`docs/` に変更が無い push ではビルドしません)。
+ページの中身は普通の Markdown のままで、先頭の `#` 見出しがページのタイトルになります。
+
+手元で見るには Node.js(LTS)を入れて、リポジトリ直下で:
 
 ```powershell
-powershell -File tools/preview-docs.ps1   # http://localhost:4000 。止めるときは docker stop ewl-docs-preview
+npm install          # 初回だけ
+npm run docs:dev     # http://localhost:5173 。保存すると自動で反映される
+npm run docs:build   # 公開と同じビルド(リンク切れがあると失敗する)
 ```
 
+- ページを足したら `docs/.vitepress/config.mts` の `sidebar` にも足す(`docs/index.md` と `docs/llms.txt` も)。
+- 注記は GitHub と同じ書き方(`> [!NOTE]`・`> [!WARNING]` など)で書くと、サイトでも枠付きで表示される。
 - `docs/` の外(リポジトリ直下の `CHANGELOG.md` など)へは相対リンクでは辿れません。GitHub 上の URL で書きます。
-- Web に出したくないページは `docs/_config.yml` の `exclude` に書きます(リポジトリ上では読めます)。
+- Web に出したくないページは `docs/.vitepress/config.mts` の `srcExclude` に書きます(リポジトリ上では読めます)。
+- サイトには各ページの生の Markdown も置かれます(例: `/guide/csharp.md`)。AI は `/llms.txt` から辿れます。
 
 ## 書くときの注意
 

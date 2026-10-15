@@ -31,7 +31,7 @@ $specOf = @{
 }
 $apiOrder = 'Weapon', 'WeaponSpec', 'ProjectileSpec', 'ExplosionSpec', 'BoosterSpec', 'GuidanceSpec', 'ColliderShape', 'ColliderKind',
   'ProjectileHit', 'HitKind', 'Attacker', 'BundleAssets'
-$generatedNote = '> このページは生成物です(`tools/gen-reference.ps1`)。手で編集せず、`src/` の `///` コメントを直して作り直してください。'
+$generatedNote = "> [!NOTE]`n> " + 'このページは生成物です(`tools/gen-reference.ps1`)。手で編集せず、`src/` の `///` コメントを直して作り直してください。'
 
 function Convert-Doc([string]$inner, [bool]$inTable) {
   if (-not $inner) { return '' }
@@ -172,8 +172,8 @@ function Get-XmlShape($field) {
   $arrayAttribute = Get-Attribute $field 'XmlArrayAttribute'
   if ($arrayAttribute -ne $null) {
     $items = @($field.CustomAttributes | Where-Object { $_.AttributeType.Name -eq 'XmlArrayItemAttribute' } | ForEach-Object { $_.ConstructorArguments[0].Value })
-    if ($typeName -match 'ResourceReference') { return '`<' + $items[0] + ' name="…" />` の並び(リソース名)' }
-    return (($items | ForEach-Object { '`<' + $_ + '>`' }) -join ' / ') + ' の並び(ブロックの Colliders と同じ書式)'
+    if ($typeName -match 'ResourceReference') { return '`<' + $items[0] + ' />` の並び' }
+    return (($items | ForEach-Object { '`<' + $_ + '>`' }) -join ' / ') + ' の並び'
   }
   $definition = $field.FieldType.Resolve()
   if ($definition -ne $null -and $definition.IsEnum) {
@@ -184,12 +184,12 @@ function Get-XmlShape($field) {
     'System.Int32' { return '整数' }
     'System.Boolean' { return '`true` / `false`' }
     'System.String' { return '文字列' }
-    'Modding.Serialization.Vector3' { return '`x` `y` `z` 属性' }
-    'Modding.Serialization.MKeyReference' { return 'キー(`key` 属性 = ModuleMapperTypes のキー名)' }
-    'Modding.Serialization.MToggleReference' { return 'トグル(`key` 属性 = ModuleMapperTypes のトグル名)' }
-    'Modding.Serialization.MSliderReference' { return 'スライダー(`key` 属性 = ModuleMapperTypes のスライダー名)' }
-    'Modding.Serialization.ResourceReference' { return 'リソース名(`name` 属性)' }
-    'Modding.Serialization.MeshReference' { return 'メッシュ(`name` 属性と `Position` / `Rotation` / `Scale`)' }
+    'Modding.Serialization.Vector3' { return 'ベクトル' }
+    'Modding.Serialization.MKeyReference' { return 'キー参照' }
+    'Modding.Serialization.MToggleReference' { return 'トグル参照' }
+    'Modding.Serialization.MSliderReference' { return 'スライダー参照' }
+    'Modding.Serialization.ResourceReference' { return 'リソース名' }
+    'Modding.Serialization.MeshReference' { return 'メッシュ' }
   }
   return Format-TypeName $field.FieldType
 }
@@ -245,6 +245,7 @@ $xmlLines.Add('')
 $xmlLines.Add('- ブロック XML の `<Modules>` に、`modid="0d219960-b202-4906-b29d-8d90a61a89b8"`(EWL の Mod ID)を付けて書きます。')
 $xmlLines.Add('- **必須** と書いた要素以外は省略でき、省略した要素は既定値になります。単位は C# 側と同じです(`[m/s]`・`[s]`・`[度]`)。')
 $xmlLines.Add('- 位置・回転はブロックローカル、回転はオイラー角 [度] です。')
+$xmlLines.Add('- 「書き方」の見方: ベクトル = `<要素名 x="0" y="0" z="1" />`、キー参照・トグル参照・スライダー参照 = `<要素名 key="…" />`(`key` はブロックの `ModuleMapperTypes` に定義した名前)、リソース名 = `<要素名 name="…" />`(ブロックを定義した Mod の `Resources` の名前)、メッシュ = リソース名に `Position` / `Rotation` / `Scale` を足したもの、`<AudioClip />` の並び = `<AudioClip name="…" />` を並べる、コライダーの並び = ブロックの `Colliders` と同じ書式。')
 $xmlLines.Add('- 再読込 ○: ブロックを定義した Mod の `Mod.xml` が `<Debug>true</Debug>` のとき、ゲーム中に XML を保存すると次のシミュレーション開始から反映されます。空欄の要素は Besiege の再起動が必要です。')
 $moduleTypes = $types.Values | Where-Object { $_.Namespace -eq 'EWL.Modules' -and (Get-Attribute $_ 'XmlRootAttribute') -ne $null } | Sort-Object { if ($_.Name -eq 'EwlWeaponModule') { 0 } else { 1 } }
 foreach ($moduleType in $moduleTypes) {

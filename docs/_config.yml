@@ -1,8 +1,0 @@
-# GitHub Pages(main ブランチの /docs から公開)の設定。テーマ・プラグインは GitHub Pages の既定をそのまま使う。
-# ローカルでの確認: powershell -File tools/preview-docs.ps1
-title: E'sWeaponsLib
-description: Besiege の武装 Mod 向け前提ライブラリ(XML カスタムモジュールと C# API)
-lang: ja
-
-# Web に出さないページ・フォルダ(リポジトリ上では読める。本当に非公開のものはリポジトリに置かない)
-exclude: []
