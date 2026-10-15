@@ -45,29 +45,29 @@
 
 `public sealed class EWL.Api.WeaponSpec`
 
-武装1基の定義(純データ)。発射機そのものの値と、撃つ弾の定義 `WeaponSpec.Projectile` を持つ。`Weapon` は発射のたびにこの値を読むので、発射前に書き換えればその弾から反映される(スライダー連動など)。全項目に既定値あり。位置・回転はブロックローカルで、回転はオイラー角 [度]。中の定義(Projectile・Explosion・Booster・Guidance)に null を代入しない(使わない機能は既定値のまま = 無効)。
+武装1基の定義(純データ)。発射機そのものの値と、撃つ弾の定義 `WeaponSpec.Projectile` を持つ。`Weapon` は発射のたびにこの値を読むので、発射前に書き換えればその弾から反映される(スライダー連動など)。全項目に既定値あり。位置・回転はブロックローカルで、回転はオイラー角 \[度]。中の定義(Projectile・Explosion・Booster・Guidance)に null を代入しない(使わない機能は既定値のまま = 無効)。
 
 | フィールド | 型 | 既定値 | 説明 |
 |---|---|---|---|
 | `MuzzlePosition` | `Vector3` | `(0, 0, 0)` | 発射位置。 |
-| `MuzzleRotation` | `Vector3` | `(0, 0, 0)` | 発射向き(オイラー角 [度])。弾はこの回転の +Z へ飛ぶ。 |
-| `MuzzleVelocity` | `float` | `100` | 初速 [m/s]。ブロックの速度に加算される。 |
-| `EjectVelocity` | `Vector3` | `(0, 0, 0)` | 発射時に弾のローカル軸で足す速度 [m/s](ロケットを発射筒から押し出す等)。反動には含めない。 |
-| `FireInterval` | `float` | `0.5` | 最短発射間隔 [s]。 |
-| `FireDelay` | `float` | `0` | 発射要求から弾が出るまでの固定遅延 [s]。 |
-| `FireDelayRandomExtra` | `float` | `0` | 遅延に加える乱数幅 [s](0〜この値)。 |
-| `Spread` | `float` | `0` | 拡散 [度]。前方に tan(Spread) 半径の球内の乱数ベクトルを足して方向を決める。弾の向きもこの方向に合わせる。 |
+| `MuzzleRotation` | `Vector3` | `(0, 0, 0)` | 発射向き(オイラー角 \[度])。弾はこの回転の +Z へ飛ぶ。 |
+| `MuzzleVelocity` | `float` | `100` | 初速 \[m/s]。ブロックの速度に加算される。 |
+| `EjectVelocity` | `Vector3` | `(0, 0, 0)` | 発射時に弾のローカル軸で足す速度 \[m/s](ロケットを発射筒から押し出す等)。反動には含めない。 |
+| `FireInterval` | `float` | `0.5` | 最短発射間隔 \[s]。 |
+| `FireDelay` | `float` | `0` | 発射要求から弾が出るまでの固定遅延 \[s]。 |
+| `FireDelayRandomExtra` | `float` | `0` | 遅延に加える乱数幅 \[s](0〜この値)。 |
+| `Spread` | `float` | `0` | 拡散 \[度]。前方に tan(Spread) 半径の球内の乱数ベクトルを足して方向を決める。弾の向きもこの方向に合わせる。 |
 | `RecoilMultiplier` | `float` | `1` | 反動の倍率。弾の運動量 × この値の撃力をブロックへ逆向きに与える(1 で物理的に正しい反動)。 |
 | `BurstCount` | `int` | `1` | 1回の発射要求で撃つ弾数。1発ごとに弾数を消費し、弾切れで止まる。 |
-| `BurstInterval` | `float` | `0.1` | バースト内の弾の間隔 [s]。次の発射要求は最後の弾から FireInterval 後に受け付ける。 |
+| `BurstInterval` | `float` | `0.1` | バースト内の弾の間隔 \[s]。次の発射要求は最後の弾から FireInterval 後に受け付ける。 |
 | `TotalAmmo` | `int` | `-1` | 総弾数(弾倉内を含む)。負値で無制限。マシンの無限弾薬設定時は消費しない(弾倉を使う武装は弾倉の弾だけ減り、予備弾は減らない)。武装の生成時だけ読む。 |
 | `MagazineCapacity` | `int` | `0` | 弾倉の容量。0 以下なら弾倉なし。武装の生成時に TotalAmmo から弾倉を満たし、残りを予備弾にする。 |
-| `ReloadTime` | `float` | `1` | リロード時間 [s]。リロード中は撃てない。 |
+| `ReloadTime` | `float` | `1` | リロード時間 \[s]。リロード中は撃てない。 |
 | `AutoReload` | `bool` | `true` | 弾倉が空になったら自動でリロードする。 |
 | `ShowLoadedProjectile` | `bool` | `false` | 撃てる状態の間、次の弾の見た目を発射位置に表示する(迫撃砲・爆弾など)。発射の瞬間に消え、発射間隔の後に戻る。弾切れ・リロード中は表示しない。見た目だけでコライダーは持たない。 |
 | `MuzzleFlash` | `GameObject` | なし | 発射エフェクトのプレハブ(AssetBundle 等から取得)。null なら無し。 |
 | `MuzzleFlashPosition` | `Vector3` | `(0, 0, 0)` | 発射エフェクトの位置(ブロックローカル)。発射音もここで鳴る。 |
-| `MuzzleFlashRotation` | `Vector3` | `(0, 0, 0)` | 発射エフェクトの向き(オイラー角 [度]、ブロックローカル)。 |
+| `MuzzleFlashRotation` | `Vector3` | `(0, 0, 0)` | 発射エフェクトの向き(オイラー角 \[度]、ブロックローカル)。 |
 | `MuzzleFlashScale` | `Vector3` | `(1, 1, 1)` | 発射エフェクトの拡大率。 |
 | `FireSounds` | `List<AudioClip>` | 空 | 発射音(ランダムに1つ。MuzzleFlashPosition で鳴る)。 |
 | `ReloadSounds` | `List<AudioClip>` | 空 | リロード開始時の音(ランダムに1つ)。 |
@@ -81,13 +81,13 @@
 
 | フィールド | 型 | 既定値 | 説明 |
 |---|---|---|---|
-| `Mass` | `float` | `1` | 弾の質量 [kg]。反動・推進の加速度と、物理的な衝突に効く(命中時に与える力は ImpactForce で決まる)。 |
+| `Mass` | `float` | `1` | 弾の質量 \[kg]。反動・推進の加速度と、物理的な衝突に効く(命中時に与える力は ImpactForce で決まる)。 |
 | `Drag` | `float` | `0` | 空気抵抗(Rigidbody.drag)。 |
 | `AngularDrag` | `float` | `0` | 回転の抵抗(Rigidbody.angularDrag)。 |
 | `IgnoreGravity` | `bool` | `false` | true なら重力を受けない。 |
 | `CollisionMode` | `CollisionDetectionMode` | `ContinuousDynamic` | 衝突検出の方式。速い弾がすり抜けないよう、既定は ContinuousDynamic。 |
-| `Lifetime` | `float` | `20` | 寿命 [s]。着弾しなくてもこの時間で消える。 |
-| `ColliderEnableDelay` | `float` | `0.02` | 発射後、弾のコライダーを有効にするまでの時間 [s]。自機との干渉を防ぐ。初速の遅い弾(ロケット・ミサイル・爆弾等)は長めにする。0 なら発射と同時に有効(負値は 0 扱い)。撃った武装ブロックとはこの値に関係なく衝突しない。 |
+| `Lifetime` | `float` | `20` | 寿命 \[s]。着弾しなくてもこの時間で消える。 |
+| `ColliderEnableDelay` | `float` | `0.02` | 発射後、弾のコライダーを有効にするまでの時間 \[s]。自機との干渉を防ぐ。初速の遅い弾(ロケット・ミサイル・爆弾等)は長めにする。0 なら発射と同時に有効(負値は 0 扱い)。撃った武装ブロックとはこの値に関係なく衝突しない。 |
 | `Colliders` | `List<ColliderShape>` | 空 | コライダー(弾ローカル)。空なら半径 0.1 の球。 |
 | `Friction` | `float` | `0.6` | 弾の摩擦係数(静止・動摩擦とも)。 |
 | `Bounciness` | `float` | `0` | 弾の反発係数(0〜1)。 |
@@ -98,19 +98,19 @@
 | `Mesh` | `Mesh` | なし | 見た目。null なら球を表示。 |
 | `Texture` | `Texture` | なし | 見た目のテクスチャ。null ならテクスチャなし(白)。 |
 | `MeshPosition` | `Vector3` | `(0, 0, 0)` | 見た目の位置(弾ローカル)。Mesh が null のときは使わない。 |
-| `MeshRotation` | `Vector3` | `(0, 0, 0)` | 見た目の向き(オイラー角 [度]、弾ローカル)。Mesh が null のときは使わない。 |
+| `MeshRotation` | `Vector3` | `(0, 0, 0)` | 見た目の向き(オイラー角 \[度]、弾ローカル)。Mesh が null のときは使わない。 |
 | `MeshScale` | `Vector3` | `(1, 1, 1)` | 見た目の拡大率。Mesh が null のときは使わない。 |
 | `Trail` | `GameObject` | なし | 弾に追従し、命中・消滅で切り離されてフェードするエフェクトのプレハブ。 |
 | `AttachedEffect` | `GameObject` | なし | 弾に追従し、弾と一緒に消えるエフェクトのプレハブ(弾の光・炎など)。 |
-| `ImpactForce` | `float` | `10` | 命中した剛体に「弾の速度 × この値」の力 [N/(m/s)] を与える。ダメージ・力は最初の命中で1回だけ。 |
+| `ImpactForce` | `float` | `10` | 命中した剛体に「弾の速度 × この値」の力 \[N/(m/s)] を与える。ダメージ・力は最初の命中で1回だけ。 |
 | `BlockDamage` | `float` | `0` | 直撃したとき、HP を持つブロックに与えるダメージ(爆風では使わない)。 |
 | `EntityDamage` | `float` | `0` | 直撃したとき、レベルのエンティティ(人・動物など)に与えるダメージ(爆風では使わない)。 |
 | `StickOnHit` | `bool` | `false` | 命中物に刺さって止まる。 |
 | `DespawnOnHit` | `bool` | `false` | 爆発しない弾を命中時に即消す。false なら命中の1秒後に消える。 |
-| `TimeFuse` | `float` | `0` | 時限信管 [s]。0 なら無効。経過で起爆(爆発しない弾は消える)。 |
-| `TimeFuseRandomExtra` | `float` | `0.05` | 時限信管に加える乱数 [s](0〜この値)。発射時に決める。TimeFuse が 0 のときは使わない。 |
-| `DetonationDelay` | `float` | `0` | 命中から起爆までの遅延 [s]。 |
-| `DetonationDelayRandomExtra` | `float` | `0` | 起爆遅延に加える乱数幅 [s](0〜この値)。 |
+| `TimeFuse` | `float` | `0` | 時限信管 \[s]。0 なら無効。経過で起爆(爆発しない弾は消える)。 |
+| `TimeFuseRandomExtra` | `float` | `0.05` | 時限信管に加える乱数 \[s](0〜この値)。発射時に決める。TimeFuse が 0 のときは使わない。 |
+| `DetonationDelay` | `float` | `0` | 命中から起爆までの遅延 \[s]。 |
+| `DetonationDelayRandomExtra` | `float` | `0` | 起爆遅延に加える乱数幅 \[s](0〜この値)。 |
 | `Explosion` | `ExplosionSpec` | — | 起爆したときの爆発。Radius が 0 なら爆発しない。 |
 | `Booster` | `BoosterSpec` | — | 推進(ロケット)。Thrust が 0 なら推進しない。 |
 | `Guidance` | `GuidanceSpec` | — | 誘導(仮実装)。Gain が 0 なら誘導しない。 |
@@ -123,7 +123,7 @@
 
 | フィールド | 型 | 既定値 | 説明 |
 |---|---|---|---|
-| `Radius` | `float` | `0` | 半径 [m]。0 なら爆発しない。 |
+| `Radius` | `float` | `0` | 半径 \[m]。0 なら爆発しない。 |
 | `Force` | `float` | `0` | AddExplosionForce の explosionForce。 |
 | `UpwardsModifier` | `float` | `0` | AddExplosionForce の upwardsModifier。 |
 | `OnlyWithExplodingCannonballs` | `bool` | `false` | 通常は爆発しない弾として扱い、ゴッドツール「爆発する砲弾」が有効なときだけ爆発する。 |
@@ -139,9 +139,9 @@
 
 | フィールド | 型 | 既定値 | 説明 |
 |---|---|---|---|
-| `Thrust` | `float` | `0` | 推力 [N]。弾の前方へ毎物理フレーム加える(加速度 = Thrust / 弾の Mass)。 |
-| `BurnTime` | `float` | `0` | 燃焼時間 [s]。0 なら弾が消えるまで燃え続ける。 |
-| `LateralDrag` | `float` | `0` | 燃焼中、弾の向きに対する横滑り速度 × この値の力で横滑りを抑える(安定翼)[N/(m/s)]。 |
+| `Thrust` | `float` | `0` | 推力 \[N]。弾の前方へ毎物理フレーム加える(加速度 = Thrust / 弾の Mass)。 |
+| `BurnTime` | `float` | `0` | 燃焼時間 \[s]。0 なら弾が消えるまで燃え続ける。 |
+| `LateralDrag` | `float` | `0` | 燃焼中、弾の向きに対する横滑り速度 × この値の力で横滑りを抑える(安定翼)\[N/(m/s)]。 |
 
 ## GuidanceSpec
 
@@ -163,10 +163,10 @@
 |---|---|---|---|
 | `Kind` | `ColliderKind` | `Sphere` | 形。 |
 | `Position` | `Vector3` | `(0, 0, 0)` | 位置(弾ローカル)。 |
-| `Rotation` | `Vector3` | `(0, 0, 0)` | 向き(オイラー角 [度]、弾ローカル)。 |
-| `Size` | `Vector3` | `(1, 1, 1)` | Box の大きさ [m]。 |
-| `Radius` | `float` | `0.1` | Sphere・Capsule の半径 [m]。 |
-| `Height` | `float` | `1` | Capsule の高さ [m]。 |
+| `Rotation` | `Vector3` | `(0, 0, 0)` | 向き(オイラー角 \[度]、弾ローカル)。 |
+| `Size` | `Vector3` | `(1, 1, 1)` | Box の大きさ \[m]。 |
+| `Radius` | `float` | `0.1` | Sphere・Capsule の半径 \[m]。 |
+| `Height` | `float` | `1` | Capsule の高さ \[m]。 |
 | `Direction` | `int` | `2` | Capsule の向きの軸(0 = X、1 = Y、2 = Z)。 |
 
 ## ColliderKind

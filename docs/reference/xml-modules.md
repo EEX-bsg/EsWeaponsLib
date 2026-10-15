@@ -21,31 +21,31 @@ C# では `WeaponSpec` に当たります。
 | `HoldToFireToggle` | トグル(`key` 属性 = ModuleMapperTypes のトグル名) | なし |  | ON: 押している間連射 / OFF: 押すたびに連射の開始・停止を切り替え。省略時は HoldToFire。 |
 | `ReloadKey` | キー(`key` 属性 = ModuleMapperTypes のキー名) | なし |  | 押すとリロード(MagazineCapacity が 1 以上のとき)。 |
 | `AutoReloadToggle` | トグル(`key` 属性 = ModuleMapperTypes のトグル名) | なし |  | ON で弾倉が空になったら自動リロード。省略時は AutoReload。 |
-| `FireRateSlider` | スライダー(`key` 属性 = ModuleMapperTypes のスライダー名) | なし |  | 値 [発/s] の逆数を FireInterval に使う(XML の値より優先。0 以下なら撃たない)。発射ごとに読む。 |
-| `FireDelaySlider` | スライダー(`key` 属性 = ModuleMapperTypes のスライダー名) | なし |  | 値 [s] を FireDelay に加える。発射ごとに読む。 |
-| `TimeFuseSlider` | スライダー(`key` 属性 = ModuleMapperTypes のスライダー名) | なし |  | 値 [s] を Projectile/TimeFuse に使う(XML の値より優先)。Projectile/TimeFuseRandomExtra の乱数は別に加わる。発射ごとに読み、飛行中の弾は変えない。 |
+| `FireRateSlider` | スライダー(`key` 属性 = ModuleMapperTypes のスライダー名) | なし |  | 値 \[発/s] の逆数を FireInterval に使う(XML の値より優先。0 以下なら撃たない)。発射ごとに読む。 |
+| `FireDelaySlider` | スライダー(`key` 属性 = ModuleMapperTypes のスライダー名) | なし |  | 値 \[s] を FireDelay に加える。発射ごとに読む。 |
+| `TimeFuseSlider` | スライダー(`key` 属性 = ModuleMapperTypes のスライダー名) | なし |  | 値 \[s] を Projectile/TimeFuse に使う(XML の値より優先)。Projectile/TimeFuseRandomExtra の乱数は別に加わる。発射ごとに読み、飛行中の弾は変えない。 |
 | `MagazineCapacitySlider` | スライダー(`key` 属性 = ModuleMapperTypes のスライダー名) | なし |  | 値を四捨五入して MagazineCapacity に使う(XML の値より優先)。シミュ開始時に読む。 |
 | `HoldToFire` | `true` / `false` | `true` | ○ | HoldToFireToggle が無いときの発射方式。true: 押している間連射 / false: 押すたびに連射の開始・停止を切り替え。 |
 | `AssetBundle` | リソース名(`name` 属性) | なし | ○ | エフェクトのプレハブ(MuzzleFlash・Projectile/Trail・Projectile/AttachedEffect・Projectile/Explosion/Effect)を探す AssetBundle。Mac/Linux では「バンドル名+Mac」があればそちらを使う。 |
 | `MuzzlePosition` | `x` `y` `z` 属性 | `(0, 0, 0)` | ○ | 発射位置。 |
-| `MuzzleRotation` | `x` `y` `z` 属性 | `(0, 0, 0)` | ○ | 発射向き(オイラー角 [度])。弾はこの回転の +Z へ飛ぶ。 |
-| `MuzzleVelocity` | 数値 | `100` | ○ | 初速 [m/s]。ブロックの速度に加算される。 |
-| `EjectVelocity` | `x` `y` `z` 属性 | `(0, 0, 0)` | ○ | 発射時に弾のローカル軸で足す速度 [m/s](ロケットを発射筒から押し出す等)。反動には含めない。 |
-| `FireInterval` | 数値 | `0.5` | ○ | 最短発射間隔 [s]。 |
-| `FireDelay` | 数値 | `0` | ○ | 発射要求から弾が出るまでの固定遅延 [s]。 |
-| `FireDelayRandomExtra` | 数値 | `0` | ○ | 遅延に加える乱数幅 [s](0〜この値)。 |
-| `Spread` | 数値 | `0` | ○ | 拡散 [度]。前方に tan(Spread) 半径の球内の乱数ベクトルを足して方向を決める。弾の向きもこの方向に合わせる。 |
+| `MuzzleRotation` | `x` `y` `z` 属性 | `(0, 0, 0)` | ○ | 発射向き(オイラー角 \[度])。弾はこの回転の +Z へ飛ぶ。 |
+| `MuzzleVelocity` | 数値 | `100` | ○ | 初速 \[m/s]。ブロックの速度に加算される。 |
+| `EjectVelocity` | `x` `y` `z` 属性 | `(0, 0, 0)` | ○ | 発射時に弾のローカル軸で足す速度 \[m/s](ロケットを発射筒から押し出す等)。反動には含めない。 |
+| `FireInterval` | 数値 | `0.5` | ○ | 最短発射間隔 \[s]。 |
+| `FireDelay` | 数値 | `0` | ○ | 発射要求から弾が出るまでの固定遅延 \[s]。 |
+| `FireDelayRandomExtra` | 数値 | `0` | ○ | 遅延に加える乱数幅 \[s](0〜この値)。 |
+| `Spread` | 数値 | `0` | ○ | 拡散 \[度]。前方に tan(Spread) 半径の球内の乱数ベクトルを足して方向を決める。弾の向きもこの方向に合わせる。 |
 | `RecoilMultiplier` | 数値 | `1` | ○ | 反動の倍率。弾の運動量 × この値の撃力をブロックへ逆向きに与える(1 で物理的に正しい反動)。 |
 | `BurstCount` | 整数 | `1` | ○ | 1回の発射要求で撃つ弾数。1発ごとに弾数を消費し、弾切れで止まる。 |
-| `BurstInterval` | 数値 | `0.1` | ○ | バースト内の弾の間隔 [s]。次の発射要求は最後の弾から FireInterval 後に受け付ける。 |
+| `BurstInterval` | 数値 | `0.1` | ○ | バースト内の弾の間隔 \[s]。次の発射要求は最後の弾から FireInterval 後に受け付ける。 |
 | `TotalAmmo` | 整数 | `-1` | ○ | 総弾数(弾倉内を含む)。負値で無制限。マシンの無限弾薬設定時は消費しない(弾倉を使う武装は弾倉の弾だけ減り、予備弾は減らない)。武装の生成時だけ読む。 |
 | `MagazineCapacity` | 整数 | `0` | ○ | 弾倉の容量。0 以下なら弾倉なし。武装の生成時に TotalAmmo から弾倉を満たし、残りを予備弾にする。 |
-| `ReloadTime` | 数値 | `1` | ○ | リロード時間 [s]。リロード中は撃てない。 |
+| `ReloadTime` | 数値 | `1` | ○ | リロード時間 \[s]。リロード中は撃てない。 |
 | `AutoReload` | `true` / `false` | `true` | ○ | 弾倉が空になったら自動でリロードする。 |
 | `ShowLoadedProjectile` | `true` / `false` | `false` | ○ | 撃てる状態の間、次の弾の見た目を発射位置に表示する(迫撃砲・爆弾など)。発射の瞬間に消え、発射間隔の後に戻る。弾切れ・リロード中は表示しない。見た目だけでコライダーは持たない。 |
 | `MuzzleFlash` | 文字列 | なし | ○ | AssetBundle 内のプレハブ名。 |
 | `MuzzleFlashPosition` | `x` `y` `z` 属性 | `(0, 0, 0)` | ○ | 発射エフェクトの位置(ブロックローカル)。発射音もここで鳴る。 |
-| `MuzzleFlashRotation` | `x` `y` `z` 属性 | `(0, 0, 0)` | ○ | 発射エフェクトの向き(オイラー角 [度]、ブロックローカル)。 |
+| `MuzzleFlashRotation` | `x` `y` `z` 属性 | `(0, 0, 0)` | ○ | 発射エフェクトの向き(オイラー角 \[度]、ブロックローカル)。 |
 | `MuzzleFlashScale` | `x` `y` `z` 属性 | `(1, 1, 1)` | ○ | 発射エフェクトの拡大率。 |
 | `FireSounds` | `<AudioClip name="…" />` の並び(リソース名) | 空 | ○ | 発射音(ランダムに1つ。MuzzleFlashPosition で鳴る)。 |
 | `ReloadSounds` | `<AudioClip name="…" />` の並び(リソース名) | 空 | ○ | リロード開始時の音(ランダムに1つ)。 |
@@ -59,13 +59,13 @@ C# では `ProjectileSpec` に当たります。
 
 | 要素 | 書き方 | 既定値 | 再読込 | 説明 |
 |---|---|---|---|---|
-| `Mass` | 数値 | `1` | ○ | 弾の質量 [kg]。反動・推進の加速度と、物理的な衝突に効く(命中時に与える力は ImpactForce で決まる)。 |
+| `Mass` | 数値 | `1` | ○ | 弾の質量 \[kg]。反動・推進の加速度と、物理的な衝突に効く(命中時に与える力は ImpactForce で決まる)。 |
 | `Drag` | 数値 | `0` | ○ | 空気抵抗(Rigidbody.drag)。 |
 | `AngularDrag` | 数値 | `0` | ○ | 回転の抵抗(Rigidbody.angularDrag)。 |
 | `IgnoreGravity` | `true` / `false` | `false` | ○ | true なら重力を受けない。 |
 | `CollisionMode` | `Discrete` / `Continuous` / `ContinuousDynamic` | `ContinuousDynamic` | ○ | 衝突検出の方式。速い弾がすり抜けないよう、既定は ContinuousDynamic。 |
-| `Lifetime` | 数値 | `20` | ○ | 寿命 [s]。着弾しなくてもこの時間で消える。 |
-| `ColliderEnableDelay` | 数値 | `0.02` | ○ | 発射後、弾のコライダーを有効にするまでの時間 [s]。自機との干渉を防ぐ。初速の遅い弾(ロケット・ミサイル・爆弾等)は長めにする。0 なら発射と同時に有効(負値は 0 扱い)。撃った武装ブロックとはこの値に関係なく衝突しない。 |
+| `Lifetime` | 数値 | `20` | ○ | 寿命 \[s]。着弾しなくてもこの時間で消える。 |
+| `ColliderEnableDelay` | 数値 | `0.02` | ○ | 発射後、弾のコライダーを有効にするまでの時間 \[s]。自機との干渉を防ぐ。初速の遅い弾(ロケット・ミサイル・爆弾等)は長めにする。0 なら発射と同時に有効(負値は 0 扱い)。撃った武装ブロックとはこの値に関係なく衝突しない。 |
 | `Colliders` | `<SphereCollider>` / `<CapsuleCollider>` / `<BoxCollider>` の並び(ブロックの Colliders と同じ書式) | 空 | ○ | ブロックの Colliders と同じ書式(SphereCollider / CapsuleCollider / BoxCollider)。 |
 | `Friction` | 数値 | `0.6` | ○ | 弾の摩擦係数(静止・動摩擦とも)。 |
 | `Bounciness` | 数値 | `0` | ○ | 弾の反発係数(0〜1)。 |
@@ -76,15 +76,15 @@ C# では `ProjectileSpec` に当たります。
 | `Texture` | リソース名(`name` 属性) | なし | ○ | 見た目のテクスチャ。null ならテクスチャなし(白)。 |
 | `Trail` | 文字列 | なし | ○ | AssetBundle 内のプレハブ名。 |
 | `AttachedEffect` | 文字列 | なし | ○ | AssetBundle 内のプレハブ名。 |
-| `ImpactForce` | 数値 | `10` | ○ | 命中した剛体に「弾の速度 × この値」の力 [N/(m/s)] を与える。ダメージ・力は最初の命中で1回だけ。 |
+| `ImpactForce` | 数値 | `10` | ○ | 命中した剛体に「弾の速度 × この値」の力 \[N/(m/s)] を与える。ダメージ・力は最初の命中で1回だけ。 |
 | `BlockDamage` | 数値 | `0` | ○ | 直撃したとき、HP を持つブロックに与えるダメージ(爆風では使わない)。 |
 | `EntityDamage` | 数値 | `0` | ○ | 直撃したとき、レベルのエンティティ(人・動物など)に与えるダメージ(爆風では使わない)。 |
 | `StickOnHit` | `true` / `false` | `false` | ○ | 命中物に刺さって止まる。 |
 | `DespawnOnHit` | `true` / `false` | `false` | ○ | 爆発しない弾を命中時に即消す。false なら命中の1秒後に消える。 |
-| `TimeFuse` | 数値 | `0` | ○ | 時限信管 [s]。0 なら無効。経過で起爆(爆発しない弾は消える)。 |
-| `TimeFuseRandomExtra` | 数値 | `0.05` | ○ | 時限信管に加える乱数 [s](0〜この値)。発射時に決める。TimeFuse が 0 のときは使わない。 |
-| `DetonationDelay` | 数値 | `0` | ○ | 命中から起爆までの遅延 [s]。 |
-| `DetonationDelayRandomExtra` | 数値 | `0` | ○ | 起爆遅延に加える乱数幅 [s](0〜この値)。 |
+| `TimeFuse` | 数値 | `0` | ○ | 時限信管 \[s]。0 なら無効。経過で起爆(爆発しない弾は消える)。 |
+| `TimeFuseRandomExtra` | 数値 | `0.05` | ○ | 時限信管に加える乱数 \[s](0〜この値)。発射時に決める。TimeFuse が 0 のときは使わない。 |
+| `DetonationDelay` | 数値 | `0` | ○ | 命中から起爆までの遅延 \[s]。 |
+| `DetonationDelayRandomExtra` | 数値 | `0` | ○ | 起爆遅延に加える乱数幅 \[s](0〜この値)。 |
 | `Explosion` | 子要素([EwlWeapon/Projectile/Explosion](#ewlweaponprojectileexplosion)) | — | ○ | 起爆したときの爆発。Radius が 0 なら爆発しない。 |
 | `Booster` | 子要素([EwlWeapon/Projectile/Booster](#ewlweaponprojectilebooster)) | — | ○ | 推進(ロケット)。Thrust が 0 なら推進しない。 |
 | `Guidance` | 子要素([EwlWeapon/Projectile/Guidance](#ewlweaponprojectileguidance)) | — | ○ | 誘導(仮実装。要素ごと今後破壊的に変更する予定)。 |
@@ -97,7 +97,7 @@ C# では `ExplosionSpec` に当たります。
 
 | 要素 | 書き方 | 既定値 | 再読込 | 説明 |
 |---|---|---|---|---|
-| `Radius` | 数値 | `0` | ○ | 半径 [m]。0 なら爆発しない。 |
+| `Radius` | 数値 | `0` | ○ | 半径 \[m]。0 なら爆発しない。 |
 | `Force` | 数値 | `0` | ○ | AddExplosionForce の explosionForce。 |
 | `UpwardsModifier` | 数値 | `0` | ○ | AddExplosionForce の upwardsModifier。 |
 | `OnlyWithExplodingCannonballs` | `true` / `false` | `false` | ○ | 通常は爆発しない弾として扱い、ゴッドツール「爆発する砲弾」が有効なときだけ爆発する。 |
@@ -113,9 +113,9 @@ C# では `BoosterSpec` に当たります。
 
 | 要素 | 書き方 | 既定値 | 再読込 | 説明 |
 |---|---|---|---|---|
-| `Thrust` | 数値 | `0` | ○ | 推力 [N]。弾の前方へ毎物理フレーム加える(加速度 = Thrust / 弾の Mass)。 |
-| `BurnTime` | 数値 | `0` | ○ | 燃焼時間 [s]。0 なら弾が消えるまで燃え続ける。 |
-| `LateralDrag` | 数値 | `0` | ○ | 燃焼中、弾の向きに対する横滑り速度 × この値の力で横滑りを抑える(安定翼)[N/(m/s)]。 |
+| `Thrust` | 数値 | `0` | ○ | 推力 \[N]。弾の前方へ毎物理フレーム加える(加速度 = Thrust / 弾の Mass)。 |
+| `BurnTime` | 数値 | `0` | ○ | 燃焼時間 \[s]。0 なら弾が消えるまで燃え続ける。 |
+| `LateralDrag` | 数値 | `0` | ○ | 燃焼中、弾の向きに対する横滑り速度 × この値の力で横滑りを抑える(安定翼)\[N/(m/s)]。 |
 
 ## EwlWeapon/Projectile/Guidance
 
@@ -149,7 +149,7 @@ C# では `GuidanceSpec` に当たります。
 
 ## EwlBlockPhysics/Rotation
 
-軸は Locked / Limited / Free。Spring・Damper は回転を元の向きへ戻す力、Limit は Limited の可動角[度]。
+軸は Locked / Limited / Free。Spring・Damper は回転を元の向きへ戻す力、Limit は Limited の可動角\[度]。
 
 | 要素 | 書き方 | 既定値 | 再読込 | 説明 |
 |---|---|---|---|---|
@@ -158,4 +158,4 @@ C# では `GuidanceSpec` に当たります。
 | `AxisZ` | `Locked` / `Limited` / `Free` | `Locked` | ○ | Z 軸まわりの回転。 |
 | `Spring` | 数値 | `0` | ○ | 元の向きへ戻すばねの強さ。0 なら戻さない。 |
 | `Damper` | 数値 | `0` | ○ | ばねの減衰。 |
-| `Limit` | 数値 | `0` | ○ | Limited の軸の可動角 [度]。 |
+| `Limit` | 数値 | `0` | ○ | Limited の軸の可動角 \[度]。 |

@@ -21,3 +21,7 @@
 # Codex
 /.codex/
 /temp-skin-probe/
+# Local docs preview (tools/preview-docs.ps1)
+/docs/.jekyll-cache/
+/docs/_site/
+/tools/docs-preview/Gemfile.lock

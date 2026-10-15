@@ -46,6 +46,8 @@ function Convert-Doc([string]$inner, [bool]$inTable) {
   $breakMark = if ($inTable) { '<br>' } else { "`n`n" }
   $text = $text -replace '\s*<para>\s*', $breakMark -replace '\s*</para>\s*', ''
   $text = [System.Web.HttpUtility]::HtmlDecode($text).Trim()
+  # 説明文に Markdown のリンクは無い。"[m/s](…)" のような単位の後の括弧がリンクにならないよう [ をエスケープする
+  $text = $text -replace '\[', '\['
   if ($inTable) { $text = $text -replace '\|', '\|' }
   return $text
 }
