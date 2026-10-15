@@ -1,6 +1,7 @@
-# AGENTS.md — EsWeaponsLib Project
+# AGENTS.md — E'sWeaponsLib
 
-この Mod の開発規約・作業フローの**正本**です。ルールの追加・変更はこのファイルに行います(編集には人間の承認が要ります。下記)。
+AI エージェント向けの入口です。作業の前に読んでください。規約の詳しい正本は `docs/contributing/` にあり、
+このファイルは要点・コマンド・手順を持ちます。人向けの入口は `CONTRIBUTING.md` です。
 
 ## エージェント設定ファイルの編集禁止
 
@@ -13,30 +14,43 @@
 
 | 項目 | 値 |
 |---|---|
-| プロジェクト | `EsWeaponsLib Project` |
 | Mod 表示名 / GUID | `E'sWeaponsLib` / `0d219960-b202-4906-b29d-8d90a61a89b8` |
 | ルート名前空間 / アセンブリ | `EWL` / `EsWeaponsLib`(AssemblyVersion は `1.0.0.0` 固定) |
-| 対象 Besiege | `1.9.1-25490`(Unity 5.4 / Mono 4.4 / C# 6 / .NET 3.5) |
-| ビルド | `& "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" .\src\EsWeaponsLib.sln /restore /p:Configuration=Release /nologo /v:minimal` |
-| 成果物 | `.\EsWeaponsLib\EsWeaponsLib.dll`(ビルド後に自動コピー) |
-| IL 検査 | `powershell -File .\tools\ilscan.ps1`(本体 AssemblyScanner 相当。OK なら `IL scan OK`) |
-| 公開面一覧 | `powershell -File .\tools\api-surface.ps1` → `api-surface.txt`(差分で破壊的変更を検出) |
+| 対象 Besiege | `1.9.1-25490`(Unity 5.4 / Mono / C# 6 / .NET 3.5) |
+| 置き場所 | リポジトリは `Besiege_Data/Mods/` の下(参照 DLL を相対パスで探す) |
+| ビルド | `MSBuild.exe .\src\EsWeaponsLib.sln /restore /p:Configuration=Release /nologo /v:minimal`(Visual Studio 2022 の MSBuild) |
+| 成果物 | `.\EsWeaponsLib\EsWeaponsLib.dll`(ビルド後に自動コピー)と `src\EsWeaponsLib\bin\Release\EsWeaponsLib.xml`(XML ドキュメント) |
+| IL 検査 | `powershell -File .\tools\ilscan.ps1`(OK なら `IL scan OK`) |
+| 公開面一覧 | `powershell -File .\tools\api-surface.ps1` → `api-surface.txt` |
+| リファレンス生成 | `powershell -File .\tools\gen-reference.ps1` → `docs/reference/` |
+| 公開前チェック | `powershell -File .\tools\check-public.ps1`(OK なら `check-public OK`) |
 | 実機ログ | `Besiege_Data\output_log.txt` |
 
 ## このModは何か
 
-E'sWeaponsLib(EWL)は、**外部Modの開発者とその AI エージェントが使う汎用武装ライブラリ**です。
-XML カスタムモジュールと C# API を提供します。E'sTankCannonsMod(E砲)は最初の利用者で、リファレンス実装を兼ねます。
+E'sWeaponsLib(EWL)は、**外部 Mod の開発者とその AI エージェントが使う汎用武装ライブラリ**です。
+XML カスタムモジュールと C# API を提供します。E'sTankCannonsMod が最初の利用者です。
 
 - 変えない目的: 外部 Mod は公開 API 経由で使い、内部の仕組みに関与しない / EWL のカスタムモジュールをそのまま使える /
   API で独自に機能を足し、独自カスタムモジュールを作れる。構成や層は手段であり、目的を満たす限り変えてよい。
 - そのため EWL 自身の XML モジュールも公開 API だけで書く。新機能は内部 → `Api/` → (必要なら)`Modules/` の順に入れる。
 - C# API の形は 1.0.0 まで確定しない(破壊的変更可、CHANGELOG に記録)。
-
 - ACM(AddCustomModule)との互換は**目的外**。ACM 由来のコード・アセット・名称を持ち込まない。
 - ワールド拡張(4km 境界突破・原点シフト等)は**廃止済み**。再導入しない。
-- 実装範囲は E砲の実需で決め、名前・スキーマ・API の形は汎用武装の語彙で設計する。
-## 必須規則
+- 実装範囲は実在の利用者の必要で決め、名前・スキーマ・API の形は汎用武装の語彙で設計する。
+
+## 読むもの
+
+| 作業 | 資料 |
+|---|---|
+| どの作業でも | `docs/contributing/design-principles.md`、`docs/contributing/conventions.md` |
+| コードの構成を知る | `docs/contributing/architecture.md` |
+| 公開面(`Api/`・`Modules/`・XML スキーマ)を変える | `docs/contributing/compatibility.md` |
+| 確認・テスト | `docs/contributing/testing.md` |
+| ドキュメントを書く | `docs/contributing/documentation.md` |
+| 利用者から見た使い方 | `docs/guide/`、`docs/reference/` |
+
+## 必須規則(要点。詳細は docs/contributing/conventions.md)
 
 ### 共通(Besiege Mod)
 
@@ -65,8 +79,8 @@ XML カスタムモジュールと C# API を提供します。E'sTankCannonsMod
 - **命名**: 一般的な C# の慣例に従い、読んで役割が分かる名前にする(型・メソッドは PascalCase の完全な英単語)。
   コード量を減らすことはあっても名前は削らない。`Fx` `Sim` `Hits` のような略称や、仕様・部品を指す1文字の別名(`var f = spec.Fire`)は使わない。
   ループ添字や `rb`(Rigidbody)・`go`(GameObject)のような定番の略は可。冗長に長くする必要はない。
-- **名前**: ACM 由来名(`Ad*Prop`、`OldCannon` 等)と E砲固有名(`ETCM` 等)を EWL に入れない。
-  ACMu のコードを流用する場合は、これらの名前と ACM 行番号の注記を除去する。
+- **名前**: ACM 由来名(`Ad*Prop`、`OldCannon` 等)と、特定の利用 Mod の固有名を EWL に入れない。
+- **ドキュメント**: 公開する型・メンバーには `///` で説明を書く(単位・既定値の意味を含める。`docs/reference/` はここから生成される)。
 
 ## 作業フロー
 
@@ -74,19 +88,34 @@ XML カスタムモジュールと C# API を提供します。E'sTankCannonsMod
 
 1. 関係する資料を読む。コードと既存差分を確認する。
 2. 実装する。
-3. ビルド → IL 検査を実行する。
+3. ビルド → IL 検査 → 公開前チェックを実行する。
 4. `Api/` か `Modules/` に触れたら「公開面の変更」へ。
-5. ゲーム外で確認できる項目をセルフレビューする。
+5. ゲーム外で確認できる項目をセルフレビューする(`docs/contributing/testing.md`)。
 6. 実機確認が必要な項目と残課題を報告する。
 
 ### 公開面の変更(`Api/`・`Modules/`・XML スキーマ)
 
 1. `tools/api-surface.ps1` を実行し、`api-surface.txt` の差分を確認する。
 2. 判定: **「既存の外部ブロック XML か、コンパイル済みの外部 DLL が壊れるか」**
-   - 壊れない: `CHANGELOG.md` に追記して進める。
-   - 壊れる: α 期間(1.0 前)は `CHANGELOG.md` に「旧→新」の具体例を書いて進める。1.0 以降はメジャー版を上げ、人間に確認する。
-3. `api-surface.txt` は変更と一緒に保存する(コミット対象)。
+   - 壊れない: `CHANGELOG.md` の `[Unreleased]` に1行で追記する。
+   - 壊れる: `[Breaking]` と書き「旧→新」の具体例を付ける。1.0 以降はメジャー版を上げ、人間に確認する。
+3. `tools/gen-reference.ps1` で `docs/reference/` を作り直し、関係する `docs/guide/` も直す。
+4. `api-surface.txt` と `docs/reference/` は変更と一緒にコミットする。
 
-### リリース(1.0 以降の手順は設計書 §4・§7 を参照)
+### ドキュメント
 
-- `Mod.xml` の `Debug` を `false`、`Version` を更新、`CHANGELOG.md` を確定する。
+- 正本は日本語。英語版は日本語版から自動で作るので、英語版だけを直さない。
+- `docs/reference/` は生成物。手で編集せず `///` を直して作り直す。
+- 公開してはいけない情報(デコンパイル由来の内部実装名、他 Mod のソース由来の情報)を書かない。Besiege の挙動は観測できる挙動として書く。
+- 用語: ブロック XML に書くモジュールは「XML カスタムモジュール」。
+
+### リリース
+
+- `Mod.xml` の `Debug` を `false`、`Version` を更新、`CHANGELOG.md` の `[Unreleased]` を版番号に確定する。
+
+## 確認が必要な場合
+
+- 公開済みの ID・保存形式・ネットワーク形式・公開面(1.0 以降)を壊す。
+- `docs/contributing/design-principles.md` の目的・原則・責務範囲から外れる(範囲外に見える機能は実装前に確認する)。
+- 選択によって機能・操作感・MP の実行権威が大きく変わる。
+- 禁止 API や本体の private 実装への依存が必要になる。第三者のコード・素材の利用条件が不明。
