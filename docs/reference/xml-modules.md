@@ -85,8 +85,8 @@ C#では `ProjectileSpec` に当たります。
 | `EntityDamage` | 数値 | `0` | ○ | 直撃したとき、レベルのエンティティ(人・動物など)に与えるダメージ(爆風では使わない)。 |
 | `AttachOnHit` | `true` / `false` | `false` | ○ | 命中物にくっついて止まり、以後は命中物と一緒に動く(矢など)。地形では、その場で止まる。 |
 | `DespawnOnHit` | `true` / `false` | `false` | ○ | 爆発しない弾を命中時に即消す。falseなら命中の1秒後に消える。 |
-| `TimeFuse` | 数値 | `0` | ○ | 時限信管 \[s]。0なら無効。経過で起爆(爆発しない弾は消える)。 |
-| `TimeFuseRandomExtra` | 数値 | `0.05` | ○ | 時限信管に加える乱数 \[s](0〜この値)。発射時に決める。TimeFuseが0のときは使わない。 |
+| `TimeFuse` | 数値 | `INF` | ○ | 時限信管 \[s]。発射からこの時間で起爆(爆発しない弾は消える)。0は発射直後に起爆。既定は無限(時限信管なし)。 |
+| `TimeFuseRandomExtra` | 数値 | `0.05` | ○ | 時限信管に加える乱数 \[s](0〜この値)。発射時に決める。TimeFuseが無限のときは効かない。 |
 | `DetonationDelay` | 数値 | `0` | ○ | 命中から起爆までの遅延 \[s]。 |
 | `DetonationDelayRandomExtra` | 数値 | `0` | ○ | 起爆遅延に加える乱数幅 \[s](0〜この値)。 |
 | `Explosion` | 子要素([EwlWeapon/Projectile/Explosion](#ewlweapon-projectile-explosion)) | — | ○ | 起爆したときの爆発。Radiusが0なら爆発しない。 |
@@ -118,8 +118,8 @@ C#では `BoosterSpec` に当たります。
 | 要素 | 書き方 | 既定値 | 再読込 | 説明 |
 |---|---|---|---|---|
 | `Thrust` | 数値 | `0` | ○ | 推力 \[N]。弾の前方へ毎物理フレーム加える(加速度 = Thrust / 弾のMass)。 |
-| `BurnTime` | 数値 | `0` | ○ | 燃焼時間 \[s]。0なら弾が消えるまで燃え続ける。 |
-| `LateralDrag` | 数値 | `0` | ○ | 燃焼中、弾の向きに対する横滑り速度 × この値の力で横滑りを抑える(安定翼)\[N/(m/s)]。 |
+| `ThrustTime` | 数値 | `INF` | ○ | 推力を出す時間 \[s]。発射からこの時間で推力が止まる。0は推力なし。既定は無限(弾が消えるまで)。 |
+| `LateralDrag` | 数値 | `0` | ○ | 推力が出ている間、弾の向きに対する横滑り速度 × この値の力で横滑りを抑える(安定翼)\[N/(m/s)]。 |
 
 ## EwlWeapon/Projectile/Guidance
 
@@ -137,7 +137,7 @@ C#では `GuidanceSpec` に当たります。
 
 | 要素 | 書き方 | 既定値 | 再読込 | 説明 |
 |---|---|---|---|---|
-| `JointStrength` | 数値 | `0` | ○ | 親ブロックとの接合の破断力・破断トルク。0 = 変えない。壊れない接合はINF。 |
+| `JointStrength` | 数値 | `-1` | ○ | 親ブロックとの接合の破断力・破断トルク。省略すると変えない。0は力が少しでもかかれば壊れる接合。壊れない接合はINF。 |
 | `Material` | 子要素([EwlBlockPhysics/Material](#ewlblockphysics-material)) | — | ○ | 書けばブロックのコライダー全部に物理マテリアルを設定する。 |
 | `Rotation` | 子要素([EwlBlockPhysics/Rotation](#ewlblockphysics-rotation)) | — | ○ | 書けば接合の回転軸を設定する。 |
 | `AdditionalColliders` | `<SphereCollider>` / `<CapsuleCollider>` / `<BoxCollider>` の並び | 空 |  | ブロックに足すコライダー。ブロックのCollidersと同じ書式(layer・trigger属性も同じ)で、BoxColliderはCenterも書ける。layer="12" にすると、他のブロックをそこに置け、シミュ開始時に置いたブロックがこのブロックへ接続する面になる。BoxColliderは6面のどこでも置け、クリックした点を面の中心から1マス単位に丸めた位置に置かれる。Sphere/Capsuleはバニラと同じく、コライダーのPosition + 当たった面の法線 × 0.5に置かれる(当たった点ではない)。Materialを書けば、これらにも適用する。 |

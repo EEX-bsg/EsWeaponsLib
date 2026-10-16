@@ -175,7 +175,7 @@ namespace EWL.Modules
 
             var boosterXml = projectileXml.Booster;
             projectile.Booster.Thrust = boosterXml.Thrust;
-            projectile.Booster.BurnTime = boosterXml.BurnTime;
+            projectile.Booster.ThrustTime = boosterXml.ThrustTime;
             projectile.Booster.LateralDrag = boosterXml.LateralDrag;
             projectile.Guidance.Gain = projectileXml.Guidance.Gain;
 

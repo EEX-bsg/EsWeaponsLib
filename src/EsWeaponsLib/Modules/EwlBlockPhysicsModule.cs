@@ -17,8 +17,8 @@ namespace EWL.Modules
     [XmlRoot("EwlBlockPhysics")]
     public class EwlBlockPhysicsModule : BlockModule
     {
-        /// <summary>親ブロックとの接合の破断力・破断トルク。0 = 変えない。壊れない接合はINF。</summary>
-        [XmlElement, DefaultValue(0f), Reloadable] public float JointStrength = 0f;
+        /// <summary>親ブロックとの接合の破断力・破断トルク。省略すると変えない。0は力が少しでもかかれば壊れる接合。壊れない接合はINF。</summary>
+        [XmlElement, DefaultValue(-1f), Reloadable] public float JointStrength = -1f;
 
         /// <summary>書けばブロックのコライダー全部に物理マテリアルを設定する。</summary>
         [XmlElement, DefaultValue(null), Reloadable] public BlockMaterialXml Material;

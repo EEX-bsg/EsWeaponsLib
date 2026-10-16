@@ -132,9 +132,9 @@ namespace EWL.Api
         /// <summary>爆発しない弾を命中時に即消す。falseなら命中の1秒後に消える。</summary>
         public bool DespawnOnHit = false;
 
-        /// <summary>時限信管 [s]。0なら無効。経過で起爆(爆発しない弾は消える)。</summary>
-        public float TimeFuse = 0f;
-        /// <summary>時限信管に加える乱数 [s](0〜この値)。発射時に決める。TimeFuseが0のときは使わない。</summary>
+        /// <summary>時限信管 [s]。発射からこの時間で起爆(爆発しない弾は消える)。0は発射直後に起爆。既定は無限(時限信管なし)。</summary>
+        public float TimeFuse = float.PositiveInfinity;
+        /// <summary>時限信管に加える乱数 [s](0〜この値)。発射時に決める。TimeFuseが無限のときは効かない。</summary>
         public float TimeFuseRandomExtra = 0.05f;
         /// <summary>命中から起爆までの遅延 [s]。</summary>
         public float DetonationDelay = 0f;
@@ -173,9 +173,9 @@ namespace EWL.Api
     {
         /// <summary>推力 [N]。弾の前方へ毎物理フレーム加える(加速度 = Thrust / 弾のMass)。</summary>
         public float Thrust = 0f;
-        /// <summary>燃焼時間 [s]。0なら弾が消えるまで燃え続ける。</summary>
-        public float BurnTime = 0f;
-        /// <summary>燃焼中、弾の向きに対する横滑り速度 × この値の力で横滑りを抑える(安定翼)[N/(m/s)]。</summary>
+        /// <summary>推力を出す時間 [s]。発射からこの時間で推力が止まる。0は推力なし。既定は無限(弾が消えるまで)。</summary>
+        public float ThrustTime = float.PositiveInfinity;
+        /// <summary>推力が出ている間、弾の向きに対する横滑り速度 × この値の力で横滑りを抑える(安定翼)[N/(m/s)]。</summary>
         public float LateralDrag = 0f;
     }
 

@@ -141,7 +141,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(false)] public bool AttachOnHit = false;
         [XmlElement, DefaultValue(false)] public bool DespawnOnHit = false;
 
-        [XmlElement, DefaultValue(0f)] public float TimeFuse = 0f;
+        [XmlElement, DefaultValue(float.PositiveInfinity)] public float TimeFuse = float.PositiveInfinity;
         [XmlElement, DefaultValue(0.05f)] public float TimeFuseRandomExtra = 0.05f;
         [XmlElement, DefaultValue(0f)] public float DetonationDelay = 0f;
         [XmlElement, DefaultValue(0f)] public float DetonationDelayRandomExtra = 0f;
@@ -171,7 +171,7 @@ namespace EWL.Modules
     public class BoosterXml : Element
     {
         [XmlElement, DefaultValue(0f)] public float Thrust = 0f;
-        [XmlElement, DefaultValue(0f)] public float BurnTime = 0f;
+        [XmlElement, DefaultValue(float.PositiveInfinity)] public float ThrustTime = float.PositiveInfinity;
         [XmlElement, DefaultValue(0f)] public float LateralDrag = 0f;
     }
 

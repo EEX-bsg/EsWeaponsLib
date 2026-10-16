@@ -86,27 +86,27 @@
 <ModuleMapperTypes>
     <Key displayName="Fire" key="fire" default="C" />
     <Slider displayName="Rate of fire" key="rate" min="0.5" max="10" default="2" />
-    <Slider displayName="Fuse" key="fuse" min="0" max="10" default="3" />
+    <Slider displayName="Fuse" key="fuse" min="0.5" max="10" default="3" />
 </ModuleMapperTypes>
 ...
 <FireRateSlider key="rate" />   <!-- [発/s]。逆数を FireInterval に使う。0 以下なら撃たない -->
-<TimeFuseSlider key="fuse" />   <!-- [s]。Projectile/TimeFuse に使う -->
+<TimeFuseSlider key="fuse" />   <!-- [s]。Projectile/TimeFuse に使う(0 は発射直後に起爆。信管なしにはできない) -->
 ```
 
-| 要素 | 値の使い道 | 読むとき |
-|---|---|---|
-| `FireRateSlider` | 1 / 値 を `FireInterval` に | 発射ごと |
-| `FireDelaySlider` | 値を `FireDelay` に足す | 発射ごと |
-| `TimeFuseSlider` | 値を `Projectile/TimeFuse` に | 発射ごと(飛んでいる弾は変わらない) |
-| `MagazineCapacitySlider` | 四捨五入して `MagazineCapacity` に | シミュレーション開始時 |
-| `PowerSlider` | 値を Power として初速に(`MuzzleVelocity` = 100 × 値 × 物理ステップ ÷ `Projectile/Mass`。通常の Besiege では 値 ÷ 質量 [m/s]) | 発射ごと |
-| `BoosterPowerSlider` | 100 × 値 を `Projectile/Booster/Thrust` [N] に | 発射ごと(飛んでいる弾にも効く) |
+| 要素 | 値の使い道 |
+|---|---|
+| `FireRateSlider` | 1 / 値 を `FireInterval` に |
+| `FireDelaySlider` | 値を `FireDelay` に足す |
+| `TimeFuseSlider` | 値を `Projectile/TimeFuse` に |
+| `MagazineCapacitySlider` | 四捨五入して `MagazineCapacity` に |
+| `PowerSlider` | 値を Power として初速に(`MuzzleVelocity` = 100 × 値 × 物理ステップ ÷ `Projectile/Mass`。通常の Besiege では 値 ÷ 質量 [m/s]) |
+| `BoosterPowerSlider` | 100 × 値 を `Projectile/Booster/Thrust` [N] に |
 
 `PowerSlider` の Power は、Besiege 公式の Shooting モジュールと同じ尺度です(100 × Power [N] の力を1物理ステップかけて撃ち出す強さ)。Power で調整してきた砲は、値を換算せずにそのまま使えます。
 
 ブロック XML でスライダーの `min`・`max` を後から変えても、保存済みの機体には変える前の値が残り、その値で撃ちます。
 
-## 弾
+## 弾丸
 
 ### 物理
 
@@ -157,7 +157,7 @@
 
 ```xml
 <Projectile>
-    <TimeFuse>3</TimeFuse>                 <!-- 発射から 3 秒で起爆。0(既定)なら時限信管なし -->
+    <TimeFuse>3</TimeFuse>                 <!-- 発射から 3 秒で起爆。書かなければ時限信管なし(0 は発射直後に起爆) -->
     <DetonationDelay>0.05</DetonationDelay> <!-- 命中から起爆までの遅延 [s] -->
     <Explosion>
         <Radius>4</Radius>                 <!-- 0(既定)なら爆発しない -->
@@ -224,7 +224,7 @@ Mac・Linuxでは、「バンドル名 + `Mac`」のAssetBundleがあればそ�
     <ColliderEnableDelay>0.3</ColliderEnableDelay> <!-- 遅い弾が自機に当たらないよう延ばす -->
     <Booster>
         <Thrust>400</Thrust>         <!-- [N] -->
-        <BurnTime>2</BurnTime>       <!-- [s]。0 なら消えるまで燃える -->
+        <ThrustTime>2</ThrustTime>   <!-- 推力を出す時間 [s]。書かなければ弾が消えるまで -->
         <LateralDrag>2</LateralDrag> <!-- 横滑りを抑える(安定翼) -->
     </Booster>
 </Projectile>

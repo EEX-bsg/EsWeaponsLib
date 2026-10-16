@@ -110,8 +110,8 @@
 | `EntityDamage` | `float` | `0` | 直撃したとき、レベルのエンティティ(人・動物など)に与えるダメージ(爆風では使わない)。 |
 | `AttachOnHit` | `bool` | `false` | 命中物にくっついて止まり、以後は命中物と一緒に動く(矢など)。地形では、その場で止まる。 |
 | `DespawnOnHit` | `bool` | `false` | 爆発しない弾を命中時に即消す。falseなら命中の1秒後に消える。 |
-| `TimeFuse` | `float` | `0` | 時限信管 \[s]。0なら無効。経過で起爆(爆発しない弾は消える)。 |
-| `TimeFuseRandomExtra` | `float` | `0.05` | 時限信管に加える乱数 \[s](0〜この値)。発射時に決める。TimeFuseが0のときは使わない。 |
+| `TimeFuse` | `float` | `INF` | 時限信管 \[s]。発射からこの時間で起爆(爆発しない弾は消える)。0は発射直後に起爆。既定は無限(時限信管なし)。 |
+| `TimeFuseRandomExtra` | `float` | `0.05` | 時限信管に加える乱数 \[s](0〜この値)。発射時に決める。TimeFuseが無限のときは効かない。 |
 | `DetonationDelay` | `float` | `0` | 命中から起爆までの遅延 \[s]。 |
 | `DetonationDelayRandomExtra` | `float` | `0` | 起爆遅延に加える乱数幅 \[s](0〜この値)。 |
 | `Explosion` | `ExplosionSpec` | — | 起爆したときの爆発。Radiusが0なら爆発しない。 |
@@ -143,8 +143,8 @@
 | フィールド | 型 | 既定値 | 説明 |
 |---|---|---|---|
 | `Thrust` | `float` | `0` | 推力 \[N]。弾の前方へ毎物理フレーム加える(加速度 = Thrust / 弾のMass)。 |
-| `BurnTime` | `float` | `0` | 燃焼時間 \[s]。0なら弾が消えるまで燃え続ける。 |
-| `LateralDrag` | `float` | `0` | 燃焼中、弾の向きに対する横滑り速度 × この値の力で横滑りを抑える(安定翼)\[N/(m/s)]。 |
+| `ThrustTime` | `float` | `INF` | 推力を出す時間 \[s]。発射からこの時間で推力が止まる。0は推力なし。既定は無限(弾が消えるまで)。 |
+| `LateralDrag` | `float` | `0` | 推力が出ている間、弾の向きに対する横滑り速度 × この値の力で横滑りを抑える(安定翼)\[N/(m/s)]。 |
 
 ## GuidanceSpec
 

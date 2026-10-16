@@ -93,7 +93,11 @@ function Get-EnumNames($typeReference) {
   return $names
 }
 
-function Format-Number($value) { return $value.ToString('R', [Globalization.CultureInfo]::InvariantCulture) }
+function Format-Number($value) {
+  # XML では INF と書く(C# の float.PositiveInfinity も同じ値)
+  if ([single]::IsPositiveInfinity($value)) { return 'INF' }
+  return $value.ToString('R', [Globalization.CultureInfo]::InvariantCulture)
+}
 
 # Field initializer values, read from the parameterless constructor up to the base constructor call.
 function Get-Initializers($type) {

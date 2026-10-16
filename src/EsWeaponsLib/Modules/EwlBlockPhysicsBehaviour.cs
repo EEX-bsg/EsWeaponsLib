@@ -20,7 +20,7 @@ namespace EWL.Modules
             // 親ブロックとの接合。他モジュールが足した分も含めて全部に適用する
             foreach (var joint in GetComponents<ConfigurableJoint>())
             {
-                if (Module.JointStrength > 0f)
+                if (Module.JointStrength >= 0f) // 負値・NaN は変えない扱い(仕様ではない)
                 {
                     joint.breakForce = Module.JointStrength;
                     joint.breakTorque = Module.JointStrength;

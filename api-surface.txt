@@ -28,10 +28,10 @@ EWL.Api.Attacker::Player : Modding.Common.Player {get}
 EWL.Api.Attacker::PlayerId : System.UInt16 {get}
 EWL.Api.Attacker::static EWL.Api.Attacker GetDetonator(BlockBehaviour)
 EWL.Api.Attacker::Team : MPTeam {get}
-EWL.Api.BoosterSpec::BurnTime : System.Single
 EWL.Api.BoosterSpec::LateralDrag : System.Single
 EWL.Api.BoosterSpec::System.Void .ctor()
 EWL.Api.BoosterSpec::Thrust : System.Single
+EWL.Api.BoosterSpec::ThrustTime : System.Single
 EWL.Api.BundleAssets::static T Load(Modding.ModAssetBundle, System.String)
 EWL.Api.ColliderKind::Box : EWL.Api.ColliderKind
 EWL.Api.ColliderKind::Capsule : EWL.Api.ColliderKind
@@ -149,17 +149,17 @@ EWL.Modules.BlockMaterialXml::Bounciness : System.Single XmlElement() DefaultVal
 EWL.Modules.BlockMaterialXml::Friction : System.Single XmlElement() DefaultValue(0.6)
 EWL.Modules.BlockMaterialXml::FrictionCombine : UnityEngine.PhysicMaterialCombine XmlElement() DefaultValue()
 EWL.Modules.BlockMaterialXml::System.Void .ctor()
-EWL.Modules.BoosterXml::BurnTime : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.BoosterXml::LateralDrag : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.BoosterXml::System.Void .ctor()
 EWL.Modules.BoosterXml::Thrust : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.BoosterXml::ThrustTime : System.Single XmlElement() DefaultValue(Infinity)
 EWL.Modules.BoxColliderXml::Center : Modding.Serialization.Vector3 XmlElement() DefaultValue()
 EWL.Modules.BoxColliderXml::System.Void .ctor()
 EWL.Modules.EwlBlockPhysicsBehaviour::System.Void .ctor()
 EWL.Modules.EwlBlockPhysicsBehaviour::virtual System.Void SafeAwake()
 EWL.Modules.EwlBlockPhysicsModule [XmlRootAttribute(EwlBlockPhysics)]
 EWL.Modules.EwlBlockPhysicsModule::AdditionalColliders : System.Collections.Generic.List`1<Modding.Serialization.ModCollider> XmlArray(AdditionalColliders) DefaultValue()
-EWL.Modules.EwlBlockPhysicsModule::JointStrength : System.Single XmlElement() DefaultValue(0) Reloadable()
+EWL.Modules.EwlBlockPhysicsModule::JointStrength : System.Single XmlElement() DefaultValue(-1) Reloadable()
 EWL.Modules.EwlBlockPhysicsModule::Material : EWL.Modules.BlockMaterialXml XmlElement() DefaultValue() Reloadable()
 EWL.Modules.EwlBlockPhysicsModule::Rotation : EWL.Modules.JointRotationXml XmlElement() DefaultValue() Reloadable()
 EWL.Modules.EwlBlockPhysicsModule::System.Void .ctor()
@@ -250,6 +250,6 @@ EWL.Modules.ProjectileXml::Mesh : Modding.Serialization.MeshReference XmlElement
 EWL.Modules.ProjectileXml::PoolSize : System.Int32 XmlElement() DefaultValue(50)
 EWL.Modules.ProjectileXml::System.Void .ctor()
 EWL.Modules.ProjectileXml::Texture : Modding.Serialization.ResourceReference XmlElement() DefaultValue()
-EWL.Modules.ProjectileXml::TimeFuse : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.ProjectileXml::TimeFuse : System.Single XmlElement() DefaultValue(Infinity)
 EWL.Modules.ProjectileXml::TimeFuseRandomExtra : System.Single XmlElement() DefaultValue(0.05)
 EWL.Modules.ProjectileXml::Trail : System.String XmlElement() DefaultValue()

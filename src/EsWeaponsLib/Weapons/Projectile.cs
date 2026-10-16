@@ -128,7 +128,8 @@ namespace EWL.Weapons
             _simulationScope = owner.Scope;
             _age = 0f;
             _colliderEnableDelay = spec.ColliderEnableDelay;
-            _timeFuse = spec.TimeFuse > 0f ? spec.TimeFuse + Random.Range(0f, spec.TimeFuseRandomExtra) : 0f;
+            // 負値・NaN は信管なし扱い(仕様ではない)。無限に乱数を足しても無限
+            _timeFuse = spec.TimeFuse >= 0f ? spec.TimeFuse + Random.Range(0f, spec.TimeFuseRandomExtra) : float.PositiveInfinity;
             _godToolExplosion = spec.Explosion.OnlyWithExplodingCannonballs && Simulation.IsExplodingCannonballs(owner.Block);
             _active = true;
             _guidanceGain = spec.Guidance.Gain;
@@ -183,7 +184,7 @@ namespace EWL.Weapons
             if (_guidanceGain > 0f && _networkVelocity.sqrMagnitude > 0.01f)
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(_networkVelocity), 1f - Mathf.Exp(-CorrectionRate * Time.deltaTime));
             var booster = _spec.Booster;
-            if (booster.Thrust > 0f && (booster.BurnTime <= 0f || _age < booster.BurnTime) && _spec.Mass > 0f)
+            if (booster.Thrust > 0f && _age < booster.ThrustTime && _spec.Mass > 0f)
                 predicted += transform.forward * (booster.Thrust / _spec.Mass * 0.5f * elapsed * elapsed);
             _correction *= Mathf.Exp(-CorrectionRate * Time.deltaTime);
             transform.position = predicted + _correction;
@@ -283,7 +284,7 @@ namespace EWL.Weapons
             _age += Time.deltaTime;
             if (!_collidersOn && _age >= _colliderEnableDelay) EnableColliders();
             float lifetime = _spec.Lifetime; // 遅延 0 の起爆はこの場で Despawn まで進み _spec が消える
-            if (!_detonating && _timeFuse > 0f && _age >= _timeFuse)
+            if (!_detonating && _age >= _timeFuse)
                 Detonate(0f, transform.rotation);
             if (_age >= lifetime) Despawn();
         }
@@ -293,7 +294,7 @@ namespace EWL.Weapons
             if (!_active || _proxy || _hit || _detonating) return;
             if (_guidanceGain > 0f) _guidance.Step(_rb, transform, _guidanceGain, _age);
             var booster = _spec.Booster;
-            if (booster.Thrust <= 0f || (booster.BurnTime > 0f && _age >= booster.BurnTime)) return;
+            if (!(booster.Thrust > 0f && _age < booster.ThrustTime)) return; // NaN でも力を加えない
             var forward = transform.forward;
             _rb.AddForce(forward * booster.Thrust);
             if (booster.LateralDrag > 0f)
