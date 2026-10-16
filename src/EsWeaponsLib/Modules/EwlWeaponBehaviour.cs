@@ -11,6 +11,8 @@ namespace EWL.Modules
     // 仕事: XML → WeaponSpec 変換、ブロック定義 Mod のリソース解決、キー入力 → Weapon.TryFire。
     public class EwlWeaponBehaviour : BlockModuleBehaviour<EwlWeaponModule>
     {
+        private const float PowerToForce = 100f; // Power 1 あたりの力 [N](公式 Shooting モジュールと同じ)
+
         private MKey _fireKey;
         private MToggle _holdToggle;
         private MKey _reloadKey;
@@ -19,6 +21,8 @@ namespace EWL.Modules
         private MSlider _fireDelaySlider;
         private MSlider _timeFuseSlider;
         private MSlider _magazineCapacitySlider;
+        private MSlider _powerSlider;
+        private MSlider _boosterPowerSlider;
         private Weapon _weapon;
         private bool _autoFire;
         private bool _fireHeldBefore;
@@ -35,6 +39,8 @@ namespace EWL.Modules
             if (Module.FireDelaySlider != null) _fireDelaySlider = GetSlider(Module.FireDelaySlider);
             if (Module.TimeFuseSlider != null) _timeFuseSlider = GetSlider(Module.TimeFuseSlider);
             if (Module.MagazineCapacitySlider != null) _magazineCapacitySlider = GetSlider(Module.MagazineCapacitySlider);
+            if (Module.PowerSlider != null) _powerSlider = GetSlider(Module.PowerSlider);
+            if (Module.BoosterPowerSlider != null) _boosterPowerSlider = GetSlider(Module.BoosterPowerSlider);
         }
 
         // ビルド中のブロック(読込・配置)だけで呼ばれる。弾が無い武装は装填中の弾を出さない(シミュ中と同じ)。
@@ -183,6 +189,11 @@ namespace EWL.Modules
             if (_fireRateSlider != null && _fireRateSlider.Value > 0f) spec.FireInterval = 1f / _fireRateSlider.Value;
             if (_fireDelaySlider != null) spec.FireDelay = Module.FireDelay + _fireDelaySlider.Value;
             if (_timeFuseSlider != null) spec.Projectile.TimeFuse = _timeFuseSlider.Value;
+            // 公式 Shooting モジュールは 100 × Power の力を1物理ステップかけて撃つ。その速度変化をそのまま初速にする
+            var projectile = spec.Projectile;
+            if (_powerSlider != null && projectile.Mass > 0f)
+                spec.MuzzleVelocity = PowerToForce * _powerSlider.Value * Time.fixedDeltaTime / projectile.Mass;
+            if (_boosterPowerSlider != null) projectile.Booster.Thrust = PowerToForce * _boosterPowerSlider.Value;
         }
 
         // Spec は発射のたびに読まれるので、シミュ中に差し込んでも次の弾から反映される。

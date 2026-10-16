@@ -51,6 +51,17 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(null)]
         public MSliderReference MagazineCapacitySlider;
 
+        /// <summary>値をPower(Besiege公式のShootingモジュールと同じ尺度)として初速を決める(XMLのMuzzleVelocityより優先)。
+        /// Powerは「100 × Power [N] の力を1物理ステップかけて撃ち出す」強さで、MuzzleVelocity = 100 × Power × 物理ステップ [s] ÷ Projectile/Mass。
+        /// 物理ステップが0.01秒の通常のBesiegeでは Power ÷ Projectile/Mass [m/s]。反動もこの初速から決まる。発射ごとに読む。Projectile/Massが0以下なら使わない。</summary>
+        [XmlElement, DefaultValue(null)]
+        public MSliderReference PowerSlider;
+
+        /// <summary>値の100倍をProjectile/Booster/Thrust [N] に使う(PowerSliderと同じ尺度。XMLの値より優先)。
+        /// 発射ごとに読む。シミュ中に値が変わると、飛んでいる弾の推力も変わる。</summary>
+        [XmlElement, DefaultValue(null)]
+        public MSliderReference BoosterPowerSlider;
+
         /// <summary>HoldToFireToggleが無いときの発射方式。true: 押している間連射 / false: 押すたびに連射の開始・停止を切り替え。</summary>
         [XmlElement, DefaultValue(true), Reloadable] public bool HoldToFire = true;
 

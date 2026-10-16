@@ -99,6 +99,12 @@
 | `FireDelaySlider` | 値を `FireDelay` に足す | 発射ごと |
 | `TimeFuseSlider` | 値を `Projectile/TimeFuse` に | 発射ごと(飛んでいる弾は変わらない) |
 | `MagazineCapacitySlider` | 四捨五入して `MagazineCapacity` に | シミュレーション開始時 |
+| `PowerSlider` | 値を Power として初速に(`MuzzleVelocity` = 100 × 値 × 物理ステップ ÷ `Projectile/Mass`。通常の Besiege では 値 ÷ 質量 [m/s]) | 発射ごと |
+| `BoosterPowerSlider` | 100 × 値 を `Projectile/Booster/Thrust` [N] に | 発射ごと(飛んでいる弾にも効く) |
+
+`PowerSlider` の Power は、Besiege 公式の Shooting モジュールと同じ尺度です(100 × Power [N] の力を1物理ステップかけて撃ち出す強さ)。Power で調整してきた砲は、値を換算せずにそのまま使えます。
+
+ブロック XML でスライダーの `min`・`max` を後から変えても、保存済みの機体には変える前の値が残り、その値で撃ちます。
 
 ## 弾
 
