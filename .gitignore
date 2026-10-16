@@ -22,7 +22,13 @@
 /.codex/
 /temp-skin-probe/
 
+# Zed
+/.zed/
+
 # Documentation site (VitePress)
 /node_modules/
 /docs/.vitepress/cache/
 /docs/.vitepress/dist/
+
+# Local VS Code workspace configuration
+/.vscode/

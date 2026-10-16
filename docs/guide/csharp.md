@@ -24,6 +24,9 @@ public class MyMod : ModEntryPoint
             Debug.LogWarning("[MyMod] E'sWeaponsLib is not loaded.");
             return;
         }
+        // 版は Mod.xml の Version。EWL の型を触らずに確かめられる
+        var ewlVersion = Mods.GetVersion(EwlModId);
+        Debug.Log("[MyMod] E'sWeaponsLib " + ewlVersion);
         RegisterModules(); // EWL の型を使う処理は別メソッドに分ける
     }
 
@@ -83,7 +86,7 @@ void OnAnyHit(ProjectileHit hit)
   (`PlayerId` は退出した人の番号が後から参加した人に再利用されることがあります)。
 - バニラのボムを誰が起爆させたかは `Attacker.GetDetonator(bomb)` で分かります(分からなければnull)。
   標準の大砲・クロスボウの直撃と「爆発する砲弾」の爆風で起爆したボムは、その撃ち手になります。グレネード・ロケット・燃料樽の爆風や着火で起爆したものは、今のところ分かりません。
-- キル・デスに数えるかどうかは、あなたのModが決めます。
+- この機能はキルデス判定などをご自身のModで判断する時に使えます。
 
 ## 自分のモジュールで武装を作る
 

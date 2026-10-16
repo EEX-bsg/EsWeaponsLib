@@ -99,13 +99,24 @@
   white-space: nowrap;
 }
 
+/* 1列目(要素名・メンバー): 短い名前は折らず、長いシグネチャは半角スペースの位置で折り返す(単語の途中では折らない) */
 .vp-doc td:first-child code {
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: normal;
 }
 
-/* 1列目(要素名)以外は、長い英字の並び(EwlWeapon/Projectile/Explosion など)も途中で折り返してよい(表を本文幅に収めるため) */
-.vp-doc td:not(:first-child) {
+/* 型・既定値などの中間列: 最低10文字分の幅を確保し(Vector3 が縦に割れるのを防ぐ)、
+   それより長い名前(CollisionDetectionMode など)だけ、表が本文幅を超えるときに折り返す */
+.vp-doc td:not(:first-child):not(:last-child) {
+  min-width: 10ch;
   overflow-wrap: anywhere;
+}
+
+/* 最終列(説明)は、長い英字の並び(EwlWeapon/Projectile/Explosion など)も途中で折り返してよい(表を本文幅に収めるため)。
+   ただし折り返し可能だと最小幅が1文字と見なされて列が潰れるので、最小幅を持たせる */
+.vp-doc td:last-child:not(:first-child) {
+  overflow-wrap: anywhere;
+  min-width: 14em;
 }
 
 /* インラインコード: 本文から浮きすぎない程度に区別する */
