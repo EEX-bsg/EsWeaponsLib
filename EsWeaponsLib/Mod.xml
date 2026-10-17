@@ -9,20 +9,20 @@
     <Name>E'sWeaponsLib</Name>
     <Author>EEX-slime</Author>
     <!-- Major.Minor.Build -->
-    <Version>0.0.1</Version>
+    <Version>0.1.0</Version>
     
     <Description>
-Weapon library for Besiege mods (projectile weapons, magazines, explosions, block physics, MP sync). Prerequisite mod for E'sTankCannonsMod and other weapon mods. (alpha)
+
     </Description>
     
     <!-- Square icon of the mod. Texture defined in the Resources section.
          This is displayed in the mod list and, if WorkshopThumbnail is not set, used as thumbnail when uploaded to the Steam workshop. -->
-    <!-- <Icon name="icon" /> -->
+    <Icon name="icon" />
     
     <!-- Texture resource used as thumbnail when uploading the mod to the workshop.
          If this is not present, the Icon texture is used instead.
          This can be set to have different icons in the mod list and the workshop. -->
-    <!-- <WorkshopThumbnail name="thumbnail" /> -->
+    <WorkshopThumbnail name="icon" />
     
     <!-- Enables reloading of various values at runtime. This is normally triggered automatically when a file is changed,
          you can also trigger it by pressing Ctrl+H.
@@ -126,6 +126,7 @@ Weapon library for Besiege mods (projectile weapons, magazines, explosions, bloc
 
         <!--<Texture name="icon" path="icon.png" />-->
         <!--<Texture name="thumbnail" path="thumbnail.png" />-->
+        <Texture name="icon" path="icon.png" />
     </Resources>
 
 
