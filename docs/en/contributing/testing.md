@@ -6,7 +6,7 @@ EWL has no automated tests. Check mechanically what can be checked outside the g
 
 | Check | Method | Passing condition |
 |---|---|---|
-| Build | The build command in [CONTRIBUTING.md](../../../CONTRIBUTING.md) | No errors |
+| Build | The build command in [CONTRIBUTING.md](https://github.com/EEX-bsg/EsWeaponsLib/blob/main/CONTRIBUTING.md) | No errors |
 | Forbidden APIs | `powershell -File tools/ilscan.ps1` | `IL scan OK` |
 | Public surface | `powershell -File tools/api-surface.ps1`, then `git diff api-surface.txt` | Only the intended differences. Breaking changes are recorded in the CHANGELOG |
 | Reference | `powershell -File tools/gen-reference.ps1`, then `git diff docs/reference` | Only the intended differences |

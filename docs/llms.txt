@@ -1,6 +1,6 @@
 # E'sWeaponsLib
 
-> Weapon library (prerequisite mod) for Besiege 1.9.1 mods. Provides XML custom modules (EwlWeapon, EwlBlockPhysics) and a C# API (namespace EWL.Api) for firing, projectiles, impacts, explosions, magazines, block physics and multiplayer sync. Mod ID: 0d219960-b202-4906-b29d-8d90a61a89b8. Docs are written in Japanese (the source of truth); paths below are relative to this file.
+> Weapon library (prerequisite mod) for Besiege 1.9.1 mods. Provides XML custom modules (EwlWeapon, EwlBlockPhysics) and a C# API (namespace EWL.Api) for firing, projectiles, impacts, explosions, magazines, block physics and multiplayer sync. Mod ID: 0d219960-b202-4906-b29d-8d90a61a89b8. Docs are written in Japanese (the source of truth); paths below are relative to this file. Site: https://eex-bsg.github.io/EsWeaponsLib/ (English pages under /en/). Repository: https://github.com/EEX-bsg/EsWeaponsLib
 
 Key rules for using EWL: add modid="0d219960-b202-4906-b29d-8d90a61a89b8" to EWL modules in block XML; only FireKey is required in EwlWeapon and omitted elements take defaults; from C#, use only the EWL.Api namespace, create a Weapon on simulation start on every peer and destroy it on stop, call TryFire from SimulateUpdateHost; never bundle EsWeaponsLib.dll with another mod.
 
@@ -17,11 +17,11 @@ Key rules for using EWL: add modid="0d219960-b202-4906-b29d-8d90a61a89b8" to EWL
 - [Using EWL from C#](guide/csharp.md): dependency setup, observing weapons, hit events and attackers, driving a Weapon from your own module
 - [XML module reference](reference/xml-modules.md): every element with type, default and description (generated)
 - [C# API reference](reference/csharp-api.md): every public type and member in EWL.Api (generated)
-- [Changelog](../CHANGELOG.md): changes visible to users; breaking changes include old -> new examples
+- [Changelog](https://github.com/EEX-bsg/EsWeaponsLib/blob/main/CHANGELOG.md): changes visible to users; breaking changes include old -> new examples
 
 ## Contributors
 
-- [CONTRIBUTING](../CONTRIBUTING.md): environment, build, checks, pull requests
+- [CONTRIBUTING](https://github.com/EEX-bsg/EsWeaponsLib/blob/main/CONTRIBUTING.md): environment, build, checks, pull requests
 - [Design principles](contributing/design-principles.md): goals that never change, principles, scope
 - [Architecture](contributing/architecture.md): folders, dependency direction, weapon flow, authority and MP sync
 - [Compatibility](contributing/compatibility.md): public surface and how to change it
