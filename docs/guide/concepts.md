@@ -74,5 +74,5 @@ Besiegeの再起動が必要です(どれが対象かは [XMLリファレンス]
 
 ## 版と互換性
 
-EWLは正式リリースまでの間、公開面(要素名・C# API)を予告付きで変えることがあります。変更点と移行の例は [CHANGELOG.md](../../CHANGELOG.md) にあります。
+EWLは正式リリースまでの間、公開面(要素名・C# API)を予告付きで変えることがあります。変更点と移行の例は [CHANGELOG.md](https://github.com/EEX-bsg/EsWeaponsLib/blob/main/CHANGELOG.md) にあります。
 正式リリース後は、既存のブロックXMLや外部DLLをの破壊的更新は慎重に行い、また原則メジャーアップデートのみで行います。

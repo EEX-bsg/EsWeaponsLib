@@ -19,7 +19,7 @@ Besiegeの武装Mod向けの前提ライブラリです。XMLカスタムモジ�
 | EWLに貢献したい | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | AIエージェント | [docs/llms.txt](docs/llms.txt)(全ページの目次)、貢献作業では [AGENTS.md](AGENTS.md) |
 
-全ページの一覧は [docs/index.md](docs/index.md) にあります。
+全ページの一覧は [docs/index.md](docs/index.md) にあります。同じ内容をWebサイト(日本語・English)でも読めます: https://eex-bsg.github.io/EsWeaponsLib/
 
 ## ライセンス
 

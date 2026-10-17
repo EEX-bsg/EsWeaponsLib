@@ -74,5 +74,5 @@ a Besiege restart (which ones apply is shown in the "Reload" column of the [XML 
 
 ## Versions and compatibility
 
-Until the official release, EWL may change its public surface (element names and C# API) with advance notice. Changes and migration examples are in [CHANGELOG.md](../../../CHANGELOG.md).
+Until the official release, EWL may change its public surface (element names and C# API) with advance notice. Changes and migration examples are in [CHANGELOG.md](https://github.com/EEX-bsg/EsWeaponsLib/blob/main/CHANGELOG.md).
 After the official release, breaking changes to existing block XML and external DLLs will be made carefully, and in principle only in major updates.

@@ -6,7 +6,7 @@ EWLには自動テストがありません。ゲームの外で確かめられ�
 
 | 確認 | 方法 | 通過の条件 |
 |---|---|---|
-| ビルド | [CONTRIBUTING.md](../../CONTRIBUTING.md) のビルドコマンド | エラーなし |
+| ビルド | [CONTRIBUTING.md](https://github.com/EEX-bsg/EsWeaponsLib/blob/main/CONTRIBUTING.md) のビルドコマンド | エラーなし |
 | 禁止API | `powershell -File tools/ilscan.ps1` | `IL scan OK` |
 | 公開面 | `powershell -File tools/api-surface.ps1` の後に `git diff api-surface.txt` | 意図した差分だけ。壊れる変更はCHANGELOGに記載済み |
 | リファレンス | `powershell -File tools/gen-reference.ps1` の後に `git diff docs/reference` | 意図した差分だけ |

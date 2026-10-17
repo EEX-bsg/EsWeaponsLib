@@ -16,11 +16,11 @@ firing, projectiles, impacts, explosions, magazines, block physics, and multipla
 - [Using C#](guide/csharp.md) — Observing weapons, hits and attackers, building weapons in your own module
 - [XML Reference](reference/xml-modules.md) — All elements and default values (generated)
 - [C# API Reference](reference/csharp-api.md) — Public types and members (generated)
-- [Changelog](../../CHANGELOG.md)
+- [Changelog](https://github.com/EEX-bsg/EsWeaponsLib/blob/main/CHANGELOG.md)
 
 ## Contributors
 
-- [CONTRIBUTING.md](../../CONTRIBUTING.md) — Environment, build, and pull requests
+- [CONTRIBUTING.md](https://github.com/EEX-bsg/EsWeaponsLib/blob/main/CONTRIBUTING.md) — Environment, build, and pull requests
 - [Design Principles](contributing/design-principles.md) — Purpose, principles, scope of responsibility, and usage patterns
 - [Architecture](contributing/architecture.md) — Folders, dependency direction, weapon flow, execution authority and multiplayer
 - [Public Surface and Compatibility](contributing/compatibility.md) — What must not be broken, and the procedure for changing the public surface

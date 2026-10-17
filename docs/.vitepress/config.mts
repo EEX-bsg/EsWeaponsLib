@@ -119,8 +119,6 @@ export default defineConfig({
   cleanUrls: true,
   // Web に出さないページ(docs/ からの相対パスの glob。リポジトリ上では読める)
   srcExclude: [],
-  // docs/ の外(リポジトリ直下)へのリンク。リポジトリ名が決まったら GitHub の URL に直してこの行を消す
-  ignoreDeadLinks: [/CHANGELOG$/, /CONTRIBUTING$/],
   lastUpdated: false,
   appearance: 'dark',
   head: [
@@ -173,6 +171,7 @@ export default defineConfig({
     },
   },
   themeConfig: {
+    socialLinks: [{ icon: 'github', link: 'https://github.com/EEX-bsg/EsWeaponsLib' }],
     search: {
       provider: 'local',
       options: {
