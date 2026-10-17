@@ -204,7 +204,6 @@ EWL.Modules.EwlWeaponModule::ReloadTime : System.Single XmlElement() DefaultValu
 EWL.Modules.EwlWeaponModule::ShowLoadedProjectile : System.Boolean XmlElement() DefaultValue(False) Reloadable()
 EWL.Modules.EwlWeaponModule::Spread : System.Single XmlElement() DefaultValue(0) Reloadable()
 EWL.Modules.EwlWeaponModule::System.Void .ctor()
-EWL.Modules.EwlWeaponModule::ThrustCutoffToggle : Modding.Serialization.MToggleReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::ThrustTimeSlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::TimeFuseSlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::TotalAmmo : System.Int32 XmlElement() DefaultValue(-1) Reloadable()

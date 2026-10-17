@@ -101,7 +101,7 @@
 | `MagazineCapacitySlider` | 四捨五入して `MagazineCapacity` に |
 | `PowerSlider` | 値を Power として初速に(`MuzzleVelocity` = 100 × 値 × 物理ステップ ÷ `Projectile/Mass`。通常の Besiege では 値 ÷ 質量 [m/s]) |
 | `BoosterPowerSlider` | 100 × 値 を `Projectile/Booster/Thrust` [N] に |
-| `ThrustTimeSlider` | 値を `Projectile/Booster/ThrustTime` [s] に(`ThrustCutoffToggle` があれば ON のときだけ) |
+| `ThrustTimeSlider` | 値を `Projectile/Booster/ThrustTime` [s] に |
 
 `PowerSlider` の Power は、Besiege 公式の Shooting モジュールと同じ尺度です(100 × Power [N] の力を1物理ステップかけて撃ち出す強さ)。Power で調整してきた砲は、値を換算せずにそのまま使えます。
 
@@ -232,15 +232,13 @@ Mac・Linuxでは、「バンドル名 + `Mac`」のAssetBundleがあればそ�
 </Projectile>
 ```
 
-推力の燃焼時間をプレイヤーに決めさせるときは `ThrustTimeSlider` を使います。燃料が切れると推力が止まり、その後は慣性で飛びます(安定翼・誘導は働き続けます)。スライダーの値では「燃料切れなし(無限)」を表せないので、切り替えたいときは `ThrustCutoffToggle` を併用します。OFF のときは XML の `ThrustTime`(書かなければ無限)を使います。
+推力の燃焼時間をプレイヤーに決めさせるときは `ThrustTimeSlider` を使います。燃料が切れると推力が止まり、その後は慣性で飛びます(安定翼・誘導は働き続けます)。燃料切れなし(無限)にする武装は、スライダーを置かず `ThrustTime` も書きません。
 
 ```xml
 <ModuleMapperTypes>
-    <Toggle displayName="Thrust cutoff" key="cutoff" default="false" />
     <Slider displayName="Burn time" key="burn" min="0.1" max="10" default="2" />
 </ModuleMapperTypes>
 ...
-<ThrustCutoffToggle key="cutoff" />
 <ThrustTimeSlider key="burn" />
 ```
 

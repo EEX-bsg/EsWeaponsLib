@@ -24,7 +24,6 @@ namespace EWL.Modules
         private MSlider _powerSlider;
         private MSlider _boosterPowerSlider;
         private MSlider _thrustTimeSlider;
-        private MToggle _thrustCutoffToggle;
         private Weapon _weapon;
         private bool _autoFire;
         private bool _fireHeldBefore;
@@ -44,7 +43,6 @@ namespace EWL.Modules
             if (Module.PowerSlider != null) _powerSlider = GetSlider(Module.PowerSlider);
             if (Module.BoosterPowerSlider != null) _boosterPowerSlider = GetSlider(Module.BoosterPowerSlider);
             if (Module.ThrustTimeSlider != null) _thrustTimeSlider = GetSlider(Module.ThrustTimeSlider);
-            if (Module.ThrustCutoffToggle != null) _thrustCutoffToggle = GetToggle(Module.ThrustCutoffToggle);
         }
 
         // ビルド中のブロック(読込・配置)だけで呼ばれる。弾が無い武装は装填中の弾を出さない(シミュ中と同じ)。
@@ -198,11 +196,7 @@ namespace EWL.Modules
             if (_powerSlider != null && projectile.Mass > 0f)
                 spec.MuzzleVelocity = PowerToForce * _powerSlider.Value * Time.fixedDeltaTime / projectile.Mass;
             if (_boosterPowerSlider != null) projectile.Booster.Thrust = PowerToForce * _boosterPowerSlider.Value;
-            if (_thrustTimeSlider != null)
-            {
-                bool cutoff = _thrustCutoffToggle == null || _thrustCutoffToggle.IsActive;
-                projectile.Booster.ThrustTime = cutoff ? _thrustTimeSlider.Value : Module.Projectile.Booster.ThrustTime;
-            }
+            if (_thrustTimeSlider != null) projectile.Booster.ThrustTime = _thrustTimeSlider.Value;
         }
 
         // Spec は発射のたびに読まれるので、シミュ中に差し込んでも次の弾から反映される。

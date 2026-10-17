@@ -29,8 +29,7 @@ C#では `WeaponSpec` に当たります。
 | `MagazineCapacitySlider` | スライダー参照 | なし |  | 値を四捨五入してMagazineCapacityに使う(XMLの値より優先)。シミュ開始時に読む。 |
 | `PowerSlider` | スライダー参照 | なし |  | 値をPower(Besiege公式のShootingモジュールと同じ尺度)として初速を決める(XMLのMuzzleVelocityより優先)。Powerは「100 × Power \[N] の力を1物理ステップかけて撃ち出す」強さで、MuzzleVelocity = 100 × Power × 物理ステップ \[s] ÷ Projectile/Mass。物理ステップが0.01秒の通常のBesiegeでは Power ÷ Projectile/Mass \[m/s]。反動もこの初速から決まる。発射ごとに読む。Projectile/Massが0以下なら使わない。 |
 | `BoosterPowerSlider` | スライダー参照 | なし |  | 値の100倍をProjectile/Booster/Thrust \[N] に使う(PowerSliderと同じ尺度。XMLの値より優先)。発射ごとに読む。シミュ中に値が変わると、飛んでいる弾の推力も変わる。 |
-| `ThrustTimeSlider` | スライダー参照 | なし |  | 値 \[s] をProjectile/Booster/ThrustTimeに使う(XMLの値より優先。燃料切れで推力が止まり、その後は慣性で飛ぶ)。ThrustCutoffToggleがあるときは、そのトグルがONのときだけ使う。発射ごとに読み、飛行中の弾は変えない。 |
-| `ThrustCutoffToggle` | トグル参照 | なし |  | ON: ThrustTimeSliderの時間で推力を止める / OFF: XMLのProjectile/Booster/ThrustTimeを使う(既定は無限 = 燃料切れなし)。スライダーの値では「無限」を表せないので、燃料切れの有無はこのトグルで切り替える。発射ごとに読む。 |
+| `ThrustTimeSlider` | スライダー参照 | なし |  | 値 \[s] をProjectile/Booster/ThrustTimeに使う(XMLの値より優先。燃料切れで推力が止まり、その後は慣性で飛ぶ)。発射ごとに読み、飛行中の弾は変えない。 |
 | `HoldToFire` | `true` / `false` | `true` | ○ | HoldToFireToggleが無いときの発射方式。true: 押している間連射 / false: 押すたびに連射の開始・停止を切り替え。 |
 | `AssetBundle` | リソース名 | なし | ○ | エフェクトのプレハブ(MuzzleFlash・Projectile/Trail・Projectile/AttachedEffect・Projectile/Explosion/Effect)を探すAssetBundle。Mac/Linuxでは「バンドル名+Mac」があればそちらを使う。 |
 | `MuzzlePosition` | ベクトル | `(0, 0, 0)` | ○ | 発射位置。 |

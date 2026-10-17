@@ -63,14 +63,9 @@ namespace EWL.Modules
         public MSliderReference BoosterPowerSlider;
 
         /// <summary>値 [s] をProjectile/Booster/ThrustTimeに使う(XMLの値より優先。燃料切れで推力が止まり、その後は慣性で飛ぶ)。
-        /// ThrustCutoffToggleがあるときは、そのトグルがONのときだけ使う。発射ごとに読み、飛行中の弾は変えない。</summary>
+        /// 発射ごとに読み、飛行中の弾は変えない。</summary>
         [XmlElement, DefaultValue(null)]
         public MSliderReference ThrustTimeSlider;
-
-        /// <summary>ON: ThrustTimeSliderの時間で推力を止める / OFF: XMLのProjectile/Booster/ThrustTimeを使う(既定は無限 = 燃料切れなし)。
-        /// スライダーの値では「無限」を表せないので、燃料切れの有無はこのトグルで切り替える。発射ごとに読む。</summary>
-        [XmlElement, DefaultValue(null)]
-        public MToggleReference ThrustCutoffToggle;
 
         /// <summary>HoldToFireToggleが無いときの発射方式。true: 押している間連射 / false: 押すたびに連射の開始・停止を切り替え。</summary>
         [XmlElement, DefaultValue(true), Reloadable] public bool HoldToFire = true;
