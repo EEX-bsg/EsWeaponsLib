@@ -173,7 +173,7 @@ namespace EWL.Api
     {
         /// <summary>推力 [N]。弾の前方へ毎物理フレーム加える(加速度 = Thrust / 弾のMass)。</summary>
         public float Thrust = 0f;
-        /// <summary>推力を出す時間 [s]。発射からこの時間で推力が止まる。0は推力なし。既定は無限(弾が消えるまで)。</summary>
+        /// <summary>推力を出す時間 [s]。発射からこの時間で推力が止まり(燃料切れ)、その後は慣性で飛ぶ(安定翼・誘導は働き続ける)。0は推力なし。既定は無限(弾が消えるまで)。発射時の値を使い、飛行中の弾は変えない。</summary>
         public float ThrustTime = float.PositiveInfinity;
         /// <summary>
         /// 風見安定(安定翼)の強さ [(rad/s²)/(m/s)]。機首に垂直な速度成分 × この値の角加速度で、機首を飛ぶ向きへ寄せる
