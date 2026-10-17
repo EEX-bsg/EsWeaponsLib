@@ -9,7 +9,9 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 
 ## [Unreleased]
 
-最初の公開版に向けた内容です。この版でできることをまとめます。
+## [0.1.0] - 2026-10-17
+
+最初の公開版(α版)です。この版でできることをまとめます。
 
 ### XMLカスタムモジュール
 
@@ -40,3 +42,6 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 
 - 誘導(`ProjectileSpec.Guidance` / XML `Projectile/Guidance`)は仮実装で、今後まとめて作り直す予定です(破壊的変更になります)。
 - 途中参加したプレイヤーには、参加前に撃たれた弾は見えません(次の弾から見えます)。
+
+[Unreleased]: https://github.com/EEX-bsg/EsWeaponsLib/compare/0.1.0...HEAD
+[0.1.0]: https://github.com/EEX-bsg/EsWeaponsLib/releases/tag/0.1.0
