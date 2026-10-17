@@ -151,18 +151,21 @@ namespace EWL.Effects
         internal bool KeepAlive;
 
         private ParticleSystem[] _systems;
+        private TrailRenderer[] _trails;
+        private float _trailTime; // 軌跡が消えきるまで [s](TrailRenderer の Time の最大)
         private Object _owner;
         private bool _hasOwner;
-        private float _deadline;
+        private float _deadline, _trailDeadline;
 
         internal void Begin(Transform parent, Vector3 pos, Quaternion rot, Vector3 scale, Object owner)
         {
-            if (_systems == null) _systems = GetComponentsInChildren<ParticleSystem>(true);
+            if (_systems == null) FindRenderers();
             IsIdle = false;
             KeepAlive = false;
             _owner = owner;
             _hasOwner = owner != null;
             _deadline = Time.time + NoParticleLifetime;
+            _trailDeadline = Time.time + _trailTime;
 
             transform.SetParent(parent != null ? parent : Home.Root, false); // 置き場は原点・無回転
             transform.localPosition = pos;
@@ -174,6 +177,21 @@ namespace EWL.Effects
                 particles.Clear();
                 particles.Play();
             }
+            foreach (var trail in _trails) trail.Clear(); // 前回の軌跡と、置き場から移った分の線を消す
+        }
+
+        // TrailRenderer の Autodestruct は止まった軌跡をオブジェクトごと破棄する。命中で切り離した軌跡や、
+        // 一時停止中の弾の軌跡が持ち主の知らないうちに消えるので、無効にして消える時間はここで管理する。
+        private void FindRenderers()
+        {
+            _systems = GetComponentsInChildren<ParticleSystem>(true);
+            _trails = GetComponentsInChildren<TrailRenderer>(true);
+            _trailTime = 0f;
+            foreach (var trail in _trails)
+            {
+                trail.autodestruct = false;
+                _trailTime = Mathf.Max(_trailTime, trail.time);
+            }
         }
 
         internal void BeginFade()
@@ -183,13 +201,20 @@ namespace EWL.Effects
             transform.SetParent(Home.Root, true);
             foreach (var particles in _systems) particles.Stop();
             _deadline = Time.time + NoParticleLifetime;
+            _trailDeadline = Time.time + _trailTime;
         }
 
         private void Update()
         {
             if (_hasOwner && _owner == null) { EffectPlayer.Return(this); return; } // シミュ終了
             if (KeepAlive) return;
-            if (_systems.Length == 0) { if (Time.time >= _deadline) EffectPlayer.Return(this); return; }
+            if (Time.time < _trailDeadline) return; // 切り離した軌跡が消えきるまで待つ
+            if (_systems.Length == 0)
+            {
+                // 軌跡だけのエフェクトは消えきったら戻す。どちらも無ければ一定時間で戻す
+                if (_trails.Length > 0 || Time.time >= _deadline) EffectPlayer.Return(this);
+                return;
+            }
             foreach (var particles in _systems) if (particles.IsAlive(true)) return;
             EffectPlayer.Return(this);
         }
