@@ -180,8 +180,8 @@ namespace EWL.Weapons
             float travelTime = drag > 0.0001f ? (1f - Mathf.Exp(-drag * elapsed)) / drag : elapsed;
             var predicted = _networkPosition + _networkVelocity * travelTime;
             if (!_spec.IgnoreGravity) predicted += Physics.gravity * (0.5f * elapsed * elapsed);
-            // 誘導弾は向きが変わるので、受け取った速度の向きへ回す(スナップショットに向きは無い)
-            if (_guidanceGain > 0f && _networkVelocity.sqrMagnitude > 0.01f)
+            // 誘導弾・安定翼付きの弾は向きが変わるので、受け取った速度の向きへ回す(スナップショットに向きは無い)
+            if ((_guidanceGain > 0f || _spec.Booster.Stability > 0f) && _networkVelocity.sqrMagnitude > 0.01f)
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(_networkVelocity), 1f - Mathf.Exp(-CorrectionRate * Time.deltaTime));
             var booster = _spec.Booster;
             if (booster.Thrust > 0f && _age < booster.ThrustTime && _spec.Mass > 0f)
@@ -294,14 +294,10 @@ namespace EWL.Weapons
             if (!_active || _proxy || _hit || _detonating) return;
             if (_guidanceGain > 0f) _guidance.Step(_rb, transform, _guidanceGain, _age);
             var booster = _spec.Booster;
-            if (!(booster.Thrust > 0f && _age < booster.ThrustTime)) return; // NaN でも力を加えない
             var forward = transform.forward;
-            _rb.AddForce(forward * booster.Thrust);
-            if (booster.LateralDrag > 0f)
-            {
-                var velocity = _rb.velocity;
-                _rb.AddForce((Vector3.Project(velocity, forward) - velocity) * booster.LateralDrag);
-            }
+            // 風見トルク: forward × velocity は大きさが機首に垂直な速度成分で、機首を速度へ回す軸を向く
+            if (booster.Stability > 0f) _rb.AddTorque(Vector3.Cross(forward, _rb.velocity) * booster.Stability, ForceMode.Acceleration);
+            if (booster.Thrust > 0f && _age < booster.ThrustTime) _rb.AddForce(forward * booster.Thrust); // NaN でも力を加えない
         }
 
         private void OnCollisionEnter(Collision collision)

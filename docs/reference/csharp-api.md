@@ -9,7 +9,7 @@
 - [WeaponSpec](#weaponspec) — 武装1基の定義(純データ)。
 - [ProjectileSpec](#projectilespec) — 弾1種類の定義(純データ)。
 - [ExplosionSpec](#explosionspec) — 爆発1回の定義(純データ)。
-- [BoosterSpec](#boosterspec) — 弾の推進(ロケット)。
+- [BoosterSpec](#boosterspec) — 弾の推進(ロケット)と安定翼。
 - [GuidanceSpec](#guidancespec) — 誘導(仮実装)。
 - [ColliderShape](#collidershape) — 弾のコライダー1個。
 - [ColliderKind](#colliderkind) — 弾のコライダーの形。
@@ -138,13 +138,13 @@
 
 `public sealed class EWL.Api.BoosterSpec`
 
-弾の推進(ロケット)。Thrustが0なら推進しない。命中したら推力は止まる。
+弾の推進(ロケット)と安定翼。Thrustが0なら推進しない。命中したら推力・安定翼とも止まる。
 
 | フィールド | 型 | 既定値 | 説明 |
 |---|---|---|---|
 | `Thrust` | `float` | `0` | 推力 \[N]。弾の前方へ毎物理フレーム加える(加速度 = Thrust / 弾のMass)。 |
 | `ThrustTime` | `float` | `INF` | 推力を出す時間 \[s]。発射からこの時間で推力が止まる。0は推力なし。既定は無限(弾が消えるまで)。 |
-| `LateralDrag` | `float` | `0` | 推力が出ている間、弾の向きに対する横滑り速度 × この値の力で横滑りを抑える(安定翼)\[N/(m/s)]。 |
+| `Stability` | `float` | `0` | 風見安定(安定翼)の強さ \[(rad/s²)/(m/s)]。機首に垂直な速度成分 × この値の角加速度で、機首を飛ぶ向きへ寄せる(弾の質量・形に依らない)。横滑りが大きいほど強く戻り、重力で曲がる弾道にも機首が沿う。推力の有無・燃焼の終了に関係なく、命中まで飛行中ずっと働く。0なら働かない。速度そのものは変えないので、横滑りは機首が向き直って推力が掛かることで消える。振動を抑えるには`ProjectileSpec.AngularDrag`を併用する。 |
 
 ## GuidanceSpec
 

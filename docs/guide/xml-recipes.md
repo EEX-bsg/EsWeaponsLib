@@ -222,10 +222,11 @@ Mac・Linuxでは、「バンドル名 + `Mac`」のAssetBundleがあればそ�
 <EjectVelocity x="0" y="0" z="5" />     <!-- 弾のローカル軸で足す速度 [m/s]。反動に含めない -->
 <Projectile>
     <ColliderEnableDelay>0.3</ColliderEnableDelay> <!-- 遅い弾が自機に当たらないよう延ばす -->
+    <AngularDrag>4</AngularDrag>  <!-- 安定翼で向き直るときの振動を抑える -->
     <Booster>
         <Thrust>400</Thrust>         <!-- [N] -->
         <ThrustTime>2</ThrustTime>   <!-- 推力を出す時間 [s]。書かなければ弾が消えるまで -->
-        <LateralDrag>2</LateralDrag> <!-- 横滑りを抑える(安定翼) -->
+        <Stability>0.5</Stability>   <!-- 安定翼: 機首を飛ぶ向きへ寄せる。重力で落ちる弾道にも機首が沿う -->
     </Booster>
 </Projectile>
 ```
