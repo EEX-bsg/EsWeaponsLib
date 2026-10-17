@@ -5,9 +5,7 @@ Besiegeの武装Mod向けの前提ライブラリです。XMLカスタムモジ�
 > [!IMPORTANT]
 > **現在はα版(開発中)です。** 公開面(モジュール名・XML要素・C# API)は1.0まで予告付きで変わることがあります。変更点は [CHANGELOG.md](CHANGELOG.md) を参照してください。
 
-- 対象: Besiege 1.9.1-25490
-- 最初の利用Mod: E'sTankCannonsMod
-- ACM(AddCustomModule)とは独立した実装で、互換性はありません。
+- 対象: Besiege 1.9.1以降
 
 ## 読む場所
 
