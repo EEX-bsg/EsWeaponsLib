@@ -5,8 +5,8 @@ import { join, relative } from 'node:path'
 // docs/ を GitHub Pages に出すサイトの設定。ページの中身は普通の Markdown のまま(先頭の # 見出しがタイトル)。
 // ローカルで確認: npm run docs:dev
 
-// ページを足したらここにも足す(docs/index.md・docs/llms.txt と同じ並び)
-const sidebar = [
+// ページを足したらここにも足す(docs/index.md・docs/llms.txt と同じ並び)。英語版は docs/en/ に同じ構成で置く
+const sidebarJa = [
   {
     text: 'プレイヤー',
     items: [{ text: 'はじめに', link: '/getting-started' }],
@@ -38,6 +38,42 @@ const sidebar = [
       { text: 'コーディング規約', link: '/contributing/conventions' },
       { text: '確認とテスト', link: '/contributing/testing' },
       { text: 'ドキュメントの書き方', link: '/contributing/documentation' },
+    ],
+  },
+]
+
+const sidebarEn = [
+  {
+    text: 'Players',
+    items: [{ text: 'Getting started', link: '/en/getting-started' }],
+  },
+  {
+    text: 'Guide',
+    items: [
+      { text: 'Concepts', link: '/en/guide/concepts' },
+      { text: 'First weapon (XML)', link: '/en/guide/xml-first-weapon' },
+      { text: 'XML recipes', link: '/en/guide/xml-recipes' },
+      { text: 'Block physics', link: '/en/guide/xml-block-physics' },
+      { text: 'Using EWL from C#', link: '/en/guide/csharp' },
+    ],
+  },
+  {
+    text: 'Reference',
+    items: [
+      { text: 'XML custom modules', link: '/en/reference/xml-modules' },
+      { text: 'C# API', link: '/en/reference/csharp-api' },
+    ],
+  },
+  {
+    text: 'Contributing',
+    collapsed: true,
+    items: [
+      { text: 'Design principles', link: '/en/contributing/design-principles' },
+      { text: 'Architecture', link: '/en/contributing/architecture' },
+      { text: 'Public surface and compatibility', link: '/en/contributing/compatibility' },
+      { text: 'Coding conventions', link: '/en/contributing/conventions' },
+      { text: 'Verification and testing', link: '/en/contributing/testing' },
+      { text: 'Writing documentation', link: '/en/contributing/documentation' },
     ],
   },
 ]
@@ -96,38 +132,67 @@ export default defineConfig({
     theme: { light: 'github-light', dark: 'github-dark' },
     anchor: { slugify },
   },
+  // 日本語が正本(ルート)。英語は docs/en/ に同じ構成で置く自動翻訳
+  locales: {
+    root: {
+      label: '日本語',
+      lang: 'ja',
+      themeConfig: {
+        nav: [
+          { text: 'ガイド', link: '/guide/concepts' },
+          { text: 'リファレンス', link: '/reference/xml-modules' },
+          { text: '貢献者向け', link: '/contributing/design-principles' },
+        ],
+        sidebar: sidebarJa,
+        outline: { level: [2, 3], label: 'このページの内容' },
+        docFooter: { prev: '前のページ', next: '次のページ' },
+        darkModeSwitchLabel: '表示モード',
+        lightModeSwitchTitle: 'ライトモードにする',
+        darkModeSwitchTitle: 'ダークモードにする',
+        sidebarMenuLabel: 'メニュー',
+        returnToTopLabel: 'ページの先頭へ',
+        langMenuLabel: '言語',
+        notFound: { title: 'ページが見つかりません', quote: '', linkText: 'トップへ戻る' },
+      },
+    },
+    en: {
+      label: 'English',
+      lang: 'en',
+      link: '/en/',
+      description: 'Prerequisite library for Besiege weapon mods (XML custom modules and C# API)',
+      themeConfig: {
+        nav: [
+          { text: 'Guide', link: '/en/guide/concepts' },
+          { text: 'Reference', link: '/en/reference/xml-modules' },
+          { text: 'Contributing', link: '/en/contributing/design-principles' },
+        ],
+        sidebar: sidebarEn,
+        outline: { level: [2, 3], label: 'On this page' },
+        notFound: { title: 'Page not found', quote: '', linkText: 'Back to top' },
+      },
+    },
+  },
   themeConfig: {
-    nav: [
-      { text: 'ガイド', link: '/guide/concepts' },
-      { text: 'リファレンス', link: '/reference/xml-modules' },
-      { text: '貢献者向け', link: '/contributing/design-principles' },
-    ],
-    sidebar,
-    outline: { level: [2, 3], label: 'このページの内容' },
     search: {
       provider: 'local',
       options: {
         miniSearch: { options: { tokenize } },
-        translations: {
-          button: { buttonText: '検索', buttonAriaLabel: '検索' },
-          modal: {
-            displayDetails: '詳細を表示',
-            resetButtonTitle: 'リセット',
-            backButtonTitle: '閉じる',
-            noResultsText: '見つかりませんでした',
-            footer: { selectText: '選択', navigateText: '移動', closeText: '閉じる' },
+        locales: {
+          root: {
+            translations: {
+              button: { buttonText: '検索', buttonAriaLabel: '検索' },
+              modal: {
+                displayDetails: '詳細を表示',
+                resetButtonTitle: 'リセット',
+                backButtonTitle: '閉じる',
+                noResultsText: '見つかりませんでした',
+                footer: { selectText: '選択', navigateText: '移動', closeText: '閉じる' },
+              },
+            },
           },
         },
       },
     },
-    docFooter: { prev: '前のページ', next: '次のページ' },
-    darkModeSwitchLabel: '表示モード',
-    lightModeSwitchTitle: 'ライトモードにする',
-    darkModeSwitchTitle: 'ダークモードにする',
-    sidebarMenuLabel: 'メニュー',
-    returnToTopLabel: 'ページの先頭へ',
-    langMenuLabel: '言語',
-    notFound: { title: 'ページが見つかりません', quote: '', linkText: 'トップへ戻る' },
   },
   buildEnd(siteConfig) {
     copyMarkdown(siteConfig.srcDir, siteConfig.outDir)
