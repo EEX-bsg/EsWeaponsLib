@@ -2,8 +2,9 @@
 
 How EWL's guided projectiles decide their target and how they fly.
 
-> [!NOTE]
-> Until 1.0, guidance behavior and coefficients may change. Changes are recorded in the [CHANGELOG](https://github.com/EEX-bsg/EsWeaponsLib/blob/main/CHANGELOG.md).
+> [!WARNING]
+> Guidance is under active development. Targeting, flight behavior, elements and coefficients may change significantly.
+> Before building a mod that relies on guidance, check the current state with the author. Changes are recorded in the [CHANGELOG](https://github.com/EEX-bsg/EsWeaponsLib/blob/main/CHANGELOG.md).
 
 ## Usage
 

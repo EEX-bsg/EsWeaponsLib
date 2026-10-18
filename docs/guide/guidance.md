@@ -2,8 +2,9 @@
 
 EWLの誘導弾がどう目標を決め、どう飛ぶかの説明です。
 
-> [!NOTE]
-> 1.0までは、誘導の挙動・係数を変えることがあります。変えたときは [CHANGELOG](https://github.com/EEX-bsg/EsWeaponsLib/blob/main/CHANGELOG.md) に書きます。
+> [!WARNING]
+> 誘導は開発中の機能です。目標の決まり方・飛び方・要素・係数は、今後大きく変わることがあります。
+> 誘導を使うModを作る前に、制作者に現状を確認してください。変えたときは [CHANGELOG](https://github.com/EEX-bsg/EsWeaponsLib/blob/main/CHANGELOG.md) に書きます。
 
 ## 使い方
 
