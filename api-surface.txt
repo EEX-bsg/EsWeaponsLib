@@ -48,6 +48,7 @@ EWL.Api.ColliderShape::System.Void .ctor()
 EWL.Api.ExplosionSpec::Effect : UnityEngine.GameObject
 EWL.Api.ExplosionSpec::FacesHitNormal : System.Boolean
 EWL.Api.ExplosionSpec::Force : System.Single
+EWL.Api.ExplosionSpec::ForwardOffset : System.Single
 EWL.Api.ExplosionSpec::OnlyWithExplodingCannonballs : System.Boolean
 EWL.Api.ExplosionSpec::Radius : System.Single
 EWL.Api.ExplosionSpec::Sounds : System.Collections.Generic.List`1<UnityEngine.AudioClip>
@@ -215,6 +216,7 @@ EWL.Modules.EwlWeaponModule::TotalAmmo : System.Int32 XmlElement() DefaultValue(
 EWL.Modules.ExplosionXml::Effect : System.String XmlElement() DefaultValue()
 EWL.Modules.ExplosionXml::FacesHitNormal : System.Boolean XmlElement() DefaultValue(False)
 EWL.Modules.ExplosionXml::Force : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.ExplosionXml::ForwardOffset : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ExplosionXml::OnlyWithExplodingCannonballs : System.Boolean XmlElement() DefaultValue(False)
 EWL.Modules.ExplosionXml::Radius : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ExplosionXml::Sounds : System.Collections.Generic.List`1<Modding.Serialization.ResourceReference> XmlArray(Sounds) DefaultValue()

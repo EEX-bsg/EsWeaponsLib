@@ -9,6 +9,10 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### 爆発
+
+- `Projectile/Explosion/ForwardOffset`(C#: `ExplosionSpec.ForwardOffset`)を追加。爆発地点を弾の前方へ指定距離 [m] ずらす(HEAT 等)。既定 0 は従来どおり。
+
 ### 誘導
 
 - **[Breaking]** 誘導の目標は自動で選ばず、C#の `Weapon.Target` で指定する。旧: 発射の瞬間に、発射方向の前方30度以内で最も近い敵のコアを自動で選んでいた。

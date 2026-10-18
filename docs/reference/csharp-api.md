@@ -132,6 +132,7 @@
 | `Force` | `float` | `0` | AddExplosionForceのexplosionForce。 |
 | `UpwardsModifier` | `float` | `0` | AddExplosionForceのupwardsModifier。 |
 | `OnlyWithExplodingCannonballs` | `bool` | `false` | 通常は爆発しない弾として扱い、ゴッドツール「爆発する砲弾」が有効なときだけ爆発する。 |
+| `ForwardOffset` | `float` | `0` | 爆発地点を弾の前方(機首の向き)へずらす距離 \[m]。爆風・エフェクト・音すべてに効く。0なら起爆した弾の位置(HEAT のメタルジェット等を表すときに使う)。 |
 | `Effect` | `GameObject` | なし | 爆発エフェクトのプレハブ。nullなら無し。 |
 | `FacesHitNormal` | `bool` | `false` | 爆発エフェクトを命中面の法線へ向ける。 |
 | `Sounds` | `List<AudioClip>` | 空 | 爆発音(ランダムに1つ)。 |
