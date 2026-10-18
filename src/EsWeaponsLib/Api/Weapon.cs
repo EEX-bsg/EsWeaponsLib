@@ -1,4 +1,5 @@
 using System;
+using EWL.Besiege;
 using EWL.Weapons;
 using UnityEngine;
 
@@ -74,6 +75,33 @@ namespace EWL.Api
         /// 弾に直接触るのは推奨しない(足りない操作は API への追加を提案してほしい)。置き場の構成は 1.0 まで変わりうる。
         /// </summary>
         public string PoolKey { get { return _driver != null ? _driver.PoolKey : null; } }
+
+        /// <summary>
+        /// 誘導の目標(敵マシンのコアブロックの Transform。<see cref="FindTarget"/> で探す)。<see cref="TryFire"/> が発射を受け付けた時点の値で、
+        /// その発射で出る弾(遅延・バーストで後から出る弾を含む)の目標が確定する。確定した後に変えても、発射待ち・飛行中の弾には効かない。
+        /// null、または発射の受付時に有効な敵のコアでない(味方・壊れた・リスポーンした・任意の物体等)なら、その発射の弾は無誘導で飛ぶ。
+        /// <see cref="GuidanceSpec.Gain"/> が0の武装では使われない。
+        /// MP: 撃つブロックの持ち主のピアで設定する。持ち主がクライアント(グローバルシミュ)なら実行権威のホストへ送られ、
+        /// ホストは持ち主以外からの指定を受け付けず、敵のコアでない指定は null として扱う。ホスト側でクライアントのブロックの目標を決めないこと
+        /// (ホストのカメラはそのクライアントの照準ではない)。読むと、このピアで最後に設定・受信した値。
+        /// </summary>
+        public Transform Target
+        {
+            get { return _driver != null ? _driver.Target : null; }
+            set { if (_driver != null) _driver.SetTarget(value); }
+        }
+
+        /// <summary>
+        /// 照準(位置 <c>aimOrigin</c> と向き <c>aimDirection</c>)から <c>maxAngle</c> [度] 以内にいる敵マシンのコアブロック(の Transform)のうち、
+        /// 照準の向きとのなす角が最も小さいものを返す(距離では選ばない)。無ければ null。
+        /// 敵 = この武装のブロックのマシン以外で、観戦中でなく、グローバルシミュ中のプレイヤーのマシン。ブロックにチームがあれば同じチームは除く(チーム無しは全員が敵)。
+        /// SP・ローカルシミュには他人がいないので null(コンソールコマンド ewl_dummy で置いたテスト用のダミー標的は、このピアでだけ敵として選ばれる)。
+        /// どのピアでも呼べ、毎フレーム呼んでよい。目標の指定は <see cref="Target"/> で行う。
+        /// </summary>
+        public Transform FindTarget(Vector3 aimOrigin, Vector3 aimDirection, float maxAngle)
+        {
+            return _driver != null ? MachineTargets.FindNearestToAim(_driver.Block, aimOrigin, aimDirection, maxAngle) : null;
+        }
 
         /// <summary>破棄済みなら false。</summary>
         public bool IsAlive { get { return _driver != null; } }

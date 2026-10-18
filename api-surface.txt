@@ -28,6 +28,7 @@ EWL.Api.Attacker::Player : Modding.Common.Player {get}
 EWL.Api.Attacker::PlayerId : System.UInt16 {get}
 EWL.Api.Attacker::static EWL.Api.Attacker GetDetonator(BlockBehaviour)
 EWL.Api.Attacker::Team : MPTeam {get}
+EWL.Api.BoosterSpec::MaxSpeed : System.Single
 EWL.Api.BoosterSpec::Stability : System.Single
 EWL.Api.BoosterSpec::System.Void .ctor()
 EWL.Api.BoosterSpec::Thrust : System.Single
@@ -53,6 +54,7 @@ EWL.Api.ExplosionSpec::Sounds : System.Collections.Generic.List`1<UnityEngine.Au
 EWL.Api.ExplosionSpec::System.Void .ctor()
 EWL.Api.ExplosionSpec::UpwardsModifier : System.Single
 EWL.Api.GuidanceSpec::Gain : System.Single
+EWL.Api.GuidanceSpec::ReleaseAngle : System.Single
 EWL.Api.GuidanceSpec::System.Void .ctor()
 EWL.Api.HitKind::Direct : EWL.Api.HitKind
 EWL.Api.HitKind::Explosion : EWL.Api.HitKind
@@ -118,6 +120,8 @@ EWL.Api.Weapon::static UnityEngine.GameObject CreateLoadedProjectilePreview(Bloc
 EWL.Api.Weapon::System.Boolean TryFire()
 EWL.Api.Weapon::System.Boolean TryReload()
 EWL.Api.Weapon::System.Void Destroy()
+EWL.Api.Weapon::Target : UnityEngine.Transform {get;set}
+EWL.Api.Weapon::UnityEngine.Transform FindTarget(UnityEngine.Vector3, UnityEngine.Vector3, System.Single)
 EWL.Api.WeaponSpec::AutoReload : System.Boolean
 EWL.Api.WeaponSpec::BurstCount : System.Int32
 EWL.Api.WeaponSpec::BurstInterval : System.Single
@@ -149,6 +153,7 @@ EWL.Modules.BlockMaterialXml::Bounciness : System.Single XmlElement() DefaultVal
 EWL.Modules.BlockMaterialXml::Friction : System.Single XmlElement() DefaultValue(0.6)
 EWL.Modules.BlockMaterialXml::FrictionCombine : UnityEngine.PhysicMaterialCombine XmlElement() DefaultValue()
 EWL.Modules.BlockMaterialXml::System.Void .ctor()
+EWL.Modules.BoosterXml::MaxSpeed : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.BoosterXml::Stability : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.BoosterXml::System.Void .ctor()
 EWL.Modules.BoosterXml::Thrust : System.Single XmlElement() DefaultValue(0)
@@ -216,6 +221,7 @@ EWL.Modules.ExplosionXml::Sounds : System.Collections.Generic.List`1<Modding.Ser
 EWL.Modules.ExplosionXml::System.Void .ctor()
 EWL.Modules.ExplosionXml::UpwardsModifier : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.GuidanceXml::Gain : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.GuidanceXml::ReleaseAngle : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.GuidanceXml::System.Void .ctor()
 EWL.Modules.JointRotationXml::AxisX : UnityEngine.ConfigurableJointMotion XmlElement() DefaultValue()
 EWL.Modules.JointRotationXml::AxisY : UnityEngine.ConfigurableJointMotion XmlElement() DefaultValue()

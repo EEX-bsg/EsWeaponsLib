@@ -68,6 +68,7 @@
     <Compile Include="Besiege\Damage.cs" />
     <Compile Include="Besiege\ExplosiveTag.cs" />
     <Compile Include="Besiege\MachineTargets.cs" />
+    <Compile Include="TestTargets.cs" />
     <Compile Include="Besiege\Simulation.cs" />
     <Compile Include="Besiege\Sounds.cs" />
     <Compile Include="Besiege\VanillaArrowWatch.cs" />

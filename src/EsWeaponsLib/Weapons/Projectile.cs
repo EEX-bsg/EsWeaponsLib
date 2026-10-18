@@ -77,7 +77,7 @@ namespace EWL.Weapons
 
         /// <summary>発射。発射ごとに Spec の値(質量・見た目・物理マテリアル等)を設定し直す。</summary>
         internal void Launch(WeaponDriver owner, ProjectileSpec spec, Vector3 pos, Quaternion rot, Vector3 velocity,
-            Collider[] ignore, PhysicMaterial physicMaterial, Material material)
+            Collider[] ignore, PhysicMaterial physicMaterial, Material material, Transform guidanceTarget)
         {
             Begin(owner, spec, pos, rot, material);
             _weapon = owner.Owner;
@@ -97,11 +97,10 @@ namespace EWL.Weapons
             _rb.collisionDetectionMode = spec.CollisionMode;
             _rb.velocity = velocity;
             _rb.angularVelocity = Vector3.zero;
-            if (_guidanceGain > 0f) // 目標は発射時に決めて変えない
+            if (_guidanceGain > 0f) // 目標は発射要求の時点で確定済み。飛行中は変えない
             {
                 if (_guidance == null) _guidance = new MissileGuidance();
-                var direction = rot * Vector3.forward;
-                _guidance.Begin(MachineTargets.FindEnemyCore(owner.Block, pos, direction, MissileGuidance.LockOnAngle), direction);
+                _guidance.Begin(guidanceTarget, rot * Vector3.forward, spec.Guidance.ReleaseAngle);
             }
             AttachEffects();
         }
@@ -186,7 +185,7 @@ namespace EWL.Weapons
             if ((_guidanceGain > 0f || _spec.Booster.Stability > 0f) && _networkVelocity.sqrMagnitude > 0.01f)
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(_networkVelocity), 1f - Mathf.Exp(-CorrectionRate * Time.deltaTime));
             var booster = _spec.Booster;
-            if (booster.Thrust > 0f && _age < _thrustTime && _spec.Mass > 0f)
+            if (booster.Thrust > 0f && _age < _thrustTime && _spec.Mass > 0f && BelowMaxSpeed(booster, _networkVelocity))
                 predicted += transform.forward * (booster.Thrust / _spec.Mass * 0.5f * elapsed * elapsed);
             _correction *= Mathf.Exp(-CorrectionRate * Time.deltaTime);
             transform.position = predicted + _correction;
@@ -299,7 +298,12 @@ namespace EWL.Weapons
             var forward = transform.forward;
             // 風見トルク: forward × velocity は大きさが機首に垂直な速度成分で、機首を速度へ回す軸を向く
             if (booster.Stability > 0f) _rb.AddTorque(Vector3.Cross(forward, _rb.velocity) * booster.Stability, ForceMode.Acceleration);
-            if (booster.Thrust > 0f && _age < _thrustTime) _rb.AddForce(forward * booster.Thrust); // NaN でも力を加えない
+            if (booster.Thrust > 0f && _age < _thrustTime && BelowMaxSpeed(booster, _rb.velocity)) _rb.AddForce(forward * booster.Thrust); // NaN でも力を加えない
+        }
+
+        private static bool BelowMaxSpeed(BoosterSpec booster, Vector3 velocity)
+        {
+            return booster.MaxSpeed <= 0f || velocity.sqrMagnitude < booster.MaxSpeed * booster.MaxSpeed;
         }
 
         private void OnCollisionEnter(Collision collision)

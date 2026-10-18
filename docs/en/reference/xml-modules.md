@@ -92,7 +92,7 @@ In C# this corresponds to `ProjectileSpec`.
 | `DetonationDelayRandomExtra` | Number | `0` | ○ | Width of the random amount added to the detonation delay \[s] (0 to this value). |
 | `Explosion` | Child element ([EwlWeapon/Projectile/Explosion](#ewlweapon-projectile-explosion)) | — | ○ | The explosion when detonated. If Radius is 0, there is no explosion. |
 | `Booster` | Child element ([EwlWeapon/Projectile/Booster](#ewlweapon-projectile-booster)) | — | ○ | Propulsion (rocket). If Thrust is 0, there is no propulsion. |
-| `Guidance` | Child element ([EwlWeapon/Projectile/Guidance](#ewlweapon-projectile-guidance)) | — | ○ | Guidance (provisional implementation; the element as a whole is planned to be changed in a breaking way). |
+| `Guidance` | Child element ([EwlWeapon/Projectile/Guidance](#ewlweapon-projectile-guidance)) | — | ○ | Guidance (provisional implementation). The target is specified with C# `Weapon.Target` (with XML alone there is no target, and the projectile flies unguided). |
 
 ## EwlWeapon/Projectile/Explosion
 
@@ -121,16 +121,18 @@ In C# this corresponds to `BoosterSpec`.
 | `Thrust` | Number | `0` | ○ | Thrust \[N]. Applied forward on the projectile every physics frame (acceleration = Thrust / the projectile's Mass). |
 | `ThrustTime` | Number | `INF` | ○ | How long thrust is produced \[s]. Thrust stops this long after firing (fuel runs out), and the projectile then flies on inertia (stabilizing fins and guidance keep working). 0 means no thrust. The default is infinite (until the projectile disappears). The value at the time of firing is used; projectiles in flight are not changed. |
 | `Stability` | Number | `0` | ○ | Strength of the weathervane stabilization (stabilizing fins) \[(rad/s²)/(m/s)]. With an angular acceleration of (velocity component perpendicular to the nose) × this value, the nose is pulled toward the direction of flight (independent of the projectile's mass and shape). The larger the sideslip, the stronger the correction, and the nose also follows a trajectory that bends under gravity. It works throughout flight until the hit, regardless of whether thrust is present or burning has ended. If 0, it does not work. It does not change the velocity itself, so sideslip disappears as the nose turns to face forward and thrust is applied. To suppress oscillation, use it together with `ProjectileSpec.AngularDrag`. |
+| `MaxSpeed` | Number | `0` | ○ | The upper speed that thrust accelerates to \[m/s]. While the projectile's speed is at or above this value, no thrust is produced (top speed; it can be exceeded by gravity, blasts, etc.). 0 means no limit (decided only by the balance of thrust and drag `ProjectileSpec.Drag`). |
 
 ## EwlWeapon/Projectile/Guidance
 
-Guidance (provisional implementation). Including this type and the XML Guidance element, both the way targets are decided and the steering are planned to be changed in a breaking way. At the moment of firing, it takes as the target the nearest of the core blocks of enemy machines within a fixed angle ahead of the firing direction, and does not change it during flight. If there is no target, it flies keeping the firing direction. It only changes the projectile's orientation by torque, so use it in combination with propulsion (`BoosterSpec`).
+Guidance (provisional implementation). The steering formula and coefficients may change in the future. The target is specified with `Weapon.Target` and is fixed by its value at the moment `Weapon.TryFire` accepts the shot (projectiles that come out later due to delay or burst share the same target). The target of a projectile in flight does not change; when it is lost (destroyed, respawned, simulation ended) or released, the projectile becomes unguided and does not pick up another target. For 0.2 s after firing it keeps the firing direction, then turns the projectile toward the target by torque. An unguided projectile keeps its heading and flies straight (a projectile fired without a target keeps the firing direction; after losing or releasing the target, the heading at that moment; it does not turn back to the firing direction). It only changes the orientation, so use it in combination with propulsion (`BoosterSpec`). After becoming unguided, propulsion, stabilizing fins, drag, gravity, and lifetime keep working as before.
 
 In C# this corresponds to `GuidanceSpec`.
 
 | Element | Syntax | Default | Reload | Description |
 |---|---|---|---|---|
 | `Gain` | Number | `0` | ○ | Guidance strength (coefficient of the turning torque). If 0, there is no guidance. |
+| `ReleaseAngle` | Number | `0` | ○ | Release angle \[deg]. When the angle between the projectile's nose and the direction from the projectile to the target exceeds this value, guidance is released (so that a projectile that missed and passed the target does not turn back). It is the half-angle of a cone around the nose; 90 means it keeps tracking as long as the target is in the forward hemisphere. Checked from right after firing. 0 means no release by angle. |
 
 ## EwlBlockPhysics
 

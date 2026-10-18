@@ -145,7 +145,7 @@ namespace EWL.Api
         public ExplosionSpec Explosion = new ExplosionSpec();
         /// <summary>推進(ロケット)。Thrustが0なら推進しない。</summary>
         public BoosterSpec Booster = new BoosterSpec();
-        /// <summary>誘導(仮実装)。Gainが0なら誘導しない。</summary>
+        /// <summary>誘導(仮実装)。Gainが0なら誘導しない。目標は <see cref="Weapon.Target"/> で指定する。</summary>
         public GuidanceSpec Guidance = new GuidanceSpec();
     }
 
@@ -183,18 +183,30 @@ namespace EWL.Api
         /// 振動を抑えるには<see cref="ProjectileSpec.AngularDrag"/>を併用する。
         /// </summary>
         public float Stability = 0f;
+        /// <summary>
+        /// 推力で加速する上限の速さ [m/s]。弾の速さがこの値以上の間は推力を出さない(最高速度。重力・爆風などで超えることはある)。
+        /// 0なら上限なし(抗力 <see cref="ProjectileSpec.Drag"/> と推力の釣り合いだけで決まる)。
+        /// </summary>
+        public float MaxSpeed = 0f;
     }
 
     /// <summary>
-    /// 誘導(仮実装)。この型・XMLのGuidance要素を含め、目標の決め方・操舵とも今後破壊的に変更する予定。
-    /// 発射の瞬間に、発射方向の前方一定角度内にいる敵マシンの
-    /// コアブロックのうち最も近いものを目標にし、飛行中は変えない。目標が無ければ発射方向を保って飛ぶ。
-    /// 弾の向きをトルクで変えるだけなので、推進(<see cref="BoosterSpec"/>)と組み合わせて使う。
+    /// 誘導(仮実装)。操舵の式・係数は今後変更することがある。目標は <see cref="Weapon.Target"/> で指定し、
+    /// <see cref="Weapon.TryFire"/> が発射を受け付けた時点の値で確定する(遅延・バーストで後から出る弾も同じ目標)。
+    /// 飛行中の弾の目標は変わらず、見失う(破壊・リスポーン・シミュ終了)か解除されると無誘導になり、別の目標を拾い直さない。
+    /// 発射から0.2秒は発射方向を保ち、その後は弾の向きをトルクで目標へ回す。
+    /// 無誘導の弾は向きを保って直進する(目標なしで撃った弾は発射方向、見失い・解除の後はその時点の向き。発射方向へは戻らない)。
+    /// 向きを変えるだけなので、推進(<see cref="BoosterSpec"/>)と組み合わせて使う。無誘導になった後も推進・安定翼・抗力・重力・寿命はそのまま働く。
     /// </summary>
     public sealed class GuidanceSpec
     {
         /// <summary>誘導の強さ(旋回トルクの係数)。0なら誘導しない。</summary>
         public float Gain = 0f;
+        /// <summary>
+        /// 解除角 [度]。弾の機首と「弾から目標への向き」のなす角がこの値を超えたら誘導を解除する(外れて目標を通り過ぎた弾が引き返さないように)。
+        /// 機首を軸にした円錐の半頂角で、90なら前方の半球にいる限り追い続ける。発射直後から判定する。0なら角度では解除しない。
+        /// </summary>
+        public float ReleaseAngle = 0f;
     }
 
     /// <summary>弾のコライダーの形。</summary>

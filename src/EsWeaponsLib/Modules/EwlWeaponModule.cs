@@ -153,7 +153,7 @@ namespace EWL.Modules
 
         [XmlElement, DefaultValue(null)] public ExplosionXml Explosion = new ExplosionXml();
         [XmlElement, DefaultValue(null)] public BoosterXml Booster = new BoosterXml();
-        /// <summary>誘導(仮実装。要素ごと今後破壊的に変更する予定)。</summary>
+        /// <summary>誘導(仮実装)。目標はC#の <c>Weapon.Target</c> で指定する(XMLだけでは目標が無く、無誘導で飛ぶ)。</summary>
         [XmlElement, DefaultValue(null)] public GuidanceXml Guidance = new GuidanceXml();
     }
 
@@ -178,11 +178,13 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(0f)] public float Thrust = 0f;
         [XmlElement, DefaultValue(float.PositiveInfinity)] public float ThrustTime = float.PositiveInfinity;
         [XmlElement, DefaultValue(0f)] public float Stability = 0f;
+        [XmlElement, DefaultValue(0f)] public float MaxSpeed = 0f;
     }
 
     [Serializable]
     public class GuidanceXml : Element
     {
         [XmlElement, DefaultValue(0f)] public float Gain = 0f;
+        [XmlElement, DefaultValue(0f)] public float ReleaseAngle = 0f;
     }
 }

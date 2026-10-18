@@ -141,6 +141,24 @@ public class MyCannonBehaviour : BlockModuleBehaviour<MyCannonModule>
 | For key presses, check both `IsHeld` and emulation | On the MP host, the client's "moment of pressing" can be missed. Input from logic blocks arrives on the emulation side |
 | Do not put null in the definitions inside `WeaponSpec` (`Projectile`, `Explosion`, etc.) | Leave unused features at their defaults (disabled when 0) |
 
+### Specifying the guidance target
+
+For a guided weapon (`Projectile.Guidance.Gain` greater than 0), putting the `Transform` of an enemy machine's core block into `Weapon.Target` makes the next projectiles chase it.
+To find one, use `Weapon.FindTarget(aim position, aim direction, max angle [deg])`. Among the enemies within the max angle of the aim direction, it returns the one closest to the center of the aim (chosen by angle, not distance).
+
+```csharp
+// Every frame on the shooter's peer (e.g. aim with the center of the camera view)
+var view = myCamera.transform;
+_weapon.Target = _weapon.FindTarget(view.position, view.forward, 6f);
+```
+
+- The target is fixed by its value at the moment `TryFire` accepts the shot. Projectiles that come out later due to delay or burst chase the same target, and changing `Target` afterward does not change it.
+- If it is not a valid enemy core at that moment (ally, destroyed, respawned, an arbitrary object, etc.), the projectile is unguided.
+- In MP, set it on the peer of the owner of the firing block. If the owner is a client, EWL sends it to the host. The host does not accept specifications from anyone other than the owner, or ones that are not enemy cores.
+  Do not decide the target of a client's block from the host's screen (camera).
+- The aim display (crosshair, lock-on indication, etc.) is made by your mod. EWL has no UI.
+- There are no enemies in SP. For testing, the console command `ewl_dummy add [distance]` places a test target ahead of the camera (`ewl_dummy clear` removes them). The target is chosen as an enemy on that peer only and is not synced in MP.
+
 ### Changing values on every shot
 
 `Weapon.Spec` is read on every shot, so rewriting it before `TryFire` takes effect from that projectile (for linking to sliders, etc.).

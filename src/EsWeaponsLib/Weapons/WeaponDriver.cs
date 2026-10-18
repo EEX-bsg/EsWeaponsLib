@@ -12,6 +12,8 @@ namespace EWL.Weapons
     // 武装1基の実体。ブロックの GameObject に付く。公開面は Api.Weapon が包む。
     internal sealed class WeaponDriver : MonoBehaviour
     {
+        private const float TargetResendInterval = 1f; // MP クライアントの持ち主が目標を送り直す間隔 [s]
+
         internal Weapon Owner;
         internal WeaponSpec Spec;
         internal Action Fired;
@@ -19,12 +21,15 @@ namespace EWL.Weapons
         internal int Ammo;
         internal int ReserveAmmo;
         internal bool IsReloading;
+        /// <summary>誘導の目標の指定(Weapon.Target)。発射の受付時に確かめて確定する。</summary>
+        internal Transform Target;
 
         private BlockBehaviour _block;
         private Collider[] _ownColliders;
         private float _nextFireTime;
         private bool _bursting;
         private int _pendingShots; // 遅延待ちで、まだ弾が出ていない発射
+        private float _nextTargetResendTime;
         private LoadedProjectileVisual _loadedVisual;
         private string _privatePoolKey;
         private readonly List<UnityEngine.Object> _owned = new List<UnityEngine.Object>();
@@ -85,6 +90,8 @@ namespace EWL.Weapons
                 _loadedVisual.Apply(Spec); // Spec は書き換えられうるので表示中は毎フレーム合わせる
             }
             if (_loadedVisual != null && _loadedVisual.gameObject.activeSelf != show) _loadedVisual.gameObject.SetActive(show);
+            // MP クライアントの持ち主: ホストの武装がまだ無い間に送った指定は捨てられるので、指定中は時々送り直す
+            if (Target != null && Time.time >= _nextTargetResendTime) SendTarget();
         }
 
         private void OnDestroy()
@@ -106,6 +113,25 @@ namespace EWL.Weapons
 
         private bool UsesMagazine { get { return Spec.MagazineCapacity > 0; } }
 
+        internal void SetTarget(Transform target)
+        {
+            if (target == Target) return;
+            Target = target;
+            SendTarget();
+        }
+
+        private void SendTarget()
+        {
+            _nextTargetResendTime = Time.time + TargetResendInterval;
+            ProjectileSync.TargetChanged(this);
+        }
+
+        /// <summary>ホスト: 持ち主のクライアントからの指定。有効な目標(敵のコア)でなければ指定なしにする。</summary>
+        internal void ReceiveTarget(Transform target)
+        {
+            Target = MachineTargets.IsValidTarget(_block, target) ? target : null;
+        }
+
         internal bool TryFire()
         {
             if (!Simulation.HasAuthority(_block) || Time.time < _nextFireTime || _bursting || IsReloading) return false;
@@ -114,7 +140,9 @@ namespace EWL.Weapons
                 if (UsesMagazine && Spec.AutoReload) TryReload();
                 return false;
             }
-            StartCoroutine(Burst());
+            // 目標はこの発射要求の時点で確定する。遅延・バーストで後から出る弾も同じ目標を追い、その間に指定が変わっても変えない
+            var target = MachineTargets.IsValidTarget(_block, Target) ? Target : null;
+            StartCoroutine(Burst(target));
             return true;
         }
 
@@ -124,7 +152,7 @@ namespace EWL.Weapons
             return Ammo != 0 || (!UsesMagazine && Simulation.IsInfiniteAmmo(_block));
         }
 
-        private IEnumerator Burst()
+        private IEnumerator Burst(Transform target)
         {
             _bursting = true;
             int count = Mathf.Max(1, Spec.BurstCount);
@@ -133,7 +161,7 @@ namespace EWL.Weapons
                 if (i > 0) yield return new WaitForSeconds(Spec.BurstInterval);
                 if (_block == null || !HasAmmo()) break;
                 ConsumeOne();
-                StartCoroutine(Shoot(Spec.FireDelay + UnityEngine.Random.Range(0f, Spec.FireDelayRandomExtra)));
+                StartCoroutine(Shoot(Spec.FireDelay + UnityEngine.Random.Range(0f, Spec.FireDelayRandomExtra), target));
             }
             _nextFireTime = Time.time + Spec.FireInterval;
             _bursting = false;
@@ -175,7 +203,7 @@ namespace EWL.Weapons
             ProjectileSync.WeaponStateChanged(this, WeaponStateFlags.None);
         }
 
-        private IEnumerator Shoot(float delay)
+        private IEnumerator Shoot(float delay, Transform target)
         {
             _pendingShots++;
             if (delay > 0f) yield return new WaitForSeconds(delay);
@@ -200,7 +228,8 @@ namespace EWL.Weapons
             var material = MaterialFor(projectile);
             var velocity = rb.velocity + dir * spec.MuzzleVelocity + rot * spec.EjectVelocity;
             var shot = ProjectilePool.Acquire(PoolKey, projectile);
-            shot.Launch(this, projectile, pos, rot, velocity, _ownColliders, physicMaterial, material);
+            // 待つ間に目標が壊れていれば無誘導(別の目標へは替えない)
+            shot.Launch(this, projectile, pos, rot, velocity, _ownColliders, physicMaterial, material, target);
             rb.AddForce(-dir * (spec.MuzzleVelocity * projectile.Mass * spec.RecoilMultiplier), ForceMode.Impulse);
             PlayShotEffects();
             ProjectileSync.Spawned(this, shot, pos, rot, velocity);

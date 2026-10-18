@@ -25,7 +25,7 @@ namespace EWL.Net
     {
         private const float SnapshotInterval = 0.1f; // 本体の sendRate 既定と同じ 10Hz
 
-        private static MessageType _spawnType, _despawnType, _snapshotType, _weaponStateType;
+        private static MessageType _spawnType, _despawnType, _snapshotType, _weaponStateType, _targetType;
 
         private static readonly Dictionary<int, Projectile> Published = new Dictionary<int, Projectile>(); // ホスト
         private static readonly Dictionary<int, Projectile> Proxies = new Dictionary<int, Projectile>();   // クライアント
@@ -53,6 +53,9 @@ namespace EWL.Net
             ModNetworking.Callbacks[_despawnType] += Receive(OnDespawn);
             ModNetworking.Callbacks[_snapshotType] += Receive(OnSnapshot);
             ModNetworking.Callbacks[_weaponStateType] += Receive(OnWeaponState);
+            // 後から足した種別は末尾に作る(既存の種別 ID を変えない)
+            _targetType = ModNetworking.CreateMessageType(DataType.Block, DataType.ByteArray);
+            ModNetworking.Callbacks[_targetType] += OnTarget;
             ModRoot.CreateChild("ProjectileSync").gameObject.AddComponent<ProjectileSync>();
         }
 
@@ -214,6 +217,47 @@ namespace EWL.Net
             proxy.NetworkId = 0;
             Projectile registered;
             if (Proxies.TryGetValue(id, out registered) && registered == proxy) Proxies.Remove(id);
+        }
+
+        // ---- 誘導の目標(持ち主のクライアント → ホスト) ----
+
+        /// <summary>MP クライアントの持ち主が武装の目標を指定した。グローバルシミュで実行権威のホストへ送る(ローカルシミュでは自分が権威なので送らない)。</summary>
+        internal static void TargetChanged(WeaponDriver weapon)
+        {
+            if (!Simulation.ShowsRemoteProjectiles || !Simulation.IsLocalPlayers(weapon.Block) || !weapon.Block.isSimulating) return;
+            // ダミー標的はこのピアにしか無いので、ホストには「指定なし」として送る
+            ushort targetPlayerId;
+            bool hasTarget = MachineTargets.TryGetPlayerId(weapon.Target, out targetPlayerId);
+            BeginWrite();
+            Writer.Write((byte)weapon.NetworkIndex);
+            Writer.Write(hasTarget);
+            Writer.Write(targetPlayerId);
+            try { ModNetworking.SendToHost(_targetType.CreateMessage(weapon.Block, EndWrite())); }
+            catch (Exception ex) { Debug.LogError("[EWL] ProjectileSync target send failed: " + ex); }
+        }
+
+        private static void OnTarget(Message message)
+        {
+            if (!Simulation.PublishesProjectiles) return; // ホストのグローバルシミュだけが受け付ける
+            try
+            {
+                var block = message.GetData(0) as Block;
+                var bytes = (byte[])message.GetData(1);
+                using (var reader = new BinaryReader(new MemoryStream(bytes)))
+                {
+                    int index = reader.ReadByte();
+                    bool hasTarget = reader.ReadBoolean();
+                    ushort targetPlayerId = reader.ReadUInt16();
+                    var weapon = block != null ? WeaponDriver.Find(block.InternalObject, index) : null;
+                    // 指定できるのはブロックの持ち主だけ。目標が敵のコアかは ReceiveTarget が確かめる
+                    if (weapon == null || message.Sender == null || message.Sender.NetworkId != Simulation.PlayerIdOf(weapon.Block)) return;
+                    weapon.ReceiveTarget(hasTarget ? MachineTargets.CoreOfPlayer(targetPlayerId) : null);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError("[EWL] ProjectileSync target receive failed: " + ex);
+            }
         }
 
         // ---- 共通 ----

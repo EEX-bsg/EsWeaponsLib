@@ -9,6 +9,22 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### 誘導
+
+- **[Breaking]** 誘導の目標は自動で選ばず、C#の `Weapon.Target` で指定する。旧: 発射の瞬間に、発射方向の前方30度以内で最も近い敵のコアを自動で選んでいた。
+  新: `Weapon.Target` に入れた目標を、`TryFire` が発射を受け付けた時点で確定する。XMLだけの武装は目標を持たず、無誘導で飛ぶ。
+  例: `_weapon.Target = _weapon.FindTarget(camera.transform.position, camera.transform.forward, 6f);`
+- **[Breaking]** 誘導中の弾に掛かっていた隠れた減速(物理フレームごとに速度の約0.9%)を廃止した。誘導する弾が速くなるので、旧と同じ速さにするには `Projectile/Drag` を足す
+  (旧と同等は約 `0.9`)か、`Projectile/Booster/MaxSpeed` で上限を決める。
+- 追加: `Weapon.FindTarget`(照準の中心に最も近い敵のコアを探す)、`GuidanceSpec.ReleaseAngle` / XML `Projectile/Guidance/ReleaseAngle`
+  (機首と目標方向の角がこれを超えたら誘導を解除する。既定0は解除しない)。
+- 変更: 目標を失った・解除された弾は、その時点の向きを保って直進する(発射方向へ戻らない。別の目標を追い直さない)。
+- 追加: テスト用のコンソールコマンド `ewl_dummy`(そのピアでだけ敵として扱う標的を置く・消す)。
+
+### 推進
+
+- 追加: `BoosterSpec.MaxSpeed` / XML `Projectile/Booster/MaxSpeed`(推力で加速する上限の速さ [m/s]。既定0は上限なし)。
+
 ## [0.1.0] - 2026-10-17
 
 最初の公開版(α版)です。この版でできることをまとめます。

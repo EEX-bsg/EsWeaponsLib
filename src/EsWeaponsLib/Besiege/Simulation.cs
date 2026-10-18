@@ -35,6 +35,12 @@ namespace EWL.Besiege
             get { return StatMaster.isMP && !StatMaster.isHosting && !StatMaster.isLocalSim; }
         }
 
+        /// <summary>このピアのプレイヤーのブロックか(SP は常に true)。</summary>
+        internal static bool IsLocalPlayers(BlockBehaviour block)
+        {
+            return block != null && block.ParentMachine != null && block.ParentMachine.isLocalMachine;
+        }
+
         /// <summary>ブロックを持つプレイヤーの NetworkId(Modding.Common.Player)。SP は 0。</summary>
         internal static ushort PlayerIdOf(BlockBehaviour block)
         {

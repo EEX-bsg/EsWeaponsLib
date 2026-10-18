@@ -228,9 +228,12 @@ Adding propulsion (`Booster`) makes the projectile accelerate by itself. To mere
         <Thrust>400</Thrust>         <!-- [N] -->
         <ThrustTime>2</ThrustTime>   <!-- How long thrust is produced [s]. If not written, until the projectile disappears -->
         <Stability>0.5</Stability>   <!-- Stabilizing fins: pull the nose toward the direction of flight. The nose also follows a trajectory that drops under gravity -->
+        <MaxSpeed>150</MaxSpeed>     <!-- Top speed [m/s]. Thrust does not accelerate beyond this. If not written, no limit -->
     </Booster>
 </Projectile>
 ```
+
+With thrust alone, the projectile keeps accelerating. To hold its speed down, use `MaxSpeed` (the upper speed thrust accelerates to) or `Drag` (drag; the speed levels off where it balances thrust, and acceleration also becomes gentler).
 
 To let the player decide the thrust burn time, use `ThrustTimeSlider`. When the fuel runs out, thrust stops and the projectile flies on inertia afterward (stabilizing fins and guidance keep working). For a weapon with no fuel limit (infinite), do not place a slider and do not write `ThrustTime`.
 
@@ -244,10 +247,28 @@ To let the player decide the thrust burn time, use `ThrustTimeSlider`. When the 
 
 ## Guidance (provisional)
 
-When `Projectile/Guidance/Gain` is greater than 0, at the moment of firing the projectile picks one enemy machine ahead and curves toward it. Use it in combination with propulsion.
+When `Projectile/Guidance/Gain` is greater than 0, the projectile curves toward its target enemy machine. It only changes the orientation, so use it in combination with propulsion.
+
+```xml
+<Projectile>
+    <Booster>
+        <Thrust>1000</Thrust>
+        <Stability>0.5</Stability>
+    </Booster>
+    <Guidance>
+        <Gain>0.25</Gain>             <!-- Guidance strength -->
+        <ReleaseAngle>90</ReleaseAngle> <!-- Stop guiding when the angle between the nose and the target direction exceeds this [deg]. If not written, never stops -->
+    </Guidance>
+</Projectile>
+```
+
+- **XML alone does not decide the target.** Specify `Weapon.Target` in C# (how to aim is up to your mod; see [Using C#](csharp.md#specifying-the-guidance-target)). A projectile with no target flies unguided.
+- The target is fixed at the moment the shot is accepted, and the target of a projectile in flight does not change. When the target is destroyed, respawns, or guidance is released, the projectile becomes unguided and does not chase another enemy.
+- `ReleaseAngle` keeps a projectile that missed and passed the target from turning back. With 90, it keeps tracking as long as the target is in the forward hemisphere of the nose. It is checked from right after firing, so firing in a direction far away from the target makes the projectile unguided at once.
+- An unguided projectile keeps its heading and flies straight (a projectile fired without a target keeps the firing direction; one that lost its target keeps the heading at that moment). Propulsion, stabilizing fins, drag, gravity, and lifetime keep working.
 
 > [!WARNING]
-> **Guidance is a provisional implementation.** Both the target selection and the steering, element and all, are planned to be rebuilt (this will be a breaking change).
+> **Guidance is a provisional implementation.** The steering formula and coefficients may change in the future.
 
 ## Weapons with many projectiles
 
