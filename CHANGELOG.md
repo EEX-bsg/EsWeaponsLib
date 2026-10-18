@@ -9,6 +9,10 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### 武装
+
+- `EwlWeapon` に `<FireMode>` を追加。`SemiAuto` で、キーを押すたびに1回(バースト1回)だけ撃つ。既定の `Auto` は従来どおり。
+
 ### 誘導
 
 - **[Breaking]** 誘導の目標は自動で選ばず、C#の `Weapon.Target` で指定する。旧: 発射の瞬間に、発射方向の前方30度以内で最も近い敵のコアを自動で選んでいた。

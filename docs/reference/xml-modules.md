@@ -31,6 +31,7 @@ C#では `WeaponSpec` に当たります。
 | `BoosterPowerSlider` | スライダー参照 | なし |  | 値の100倍をProjectile/Booster/Thrust \[N] に使う(PowerSliderと同じ尺度。XMLの値より優先)。発射ごとに読む。シミュ中に値が変わると、飛んでいる弾の推力も変わる。 |
 | `ThrustTimeSlider` | スライダー参照 | なし |  | 値 \[s] をProjectile/Booster/ThrustTimeに使う(XMLの値より優先。燃料切れで推力が止まり、その後は慣性で飛ぶ)。発射ごとに読み、飛行中の弾は変えない。 |
 | `HoldToFire` | `true` / `false` | `true` | ○ | HoldToFireToggleが無いときの発射方式。true: 押している間連射 / false: 押すたびに連射の開始・停止を切り替え。 |
+| `FireMode` | `Auto` / `SemiAuto` | `Auto` | ○ | 発射キーの扱い。Auto: 連射(HoldToFire・HoldToFireToggleに従う) / SemiAuto: 押すたびに1回だけ撃つ(BurstCountが2以上ならバースト1回。FireInterval中に押した分は撃たず捨てる。HoldToFireは使わない)。 |
 | `AssetBundle` | リソース名 | なし | ○ | エフェクトのプレハブ(MuzzleFlash・Projectile/Trail・Projectile/AttachedEffect・Projectile/Explosion/Effect)を探すAssetBundle。Mac/Linuxでは「バンドル名+Mac」があればそちらを使う。 |
 | `MuzzlePosition` | ベクトル | `(0, 0, 0)` | ○ | 発射位置。 |
 | `MuzzleRotation` | ベクトル | `(0, 0, 0)` | ○ | 発射向き(オイラー角 \[度])。弾はこの回転の +Zへ飛ぶ。 |

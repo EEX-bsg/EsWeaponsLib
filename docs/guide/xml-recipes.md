@@ -25,6 +25,16 @@
 <HoldToFireToggle key="hold" />
 ```
 
+### 単発撃ち
+
+```xml
+<FireMode>SemiAuto</FireMode>
+```
+
+- キーを押すたびに1回だけ撃つ(`BurstCount` が2以上ならバースト1回)。押し続けても次は撃たない。
+- `FireInterval` の間に押した分は撃たずに捨てる。
+- `SemiAuto` のとき `HoldToFire` と `HoldToFireToggle` は使わない。既定は `Auto`(連射)。
+
 ### 遅延・拡散・反動
 
 ```xml

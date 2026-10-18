@@ -24,6 +24,7 @@ class EWL.Modules.ProjectileXml : Modding.Serialization.Element
 enum EWL.Api.ColliderKind : System.Enum
 enum EWL.Api.HitKind : System.Enum
 enum EWL.Api.HitSource : System.Enum
+enum EWL.Modules.FireMode : System.Enum
 EWL.Api.Attacker::Player : Modding.Common.Player {get}
 EWL.Api.Attacker::PlayerId : System.UInt16 {get}
 EWL.Api.Attacker::static EWL.Api.Attacker GetDetonator(BlockBehaviour)
@@ -188,6 +189,7 @@ EWL.Modules.EwlWeaponModule::FireDelayRandomExtra : System.Single XmlElement() D
 EWL.Modules.EwlWeaponModule::FireDelaySlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::FireInterval : System.Single XmlElement() DefaultValue(0.5) Reloadable()
 EWL.Modules.EwlWeaponModule::FireKey : Modding.Serialization.MKeyReference XmlElement() RequireToValidate()
+EWL.Modules.EwlWeaponModule::FireMode : EWL.Modules.FireMode XmlElement() DefaultValue(Mono.Cecil.CustomAttributeArgument) Reloadable()
 EWL.Modules.EwlWeaponModule::FireRateSlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::FireSounds : System.Collections.Generic.List`1<Modding.Serialization.ResourceReference> XmlArray(FireSounds) DefaultValue() Reloadable()
 EWL.Modules.EwlWeaponModule::HoldToFire : System.Boolean XmlElement() DefaultValue(True) Reloadable()
@@ -221,6 +223,8 @@ EWL.Modules.ExplosionXml::Radius : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ExplosionXml::Sounds : System.Collections.Generic.List`1<Modding.Serialization.ResourceReference> XmlArray(Sounds) DefaultValue()
 EWL.Modules.ExplosionXml::System.Void .ctor()
 EWL.Modules.ExplosionXml::UpwardsModifier : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.FireMode::Auto : EWL.Modules.FireMode
+EWL.Modules.FireMode::SemiAuto : EWL.Modules.FireMode
 EWL.Modules.GuidanceXml::Gain : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.GuidanceXml::PredictionIterations : System.Int32 XmlElement() DefaultValue(3)
 EWL.Modules.GuidanceXml::ReleaseAngle : System.Single XmlElement() DefaultValue(0)

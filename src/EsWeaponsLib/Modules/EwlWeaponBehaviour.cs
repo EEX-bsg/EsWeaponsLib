@@ -77,8 +77,14 @@ namespace EWL.Modules
             bool fireHeld = IsHeld(_fireKey);
             bool firePressed = fireHeld && !_fireHeldBefore;
             _fireHeldBefore = fireHeld;
-            if (!hold && firePressed) _autoFire = !_autoFire;
-            if (hold ? fireHeld : _autoFire)
+            bool fire;
+            if (Module.FireMode == FireMode.SemiAuto) fire = firePressed;
+            else
+            {
+                if (!hold && firePressed) _autoFire = !_autoFire;
+                fire = hold ? fireHeld : _autoFire;
+            }
+            if (fire)
             {
                 ApplySliders(_weapon.Spec);
                 if (_fireRateSlider == null || _fireRateSlider.Value > 0f) _weapon.TryFire();

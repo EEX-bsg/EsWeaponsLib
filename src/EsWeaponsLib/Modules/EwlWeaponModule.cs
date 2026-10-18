@@ -69,6 +69,11 @@ namespace EWL.Modules
 
         /// <summary>HoldToFireToggleが無いときの発射方式。true: 押している間連射 / false: 押すたびに連射の開始・停止を切り替え。</summary>
         [XmlElement, DefaultValue(true), Reloadable] public bool HoldToFire = true;
+        /// <summary>
+        /// 発射キーの扱い。Auto: 連射(HoldToFire・HoldToFireToggleに従う) / SemiAuto: 押すたびに1回だけ撃つ
+        /// (BurstCountが2以上ならバースト1回。FireInterval中に押した分は撃たず捨てる。HoldToFireは使わない)。
+        /// </summary>
+        [XmlElement, DefaultValue(FireMode.Auto), Reloadable] public FireMode FireMode = FireMode.Auto;
 
         /// <summary>エフェクトのプレハブ(MuzzleFlash・Projectile/Trail・Projectile/AttachedEffect・Projectile/Explosion/Effect)を探すAssetBundle。
         /// Mac/Linuxでは「バンドル名+Mac」があればそちらを使う。</summary>
@@ -187,5 +192,14 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(0f)] public float Gain = 0f;
         [XmlElement, DefaultValue(0f)] public float ReleaseAngle = 0f;
         [XmlElement, DefaultValue(3)] public int PredictionIterations = 3;
+    }
+
+    /// <summary>発射キーの扱い(<see cref="EwlWeaponModule.FireMode"/>)。</summary>
+    public enum FireMode
+    {
+        /// <summary>連射。押している間(またはトグルでONの間)撃ち続ける。</summary>
+        Auto,
+        /// <summary>単発。キーを押すたびに1回(バースト1回)だけ撃つ。</summary>
+        SemiAuto,
     }
 }
