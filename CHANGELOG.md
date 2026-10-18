@@ -19,6 +19,10 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 - 追加: `Weapon.FindTarget`(照準の中心に最も近い敵のコアを探す)、`GuidanceSpec.ReleaseAngle` / XML `Projectile/Guidance/ReleaseAngle`
   (機首と目標方向の角がこれを超えたら誘導を解除する。既定0は解除しない)。
 - 変更: 目標を失った・解除された弾は、その時点の向きを保って直進する(発射方向へ戻らない。別の目標を追い直さない)。
+- 変更: 操舵は、目標が弾の到達までに動く先(迎撃点。重力を受ける弾は落ちる分だけ上)を狙い、機首を速度の遅れの分だけ先へ向ける。
+  山なりに撃ったときや動く目標で、前後・横に外れにくくなった(同じ `Gain` でも曲がり方が変わる)。
+- 追加: `GuidanceSpec.PredictionIterations` / XML `Projectile/Guidance/PredictionIterations`(迎撃点の予測の反復回数。既定3、0は目標の今の位置を狙う)。
+- 文書: 誘導の挙動を [誘導ミサイル](docs/guide/guidance.md) にまとめた。誘導は「仮実装」ではなくなったが、1.0までは挙動・係数を変えることがある。
 - 追加: テスト用のコンソールコマンド `ewl_dummy`(そのピアでだけ敵として扱う標的を置く・消す)。
 
 ### 推進

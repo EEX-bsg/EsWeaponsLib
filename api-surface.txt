@@ -54,6 +54,7 @@ EWL.Api.ExplosionSpec::Sounds : System.Collections.Generic.List`1<UnityEngine.Au
 EWL.Api.ExplosionSpec::System.Void .ctor()
 EWL.Api.ExplosionSpec::UpwardsModifier : System.Single
 EWL.Api.GuidanceSpec::Gain : System.Single
+EWL.Api.GuidanceSpec::PredictionIterations : System.Int32
 EWL.Api.GuidanceSpec::ReleaseAngle : System.Single
 EWL.Api.GuidanceSpec::System.Void .ctor()
 EWL.Api.HitKind::Direct : EWL.Api.HitKind
@@ -221,6 +222,7 @@ EWL.Modules.ExplosionXml::Sounds : System.Collections.Generic.List`1<Modding.Ser
 EWL.Modules.ExplosionXml::System.Void .ctor()
 EWL.Modules.ExplosionXml::UpwardsModifier : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.GuidanceXml::Gain : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.GuidanceXml::PredictionIterations : System.Int32 XmlElement() DefaultValue(3)
 EWL.Modules.GuidanceXml::ReleaseAngle : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.GuidanceXml::System.Void .ctor()
 EWL.Modules.JointRotationXml::AxisX : UnityEngine.ConfigurableJointMotion XmlElement() DefaultValue()

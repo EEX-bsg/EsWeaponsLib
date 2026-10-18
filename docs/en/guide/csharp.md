@@ -157,6 +157,7 @@ _weapon.Target = _weapon.FindTarget(view.position, view.forward, 6f);
 - In MP, set it on the peer of the owner of the firing block. If the owner is a client, EWL sends it to the host. The host does not accept specifications from anyone other than the owner, or ones that are not enemy cores.
   Do not decide the target of a client's block from the host's screen (camera).
 - The aim display (crosshair, lock-on indication, etc.) is made by your mod. EWL has no UI.
+- How the projectile chases its target and when guidance stops are described in [Guided missiles](guidance.md).
 - There are no enemies in SP. For testing, the console command `ewl_dummy add [distance]` places a test target ahead of the camera (`ewl_dummy clear` removes them). The target is chosen as an enemy on that peer only and is not synced in MP.
 
 ### Changing values on every shot

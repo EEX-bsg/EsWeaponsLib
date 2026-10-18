@@ -13,6 +13,7 @@ firing, projectiles, impacts, explosions, magazines, block physics, and multipla
 - [Building Your First Weapon (XML)](guide/xml-first-weapon.md) — Make a block that fires using XML alone
 - [Using XML](guide/xml-recipes.md) — Magazines, bursts, sliders, projectiles, fuses and explosions, effects and sounds, rockets
 - [Block Physics (EwlBlockPhysics)](guide/xml-block-physics.md) — Joint strength, physics material, rotation axes, additional colliders
+- [Guided missiles](guide/guidance.md) — Specifying and fixing targets, intercept prediction and steering, release, speed, test targets
 - [Using C#](guide/csharp.md) — Observing weapons, hits and attackers, building weapons in your own module
 - [XML Reference](reference/xml-modules.md) — All elements and default values (generated)
 - [C# API Reference](reference/csharp-api.md) — Public types and members (generated)

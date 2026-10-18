@@ -182,6 +182,7 @@ namespace EWL.Modules
             projectile.Booster.MaxSpeed = boosterXml.MaxSpeed;
             projectile.Guidance.Gain = projectileXml.Guidance.Gain;
             projectile.Guidance.ReleaseAngle = projectileXml.Guidance.ReleaseAngle;
+            projectile.Guidance.PredictionIterations = projectileXml.Guidance.PredictionIterations;
 
             ApplySliders(spec);
             return spec;

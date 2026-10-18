@@ -13,6 +13,7 @@ E'sWeaponsLib(EWL)は、Besiegeの武装Mod向けの前提ライブラリです�
 - [最初の武装を作る(XML)](guide/xml-first-weapon.md) — XMLだけで撃てるブロックを作る
 - [XMLの使い方](guide/xml-recipes.md) — 弾倉・バースト・スライダー・弾・信管と爆発・エフェクトと音・ロケット
 - [ブロックの物理(EwlBlockPhysics)](guide/xml-block-physics.md) — 接合強度・物理マテリアル・回転軸・追加コライダー
+- [誘導ミサイル](guide/guidance.md) — 目標の指定と確定・迎撃点の予測と操舵・誘導の解除・速さ・テスト用標的
 - [C#で使う](guide/csharp.md) — 武装の観測・命中と攻撃者・自分のモジュールで武装を作る
 - [XMLリファレンス](reference/xml-modules.md) — 全要素と既定値(生成)
 - [C# APIリファレンス](reference/csharp-api.md) — 公開型とメンバー(生成)

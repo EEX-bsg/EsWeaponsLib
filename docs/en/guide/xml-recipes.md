@@ -245,9 +245,10 @@ To let the player decide the thrust burn time, use `ThrustTimeSlider`. When the 
 <ThrustTimeSlider key="burn" />
 ```
 
-## Guidance (provisional)
+## Guidance
 
 When `Projectile/Guidance/Gain` is greater than 0, the projectile curves toward its target enemy machine. It only changes the orientation, so use it in combination with propulsion.
+How the target is decided, how it flies, and how guidance is released are explained in detail in [Guided missiles](guidance.md).
 
 ```xml
 <Projectile>
@@ -267,8 +268,8 @@ When `Projectile/Guidance/Gain` is greater than 0, the projectile curves toward 
 - `ReleaseAngle` keeps a projectile that missed and passed the target from turning back. With 90, it keeps tracking as long as the target is in the forward hemisphere of the nose. It is checked from right after firing, so firing in a direction far away from the target makes the projectile unguided at once.
 - An unguided projectile keeps its heading and flies straight (a projectile fired without a target keeps the firing direction; one that lost its target keeps the heading at that moment). Propulsion, stabilizing fins, drag, gravity, and lifetime keep working.
 
-> [!WARNING]
-> **Guidance is a provisional implementation.** The steering formula and coefficients may change in the future.
+> [!NOTE]
+> Until 1.0, guidance behavior and coefficients may change (changes are recorded in the CHANGELOG).
 
 ## Weapons with many projectiles
 

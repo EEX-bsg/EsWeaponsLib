@@ -100,7 +100,7 @@ namespace EWL.Weapons
             if (_guidanceGain > 0f) // 目標は発射要求の時点で確定済み。飛行中は変えない
             {
                 if (_guidance == null) _guidance = new MissileGuidance();
-                _guidance.Begin(guidanceTarget, rot * Vector3.forward, spec.Guidance.ReleaseAngle);
+                _guidance.Begin(guidanceTarget, rot * Vector3.forward, spec.Guidance.ReleaseAngle, spec.Guidance.PredictionIterations);
             }
             AttachEffects();
         }
@@ -293,8 +293,10 @@ namespace EWL.Weapons
         private void FixedUpdate()
         {
             if (!_active || _proxy || _hit || _detonating) return;
-            if (_guidanceGain > 0f) _guidance.Step(_rb, transform, _guidanceGain, _age);
             var booster = _spec.Booster;
+            bool thrusting = booster.Thrust > 0f && _age < _thrustTime && _spec.Mass > 0f;
+            if (_guidanceGain > 0f)
+                _guidance.Step(_rb, transform, _guidanceGain, _age, thrusting ? booster.Thrust / _spec.Mass : 0f, booster.MaxSpeed);
             var forward = transform.forward;
             // 風見トルク: forward × velocity は大きさが機首に垂直な速度成分で、機首を速度へ回す軸を向く
             if (booster.Stability > 0f) _rb.AddTorque(Vector3.Cross(forward, _rb.velocity) * booster.Stability, ForceMode.Acceleration);

@@ -12,7 +12,8 @@ Key rules for using EWL: add modid="0d219960-b202-4906-b29d-8d90a61a89b8" to EWL
 
 - [Concepts](guide/concepts.md): usage levels A-D, weapon/projectile definitions, execution authority (SP / MP host / local simulation), lifecycle, common mistakes
 - [First weapon in XML](guide/xml-first-weapon.md): minimal block XML with EwlWeapon
-- [XML recipes](guide/xml-recipes.md): fire modes, bursts, ammo and magazines, sliders, projectile physics and looks, fuses and explosions, effects and sounds, rockets, guidance (provisional)
+- [XML recipes](guide/xml-recipes.md): fire modes, bursts, ammo and magazines, sliders, projectile physics and looks, fuses and explosions, effects and sounds, rockets, guidance
+- [Guided missiles](guide/guidance.md): how guidance targets are specified and fixed, intercept prediction and steering, release, speed limits, test targets
 - [Block physics](guide/xml-block-physics.md): EwlBlockPhysics joint strength, physic material, joint rotation, additional colliders
 - [Using EWL from C#](guide/csharp.md): dependency setup, observing weapons, hit events and attackers, driving a Weapon from your own module
 - [XML module reference](reference/xml-modules.md): every element with type, default and description (generated)

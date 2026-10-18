@@ -10,7 +10,7 @@ The public types of the `EWL.Api` namespace. For usage, see [Using C#](../guide/
 - [ProjectileSpec](#projectilespec) — The definition of one kind of projectile (pure data).
 - [ExplosionSpec](#explosionspec) — The definition of one explosion (pure data).
 - [BoosterSpec](#boosterspec) — The projectile's propulsion (rocket) and stabilizing fins.
-- [GuidanceSpec](#guidancespec) — Guidance (provisional implementation).
+- [GuidanceSpec](#guidancespec) — Guidance.
 - [ColliderShape](#collidershape) — One projectile collider.
 - [ColliderKind](#colliderkind) — The shape of a projectile collider.
 - [ProjectileHit](#projectilehit) — One projectile hit (the argument of `Weapon.Hit` / `Weapon.AnyHit`).
@@ -118,7 +118,7 @@ The definition of one kind of projectile (pure data). It has the projectile body
 | `DetonationDelayRandomExtra` | `float` | `0` | Width of the random amount added to the detonation delay \[s] (0 to this value). |
 | `Explosion` | `ExplosionSpec` | — | The explosion when detonated. If Radius is 0, there is no explosion. |
 | `Booster` | `BoosterSpec` | — | Propulsion (rocket). If Thrust is 0, there is no propulsion. |
-| `Guidance` | `GuidanceSpec` | — | Guidance (provisional implementation). If Gain is 0, there is no guidance. The target is specified with `Weapon.Target`. |
+| `Guidance` | `GuidanceSpec` | — | Guidance. If Gain is 0, there is no guidance. The target is specified with `Weapon.Target`. |
 
 ## ExplosionSpec
 
@@ -153,11 +153,12 @@ The projectile's propulsion (rocket) and stabilizing fins. If Thrust is 0, there
 
 `public sealed class EWL.Api.GuidanceSpec`
 
-Guidance (provisional implementation). The steering formula and coefficients may change in the future. The target is specified with `Weapon.Target` and is fixed by its value at the moment `Weapon.TryFire` accepts the shot (projectiles that come out later due to delay or burst share the same target). The target of a projectile in flight does not change; when it is lost (destroyed, respawned, simulation ended) or released, the projectile becomes unguided and does not pick up another target. For 0.2 s after firing it keeps the firing direction, then turns the projectile toward the target by torque. An unguided projectile keeps its heading and flies straight (a projectile fired without a target keeps the firing direction; after losing or releasing the target, the heading at that moment; it does not turn back to the firing direction). It only changes the orientation, so use it in combination with propulsion (`BoosterSpec`). After becoming unguided, propulsion, stabilizing fins, drag, gravity, and lifetime keep working as before.
+Guidance. Until 1.0, the behavior and coefficients may change (changes are recorded in the CHANGELOG). The target is specified with `Weapon.Target` and is fixed by its value at the moment `Weapon.TryFire` accepts the shot (projectiles that come out later due to delay or burst share the same target). The target of a projectile in flight does not change; when it is lost (destroyed, respawned, simulation ended) or released, the projectile becomes unguided and does not pick up another target. For 0.2 s after firing it keeps the firing direction, then turns the projectile's orientation by torque. It aims at where the target will have moved by the time the projectile arrives (the intercept point; a projectile affected by gravity aims higher by the amount it falls), and since the velocity turns later than the nose, the nose is pointed beyond the direction to the intercept point by the difference from the velocity. An unguided projectile keeps its heading and flies straight (a projectile fired without a target keeps the firing direction; after losing or releasing the target, the heading at that moment; it does not turn back to the firing direction). It only changes the orientation, so use it in combination with propulsion (`BoosterSpec`). After becoming unguided, propulsion, stabilizing fins, drag, gravity, and lifetime keep working as before.
 
 | Field | Type | Default | Description |
 |---|---|---|---|
 | `Gain` | `float` | `0` | Guidance strength (coefficient of the turning torque). If 0, there is no guidance. |
+| `PredictionIterations` | `int` | `3` | Number of iterations of the intercept prediction. The time to arrive is estimated as "distance ÷ speed", the target is moved by that time, and the distance is measured again to that point, repeatedly (an approximation; more iterations are more accurate for moving targets). 0 aims at the target's current position. It is computed every physics frame, so do not make it too large. |
 | `ReleaseAngle` | `float` | `0` | Release angle \[deg]. When the angle between the projectile's nose and the direction from the projectile to the target exceeds this value, guidance is released (so that a projectile that missed and passed the target does not turn back). It is the half-angle of a cone around the nose; 90 means it keeps tracking as long as the target is in the forward hemisphere. Checked from right after firing. 0 means no release by angle. |
 
 ## ColliderShape
