@@ -9,6 +9,8 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-19
+
 ### 武装
 
 - `Booster/Lift`(`BoosterSpec.Lift`、既定0)を追加。機首に垂直な速度成分を打ち消して飛ぶ向きを機首へ寄せ、推力が切れた後も誘導で曲がれる。
