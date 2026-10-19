@@ -80,5 +80,7 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 - 誘導(`ProjectileSpec.Guidance` / XML `Projectile/Guidance`)は仮実装で、今後まとめて作り直す予定です(破壊的変更になります)。
 - 途中参加したプレイヤーには、参加前に撃たれた弾は見えません(次の弾から見えます)。
 
-[Unreleased]: https://github.com/EEX-bsg/EsWeaponsLib/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/EEX-bsg/EsWeaponsLib/compare/0.2.1...HEAD
+[0.2.1]: https://github.com/EEX-bsg/EsWeaponsLib/releases/tag/0.2.1
+[0.2.0]: https://github.com/EEX-bsg/EsWeaponsLib/releases/tag/0.2.0
 [0.1.0]: https://github.com/EEX-bsg/EsWeaponsLib/releases/tag/0.1.0
