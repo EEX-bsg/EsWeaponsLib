@@ -12,6 +12,7 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 ### 武装
 
 - `EwlWeapon` に `<FireMode>` を追加。`SemiAuto` で、キーを押すたびに1回(バースト1回)だけ撃つ。既定の `Auto` は従来どおり。
+- `Projectile` に `<Penetration>`(C#は `ProjectileSpec.Penetration`)を追加。装甲を進む向きの厚みで上限まで貫通し、止まった所で命中・起爆する。既定の0は貫通しない。
 
 ### 誘導
 

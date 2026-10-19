@@ -99,6 +99,7 @@ EWL.Api.ProjectileSpec::Mesh : UnityEngine.Mesh
 EWL.Api.ProjectileSpec::MeshPosition : UnityEngine.Vector3
 EWL.Api.ProjectileSpec::MeshRotation : UnityEngine.Vector3
 EWL.Api.ProjectileSpec::MeshScale : UnityEngine.Vector3
+EWL.Api.ProjectileSpec::Penetration : System.Single
 EWL.Api.ProjectileSpec::PoolKey : System.String
 EWL.Api.ProjectileSpec::PoolSize : System.Int32
 EWL.Api.ProjectileSpec::System.Void .ctor()
@@ -260,6 +261,7 @@ EWL.Modules.ProjectileXml::ImpactForce : System.Single XmlElement() DefaultValue
 EWL.Modules.ProjectileXml::Lifetime : System.Single XmlElement() DefaultValue(20)
 EWL.Modules.ProjectileXml::Mass : System.Single XmlElement() DefaultValue(1)
 EWL.Modules.ProjectileXml::Mesh : Modding.Serialization.MeshReference XmlElement() DefaultValue()
+EWL.Modules.ProjectileXml::Penetration : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ProjectileXml::PoolSize : System.Int32 XmlElement() DefaultValue(50)
 EWL.Modules.ProjectileXml::System.Void .ctor()
 EWL.Modules.ProjectileXml::Texture : Modding.Serialization.ResourceReference XmlElement() DefaultValue()

@@ -129,6 +129,13 @@ namespace EWL.Api
         public float EntityDamage = 0f;
         /// <summary>命中物にくっついて止まり、以後は命中物と一緒に動く(矢など)。地形では、その場で止まる。</summary>
         public bool AttachOnHit = false;
+        /// <summary>
+        /// 貫通できる装甲の厚みの上限 [m]。0なら貫通しない。命中すると弾の進む向きに装甲を通り抜け、通った厚みの合計がこの値に達した所
+        /// (それより手前で装甲を抜けたら抜けた所)で止まり、そこで命中・起爆する。厚みは進む向きに沿って測るので、斜めの装甲ほど厚い。
+        /// 0.05mより広い隙間があると装甲はそこで途切れたとみなす。ダメージ・衝撃力・命中イベントは止まった所のブロックにだけ与える。
+        /// 止まった弾は止まった所のブロックにくっつく(AttachOnHitの有無に依らない)。
+        /// </summary>
+        public float Penetration = 0f;
         /// <summary>爆発しない弾を命中時に即消す。falseなら命中の1秒後に消える。</summary>
         public bool DespawnOnHit = false;
 

@@ -166,6 +166,7 @@ namespace EWL.Modules
             projectile.BlockDamage = projectileXml.BlockDamage;
             projectile.EntityDamage = projectileXml.EntityDamage;
             projectile.AttachOnHit = projectileXml.AttachOnHit;
+            projectile.Penetration = projectileXml.Penetration;
             projectile.DespawnOnHit = projectileXml.DespawnOnHit;
             projectile.TimeFuse = projectileXml.TimeFuse;
             projectile.TimeFuseRandomExtra = projectileXml.TimeFuseRandomExtra;

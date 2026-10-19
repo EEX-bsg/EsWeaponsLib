@@ -39,6 +39,7 @@ namespace EWL.Weapons
         private MissileGuidance _guidance; // 誘導する弾だけ。弾のオブジェクトと一緒に使い回す
         private float _guidanceGain; // 発射時の値。0 なら誘導しない
         private float _age;
+        private Vector3 _flightVelocity; // 直前の物理フレームの速度(命中時の _rb.velocity は衝突後の値)
         private float _timeFuse; // 発射時の値(スライダーで変わっても飛行中の弾は変えない)
         private float _thrustTime; // 発射時の値(同上)
         private float _colliderEnableDelay; // 発射時の値
@@ -97,6 +98,7 @@ namespace EWL.Weapons
             _rb.collisionDetectionMode = spec.CollisionMode;
             _rb.velocity = velocity;
             _rb.angularVelocity = Vector3.zero;
+            _flightVelocity = velocity;
             if (_guidanceGain > 0f) // 目標は発射要求の時点で確定済み。飛行中は変えない
             {
                 if (_guidance == null) _guidance = new MissileGuidance();
@@ -301,6 +303,7 @@ namespace EWL.Weapons
             // 風見トルク: forward × velocity は大きさが機首に垂直な速度成分で、機首を速度へ回す軸を向く
             if (booster.Stability > 0f) _rb.AddTorque(Vector3.Cross(forward, _rb.velocity) * booster.Stability, ForceMode.Acceleration);
             if (booster.Thrust > 0f && _age < _thrustTime && BelowMaxSpeed(booster, _rb.velocity)) _rb.AddForce(forward * booster.Thrust); // NaN でも力を加えない
+            _flightVelocity = _rb.velocity;
         }
 
         private static bool BelowMaxSpeed(BoosterSpec booster, Vector3 velocity)
@@ -317,13 +320,20 @@ namespace EWL.Weapons
             _hit = true;
 
             var spec = _spec;
-            var attachTo = Damage.ApplyHit(collision.collider, _rb.velocity, spec.ImpactForce, spec.BlockDamage, spec.EntityDamage, spec.AttachOnHit, _shooter);
+            var hitCollider = collision.collider;
+            var point = collision.contacts.Length > 0 ? collision.contacts[0].point : transform.position;
+            bool penetrated = spec.Penetration > 0f && Penetrate(ref hitCollider, ref point);
+            var attachTo = Damage.ApplyHit(hitCollider, _rb.velocity, spec.ImpactForce, spec.BlockDamage, spec.EntityDamage, spec.AttachOnHit, _shooter);
             if (Weapon.HasHitListeners(_weapon))
+                RaiseHit(Damage.BlockOf(hitCollider), hitCollider, point, HitKind.Direct);
+            if (penetrated)
             {
-                var point = collision.contacts.Length > 0 ? collision.contacts[0].point : transform.position;
-                RaiseHit(Damage.BlockOf(collision.collider), collision.collider, point, HitKind.Direct);
+                // 装甲の中(か抜けた所)で止まり、止まった先のブロックと一緒に動く。中で押し出されないよう当たり判定を切る
+                foreach (var collider in _colliders) collider.enabled = false;
+                transform.position = point;
+                AttachTo(attachTo != null ? attachTo : (hitCollider.attachedRigidbody != null ? hitCollider.attachedRigidbody.transform : null));
             }
-            if (spec.AttachOnHit) AttachTo(attachTo);
+            else if (spec.AttachOnHit) AttachTo(attachTo);
             EffectPlayer.Fade(_trail);
             _trail = null;
 
@@ -334,6 +344,28 @@ namespace EWL.Weapons
             }
             else if (spec.DespawnOnHit) Despawn();
             else StartCoroutine(DespawnAfter(RemoveAfterHit));
+        }
+
+        // 貫通: 命中を止まった位置とそこのコライダーに置き換える。判定できなければ通常の命中のまま
+        private bool Penetrate(ref Collider hitCollider, ref Vector3 point)
+        {
+            float speed = _flightVelocity.magnitude;
+            if (speed < 0.01f) return false;
+            Vector3 stopPoint;
+            Collider stopCollider;
+            if (!Penetration.Resolve(point, _flightVelocity / speed, _spec.Penetration, _rb, CollisionMask(gameObject.layer), out stopPoint, out stopCollider))
+                return false;
+            hitCollider = stopCollider;
+            point = stopPoint;
+            return true;
+        }
+
+        private static int CollisionMask(int layer)
+        {
+            int mask = 0;
+            for (int i = 0; i < 32; i++)
+                if (!Physics.GetIgnoreLayerCollision(layer, i)) mask |= 1 << i;
+            return mask;
         }
 
         private void AttachTo(Transform target)

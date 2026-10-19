@@ -88,6 +88,7 @@
     <Compile Include="Net\ProjectileSync.cs" />
     <Compile Include="Weapons\LoadedProjectileVisual.cs" />
     <Compile Include="Weapons\MissileGuidance.cs" />
+    <Compile Include="Weapons\Penetration.cs" />
     <Compile Include="Weapons\Projectile.cs" />
     <Compile Include="Weapons\ProjectileMaterials.cs" />
     <Compile Include="Weapons\ProjectilePool.cs" />
