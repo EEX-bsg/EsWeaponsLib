@@ -9,6 +9,8 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-19
+
 ### 武装
 
 - `EwlWeapon` に `<FireMode>` を追加。`SemiAuto` で、キーを押すたびに1回(バースト1回)だけ撃つ。既定の `Auto` は従来どおり。
