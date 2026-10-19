@@ -170,6 +170,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(0f)] public float Force = 0f;
         [XmlElement, DefaultValue(0f)] public float UpwardsModifier = 0f;
         [XmlElement, DefaultValue(false)] public bool OnlyWithExplodingCannonballs = false;
+        [XmlElement, DefaultValue(0f)] public float ForwardOffset = 0f;
         /// <summary>AssetBundle内のプレハブ名。</summary>
         [XmlElement, DefaultValue(null)] public string Effect;
         [XmlElement, DefaultValue(false)] public bool FacesHitNormal = false;

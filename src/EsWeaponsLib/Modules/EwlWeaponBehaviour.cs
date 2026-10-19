@@ -179,6 +179,7 @@ namespace EWL.Modules
             explosion.Force = explosionXml.Force;
             explosion.UpwardsModifier = explosionXml.UpwardsModifier;
             explosion.OnlyWithExplodingCannonballs = explosionXml.OnlyWithExplodingCannonballs;
+            explosion.ForwardOffset = explosionXml.ForwardOffset;
             explosion.FacesHitNormal = explosionXml.FacesHitNormal;
             AddClips(explosionXml.Sounds, explosion.Sounds, "Projectile/Explosion/Sounds");
 

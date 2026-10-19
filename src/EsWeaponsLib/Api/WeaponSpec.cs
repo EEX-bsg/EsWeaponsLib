@@ -167,6 +167,8 @@ namespace EWL.Api
         public float UpwardsModifier = 0f;
         /// <summary>通常は爆発しない弾として扱い、ゴッドツール「爆発する砲弾」が有効なときだけ爆発する。</summary>
         public bool OnlyWithExplodingCannonballs = false;
+        /// <summary>爆発地点を弾の前方(機首の向き)へずらす距離 [m]。爆風・エフェクト・音すべてに効く。0なら起爆した弾の位置(HEAT のメタルジェット等を表すときに使う)。</summary>
+        public float ForwardOffset = 0f;
         /// <summary>爆発エフェクトのプレハブ。nullなら無し。</summary>
         public GameObject Effect;
         /// <summary>爆発エフェクトを命中面の法線へ向ける。</summary>

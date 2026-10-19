@@ -401,7 +401,7 @@ namespace EWL.Weapons
         {
             if (delay > 0f) yield return new WaitForSeconds(delay);
             var explosion = _spec.Explosion;
-            var pos = transform.position;
+            var pos = transform.position + transform.forward * explosion.ForwardOffset;
             if (Explodes)
             {
                 if (_godToolExplosion) Simulation.MarkGodToolUsed();

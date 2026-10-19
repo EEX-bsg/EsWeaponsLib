@@ -108,6 +108,7 @@ C#では `ExplosionSpec` に当たります。
 | `Force` | 数値 | `0` | ○ | AddExplosionForceのexplosionForce。 |
 | `UpwardsModifier` | 数値 | `0` | ○ | AddExplosionForceのupwardsModifier。 |
 | `OnlyWithExplodingCannonballs` | `true` / `false` | `false` | ○ | 通常は爆発しない弾として扱い、ゴッドツール「爆発する砲弾」が有効なときだけ爆発する。 |
+| `ForwardOffset` | 数値 | `0` | ○ | 爆発地点を弾の前方(機首の向き)へずらす距離 \[m]。爆風・エフェクト・音すべてに効く。0なら起爆した弾の位置(HEAT のメタルジェット等を表すときに使う)。 |
 | `Effect` | 文字列 | なし | ○ | AssetBundle内のプレハブ名。 |
 | `FacesHitNormal` | `true` / `false` | `false` | ○ | 爆発エフェクトを命中面の法線へ向ける。 |
 | `Sounds` | `<AudioClip />` の並び | 空 | ○ | 爆発音(ランダムに1つ)。 |
