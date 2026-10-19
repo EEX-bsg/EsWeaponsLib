@@ -69,6 +69,10 @@ namespace EWL.Api
         /// <summary>リロード中なら true(撃てない)。</summary>
         public bool IsReloading { get { return _driver.IsReloading; } }
 
+        /// <summary>発射間隔・StartDelay で次の発射を受け付けるまでの残り [s]。0 なら待ちなし(弾切れ・リロードは含まない)。
+        /// 発射間隔の残りはリスポーンでも引き継がれる。MP で発射の権威が無いピアでは、届いた発射から数えた目安。</summary>
+        public float FireCooldownRemaining { get { return _driver.FireCooldownRemaining; } }
+
         /// <summary>
         /// この武装が使う弾のプールのキー。<see cref="ProjectileSpec.PoolKey"/> が空ならこの武装専用のキー。破棄済みなら null。
         /// プールの置き場はシーン直下の "EsWeaponsLib (Scene)/ProjectilePool/(キー)" で、待機中・飛行中の弾はその子(命中物にくっついた弾はその命中物の子)。

@@ -120,6 +120,7 @@ namespace EWL.Modules
                 RecoilMultiplier = module.RecoilMultiplier,
                 BurstCount = module.BurstCount,
                 BurstInterval = module.BurstInterval,
+                StartDelay = module.StartDelay,
                 TotalAmmo = module.TotalAmmo,
                 // 弾倉は武装の生成時に詰めるので、容量はシミュ開始時だけ読む(発射ごとの ApplySliders には入れない)
                 MagazineCapacity = _magazineCapacitySlider != null

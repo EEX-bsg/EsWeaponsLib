@@ -33,6 +33,9 @@ namespace EWL.Api
         public int BurstCount = 1;
         /// <summary>バースト内の弾の間隔 [s]。次の発射要求は最後の弾からFireInterval後に受け付ける。</summary>
         public float BurstInterval = 0.1f;
+        /// <summary>シミュ開始・リスポーンのたびに撃てない時間 [s]。0で待たない。FireIntervalとは独立で、
+        /// 直前の発射から数えた発射間隔の残り(リスポーンでも引き継がれる)とは足さずに長い方を待つ。武装の生成時だけ読む。</summary>
+        public float StartDelay = 0f;
 
         /// <summary>総弾数(弾倉内を含む)。負値で無制限。マシンの無限弾薬設定時は消費しない
         /// (弾倉を使う武装は弾倉の弾だけ減り、予備弾は減らない)。武装の生成時だけ読む。</summary>

@@ -91,6 +91,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(1f), Reloadable] public float RecoilMultiplier = 1f;
         [XmlElement, DefaultValue(1), Reloadable] public int BurstCount = 1;
         [XmlElement, DefaultValue(0.1f), Reloadable] public float BurstInterval = 0.1f;
+        [XmlElement, DefaultValue(0f), Reloadable] public float StartDelay = 0f;
 
         [XmlElement, DefaultValue(-1), Reloadable] public int TotalAmmo = -1;
         [XmlElement, DefaultValue(0), Reloadable] public int MagazineCapacity = 0;
