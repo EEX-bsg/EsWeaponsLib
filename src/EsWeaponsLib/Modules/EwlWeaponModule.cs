@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Xml.Serialization;
+using EWL.Api;
 using Modding.Modules;
 using Modding.Serialization;
 using UnityEngine;
@@ -150,6 +151,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(0f)] public float EntityDamage = 0f;
         [XmlElement, DefaultValue(false)] public bool AttachOnHit = false;
         [XmlElement, DefaultValue(0f)] public float Penetration = 0f;
+        [XmlElement, DefaultValue(PenetrationMode.Total)] public PenetrationMode PenetrationMode = PenetrationMode.Total;
         [XmlElement, DefaultValue(false)] public bool DespawnOnHit = false;
 
         [XmlElement, DefaultValue(float.PositiveInfinity)] public float TimeFuse = float.PositiveInfinity;

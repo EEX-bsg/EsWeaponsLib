@@ -18,6 +18,7 @@
 - [Attacker](#attacker) — 攻撃者のタグ(誰の弾か・誰が起爆させたか)。
 - [BundleAssets](#bundleassets) — `ModAssetBundle` からアセットを取り出す。
 - [HitSource](#hitsource) — どの武器の弾か。
+- [PenetrationMode](#penetrationmode) — 貫通(`ProjectileSpec.Penetration`)で厚みをどう数えるか。
 
 ## Weapon
 
@@ -112,6 +113,7 @@
 | `EntityDamage` | `float` | `0` | 直撃したとき、レベルのエンティティ(人・動物など)に与えるダメージ(爆風では使わない)。 |
 | `AttachOnHit` | `bool` | `false` | 命中物にくっついて止まり、以後は命中物と一緒に動く(矢など)。地形では、その場で止まる。 |
 | `Penetration` | `float` | `0` | 貫通できる装甲の厚みの上限 \[m]。0なら貫通しない。命中すると弾の進む向きに装甲を通り抜け、通った厚みの合計がこの値に達した所(それより手前で装甲を抜けたら抜けた所)で止まり、そこで命中・起爆する。厚みは進む向きに沿って測るので、斜めの装甲ほど厚い。0.05mより広い隙間があると装甲はそこで途切れたとみなす。ダメージ・衝撃力・命中イベントは止まった所のブロックにだけ与える。止まった弾は止まった所のブロックにくっつく(AttachOnHitの有無に依らない)。 |
+| `PenetrationMode` | `PenetrationMode` | `Total` | 貫通で厚みをどう数えるか。既定の `PenetrationMode.Total` は通った装甲の合計。 |
 | `DespawnOnHit` | `bool` | `false` | 爆発しない弾を命中時に即消す。falseなら命中の1秒後に消える。 |
 | `TimeFuse` | `float` | `INF` | 時限信管 \[s]。発射からこの時間で起爆(爆発しない弾は消える)。0は発射直後に起爆。既定は無限(時限信管なし)。 |
 | `TimeFuseRandomExtra` | `float` | `0.05` | 時限信管に加える乱数 \[s](0〜この値)。発射時に決める。TimeFuseが無限のときは効かない。 |
@@ -257,3 +259,14 @@
 | `VanillaCannon` | Besiege標準の大砲の砲弾(散弾砲は含まない)。ゴッドツール「爆発する砲弾」の爆風を含む。 |
 | `VanillaCrossbow` | Besiege標準のクロスボウの矢。 |
 | `VanillaFuelCannon` | Besiege標準のFuelCannonの火球。当たった相手はEWLが本体と同じ判定をやり直して求めるので、まれに本体とずれることがある。 |
+
+## PenetrationMode
+
+`public enum EWL.Api.PenetrationMode`
+
+貫通(`ProjectileSpec.Penetration`)で厚みをどう数えるか。
+
+| 値 | 説明 |
+|---|---|
+| `Total` | 通った装甲の厚みの合計で数え、合計が上限に達した所で止まる(重ねた装甲を続けて抜ける)。 |
+| `FirstBlock` | 最初に当たったブロックだけを数え、そのブロックを抜けた所(厚みが上限を超えるなら上限の所)で止まる。裏に別のブロックが接していれば、その表面で止まる。 |

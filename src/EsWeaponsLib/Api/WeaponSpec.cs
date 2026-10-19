@@ -136,6 +136,8 @@ namespace EWL.Api
         /// 止まった弾は止まった所のブロックにくっつく(AttachOnHitの有無に依らない)。
         /// </summary>
         public float Penetration = 0f;
+        /// <summary>貫通で厚みをどう数えるか。既定の <see cref="EWL.Api.PenetrationMode.Total"/> は通った装甲の合計。</summary>
+        public PenetrationMode PenetrationMode = PenetrationMode.Total;
         /// <summary>爆発しない弾を命中時に即消す。falseなら命中の1秒後に消える。</summary>
         public bool DespawnOnHit = false;
 
@@ -230,6 +232,16 @@ namespace EWL.Api
         /// 機首を軸にした円錐の半頂角で、90なら前方の半球にいる限り追い続ける。発射直後から判定する。0なら角度では解除しない。
         /// </summary>
         public float ReleaseAngle = 0f;
+    }
+
+    /// <summary>貫通(<see cref="ProjectileSpec.Penetration"/>)で厚みをどう数えるか。</summary>
+    public enum PenetrationMode
+    {
+        /// <summary>通った装甲の厚みの合計で数え、合計が上限に達した所で止まる(重ねた装甲を続けて抜ける)。</summary>
+        Total,
+        /// <summary>最初に当たったブロックだけを数え、そのブロックを抜けた所(厚みが上限を超えるなら上限の所)で止まる。
+        /// 裏に別のブロックが接していれば、その表面で止まる。</summary>
+        FirstBlock,
     }
 
     /// <summary>弾のコライダーの形。</summary>

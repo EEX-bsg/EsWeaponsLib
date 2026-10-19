@@ -12,6 +12,8 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 ### 武装
 
 - `Booster/Lift`(`BoosterSpec.Lift`、既定0)を追加。機首に垂直な速度成分を打ち消して飛ぶ向きを機首へ寄せ、推力が切れた後も誘導で曲がれる。
+- `Projectile/PenetrationMode`(`ProjectileSpec.PenetrationMode`)を追加。`FirstBlock` で最初に当たったブロックの厚みだけ貫通する。既定の `Total` は従来どおり合計で数える。
+- 貫通: 速い弾で接触が装甲の奥で報告されると、命中した装甲が数えられず、止まる位置がずれたり貫通しなかったりしたのを直した。
 
 ## [0.2.0] - 2026-10-19
 

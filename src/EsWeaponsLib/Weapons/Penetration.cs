@@ -5,9 +5,10 @@ namespace EWL.Weapons
     // 貫通: 命中点から進行方向へ、通った装甲の厚みの合計が上限に達する所(上限までに装甲を抜けたら抜けた所)を求める。
     // 線分上の全コライダーの入口を前向き、出口を逆向きのレイ1本ずつで取り、コライダーごとの区間を近い順にたどる。
     // 重なった区間(1ブロックの複数コライダー・ブロック同士の重なり)は和集合として数えるので二重に数えない。
+    // firstBlockOnly なら命中したブロック(剛体。剛体が無ければコライダー)の区間だけを数え、そのブロックを抜けた所で止まる。
     internal static class Penetration
     {
-        private const float StartBack = 0.05f;     // 命中点の少し手前から撃つ(接触点が表面より内側にあることがある)
+        private const float StartBack = 0.05f;     // 命中点から最低これだけ手前から探す
         private const float GapTolerance = 0.05f;  // これより広い隙間があれば、装甲がそこで途切れたとみなす
         private const float SearchMargin = 0.5f;   // 上限より先まで探す長さ(装甲の間の小さな隙間の分)
         private const int MaxHits = 64;
@@ -19,36 +20,47 @@ namespace EWL.Weapons
         private static int _spanCount;
 
         /// <summary>
-        /// 止まる位置と、そこにある(抜けた場合は最後に抜けた)コライダーを求める。
-        /// false なら貫通の判定ができなかった(命中したコライダーが見つからない等)。通常の命中として扱う。
+        /// 止まる位置と、そこにある(抜けた場合は最後に抜けた)コライダーを求める。厚みは命中したコライダーの入口から測る。
+        /// back: 命中点からどれだけ手前から探すか [m]。速い弾は接触が装甲の中で報告されることがあるので、1物理フレームに進む距離を渡す。
+        /// false なら貫通の判定ができなかった(装甲が見つからない等)。通常の命中として扱う。
         /// </summary>
-        internal static bool Resolve(Vector3 point, Vector3 direction, float depth, Rigidbody self, int layerMask,
-            out Vector3 stopPoint, out Collider stopCollider)
+        internal static bool Resolve(Vector3 point, Vector3 direction, float back, float depth, Collider hit, bool firstBlockOnly,
+            Rigidbody self, int layerMask, out Vector3 stopPoint, out Collider stopCollider)
         {
             stopPoint = point;
             stopCollider = null;
-            float length = depth + SearchMargin;
+            back = Mathf.Max(back, StartBack);
+            var origin = point - direction * back;
+            float length = back + depth + SearchMargin;
             _spanCount = 0;
 
-            int count = Physics.RaycastNonAlloc(point - direction * StartBack, direction, RaycastHits, length + StartBack, layerMask, QueryTriggerInteraction.Ignore);
+            int count = Physics.RaycastNonAlloc(origin, direction, RaycastHits, length, layerMask, QueryTriggerInteraction.Ignore);
             for (int i = 0; i < count; i++)
-                if (Counts(RaycastHits[i].collider, self)) AddEntry(RaycastHits[i].collider, RaycastHits[i].distance - StartBack);
-            count = Physics.RaycastNonAlloc(point + direction * length, -direction, RaycastHits, length + StartBack, layerMask, QueryTriggerInteraction.Ignore);
+                if (Counts(RaycastHits[i].collider, self)) AddEntry(RaycastHits[i].collider, RaycastHits[i].distance);
+            count = Physics.RaycastNonAlloc(origin + direction * length, -direction, RaycastHits, length, layerMask, QueryTriggerInteraction.Ignore);
             for (int i = 0; i < count; i++)
                 if (Counts(RaycastHits[i].collider, self)) AddExit(RaycastHits[i].collider, length - RaycastHits[i].distance);
             SortByStart(length);
 
-            float remaining = depth, cursor = 0f;
+            // 命中したコライダーの入口から数える(手前で探した分の、命中より前の物は数えない)。見つからなければ接触点から
+            float cursor = back;
+            for (int i = 0; i < _spanCount; i++)
+                if (SpanColliders[i] == hit) { cursor = SpanStarts[i]; break; }
+            float remaining = depth;
+            Object hitBlock = BlockOf(hit); // 区間の先頭ではなく実際に当たった物(隣のブロックのコライダーが手前にはみ出していることがある)
+            bool started = false;
             for (int i = 0; i < _spanCount; i++)
             {
+                if (firstBlockOnly && BlockOf(SpanColliders[i]) != hitBlock) continue;
                 float end = SpanEnds[i];
-                if (end <= cursor) continue; // 先の区間に含まれる
+                if (end <= cursor) continue; // 命中より手前か、先の区間に含まれる
                 float start = Mathf.Max(SpanStarts[i], cursor);
-                if (start - cursor > GapTolerance) break; // 装甲が途切れた(最初の区間なら命中物が見つかっていない)
+                if (start - cursor > GapTolerance) break; // 装甲が途切れた
+                started = true;
                 float thickness = end - start;
                 if (thickness >= remaining)
                 {
-                    stopPoint = point + direction * (start + remaining);
+                    stopPoint = origin + direction * (start + remaining);
                     stopCollider = SpanColliders[i];
                     return true;
                 }
@@ -56,9 +68,15 @@ namespace EWL.Weapons
                 cursor = end;
                 stopCollider = SpanColliders[i];
             }
-            if (stopCollider == null) return false;
-            stopPoint = point + direction * cursor;
+            if (!started) return false;
+            stopPoint = origin + direction * cursor;
             return true;
+        }
+
+        private static Object BlockOf(Collider collider)
+        {
+            var rb = collider.attachedRigidbody;
+            return rb != null ? (Object)rb : collider;
         }
 
         private static bool Counts(Collider collider, Rigidbody self)

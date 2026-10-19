@@ -360,7 +360,7 @@ namespace EWL.Weapons
             if (speed < 0.01f) return false;
             Vector3 stopPoint;
             Collider stopCollider;
-            if (!Penetration.Resolve(point, _flightVelocity / speed, _spec.Penetration, _rb, CollisionMask(gameObject.layer), out stopPoint, out stopCollider))
+            if (!Penetration.Resolve(point, _flightVelocity / speed, speed * Time.fixedDeltaTime, _spec.Penetration, hitCollider, _spec.PenetrationMode == PenetrationMode.FirstBlock, _rb, CollisionMask(gameObject.layer), out stopPoint, out stopCollider))
                 return false;
             hitCollider = stopCollider;
             point = stopPoint;

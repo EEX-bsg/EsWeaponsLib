@@ -24,6 +24,7 @@ class EWL.Modules.ProjectileXml : Modding.Serialization.Element
 enum EWL.Api.ColliderKind : System.Enum
 enum EWL.Api.HitKind : System.Enum
 enum EWL.Api.HitSource : System.Enum
+enum EWL.Api.PenetrationMode : System.Enum
 enum EWL.Modules.FireMode : System.Enum
 EWL.Api.Attacker::Player : Modding.Common.Player {get}
 EWL.Api.Attacker::PlayerId : System.UInt16 {get}
@@ -66,6 +67,8 @@ EWL.Api.HitSource::Ewl : EWL.Api.HitSource
 EWL.Api.HitSource::VanillaCannon : EWL.Api.HitSource
 EWL.Api.HitSource::VanillaCrossbow : EWL.Api.HitSource
 EWL.Api.HitSource::VanillaFuelCannon : EWL.Api.HitSource
+EWL.Api.PenetrationMode::FirstBlock : EWL.Api.PenetrationMode
+EWL.Api.PenetrationMode::Total : EWL.Api.PenetrationMode
 EWL.Api.ProjectileHit::Block : BlockBehaviour {get}
 EWL.Api.ProjectileHit::Collider : UnityEngine.Collider {get}
 EWL.Api.ProjectileHit::Kind : EWL.Api.HitKind {get}
@@ -102,6 +105,7 @@ EWL.Api.ProjectileSpec::MeshPosition : UnityEngine.Vector3
 EWL.Api.ProjectileSpec::MeshRotation : UnityEngine.Vector3
 EWL.Api.ProjectileSpec::MeshScale : UnityEngine.Vector3
 EWL.Api.ProjectileSpec::Penetration : System.Single
+EWL.Api.ProjectileSpec::PenetrationMode : EWL.Api.PenetrationMode
 EWL.Api.ProjectileSpec::PoolKey : System.String
 EWL.Api.ProjectileSpec::PoolSize : System.Int32
 EWL.Api.ProjectileSpec::System.Void .ctor()
@@ -266,6 +270,7 @@ EWL.Modules.ProjectileXml::Lifetime : System.Single XmlElement() DefaultValue(20
 EWL.Modules.ProjectileXml::Mass : System.Single XmlElement() DefaultValue(1)
 EWL.Modules.ProjectileXml::Mesh : Modding.Serialization.MeshReference XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::Penetration : System.Single XmlElement() DefaultValue(0)
+EWL.Modules.ProjectileXml::PenetrationMode : EWL.Api.PenetrationMode XmlElement() DefaultValue(Mono.Cecil.CustomAttributeArgument)
 EWL.Modules.ProjectileXml::PoolSize : System.Int32 XmlElement() DefaultValue(50)
 EWL.Modules.ProjectileXml::System.Void .ctor()
 EWL.Modules.ProjectileXml::Texture : Modding.Serialization.ResourceReference XmlElement() DefaultValue()
