@@ -14,6 +14,13 @@ namespace EWL.Besiege
             return block != null && block.isSimulating && block.SimPhysics;
         }
 
+        /// <summary>レベルロジック(リスポーンボックス・スポーンボックス等)のリスポーンでシミュをやり直している最中か。
+        /// 通常のシミュ開始では false。リスポーンを実行する側(SP・MP ホスト・ローカルシミュ中のクライアント)で、OnSimulateStart の中なら読める。</summary>
+        internal static bool IsRespawning(BlockBehaviour block)
+        {
+            return block != null && block.ParentMachine != null && block.ParentMachine.isRespawning;
+        }
+
         internal static bool IsLevelSimulating { get { return StatMaster.levelSimulating; } }
 
         /// <summary>バニラの弾の命中を本体が処理する側か(SP・MP ホスト・ローカルシミュ中のクライアント)。本体の弾の判定と同じ条件。</summary>

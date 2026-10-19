@@ -15,7 +15,8 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
   爆発する弾は抜けた所で起爆を始める。旧: 抜けた所で止まって命中・起爆していた(弾の大きさを考えず、出口に弾がはみ出していた)。
 - 貫通: ダメージ・衝撃力・命中イベントを、通ったブロックそれぞれに与える。旧: 止まった所のブロックだけ。命中イベントの位置は各ブロックへの入口。
 
-- `StartDelay`(`WeaponSpec.StartDelay`、既定0)を追加。シミュ開始・リスポーンのたびに撃てない時間 [s]。発射間隔の残りはリスポーンでも引き継がれ、長い方を待つ。
+- `StartDelay`(`WeaponSpec.StartDelay`、既定0)を追加。シミュ開始・リスポーンのたびに撃てない時間 [s]。
+- `KeepFireIntervalOnRespawn`(`WeaponSpec.KeepFireIntervalOnRespawn`、既定 false)を追加。true ならレベルロジックのリスポーンで発射間隔の残りを引き継ぎ、`StartDelay` とは長い方を待つ。通常のシミュ停止・開始では引き継がない。
 - `Weapon.FireCooldownRemaining`(次の発射を受け付けるまでの残り [s])を追加。
 
 ## [0.2.1] - 2026-10-19

@@ -65,7 +65,8 @@ namespace EWL.Weapons
                 Ammo = Ammo < 0 ? capacity : Mathf.Min(capacity, spec.TotalAmmo);
                 ReserveAmmo = spec.TotalAmmo < 0 ? -1 : spec.TotalAmmo - Ammo;
             }
-            _nextFireTime = Mathf.Max(FireCooldowns.Restore(block, NetworkIndex), Time.time + spec.StartDelay);
+            float carried = spec.KeepFireIntervalOnRespawn ? FireCooldowns.Restore(block, NetworkIndex) : 0f;
+            _nextFireTime = Mathf.Max(carried, Time.time + spec.StartDelay);
             _ownColliders = block.GetComponentsInChildren<Collider>();
             _privatePoolKey = "weapon#" + GetInstanceID();
             ProjectilePool.Prewarm(PoolKey, spec.Projectile);
@@ -167,7 +168,7 @@ namespace EWL.Weapons
                 StartCoroutine(Shoot(Spec.FireDelay + UnityEngine.Random.Range(0f, Spec.FireDelayRandomExtra), target));
             }
             _nextFireTime = Time.time + Spec.FireInterval;
-            FireCooldowns.Record(_block, NetworkIndex, _nextFireTime);
+            if (Spec.KeepFireIntervalOnRespawn) FireCooldowns.Record(_block, NetworkIndex, _nextFireTime);
             _bursting = false;
             if (Ammo == 0 && UsesMagazine && Spec.AutoReload) TryReload();
         }
@@ -266,8 +267,6 @@ namespace EWL.Weapons
             var proxy = ProjectilePool.Acquire(PoolKey, projectile);
             proxy.LaunchProxy(this, projectile, position, rotation, velocity, MaterialFor(projectile));
             _nextFireTime = Time.time + Spec.FireInterval; // 待機弾の表示を発射間隔だけ消す
-            // このピアでは発射を決めないので、記録は表示(残り時間・待機弾)の引き継ぎにだけ使われる
-            FireCooldowns.Record(_block, NetworkIndex, _nextFireTime);
             PlayShotEffects();
             return proxy;
         }

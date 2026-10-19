@@ -70,7 +70,7 @@ namespace EWL.Api
         public bool IsReloading { get { return _driver.IsReloading; } }
 
         /// <summary>発射間隔・StartDelay で次の発射を受け付けるまでの残り [s]。0 なら待ちなし(弾切れ・リロードは含まない)。
-        /// 発射間隔の残りはリスポーンでも引き継がれる。MP で発射の権威が無いピアでは、届いた発射から数えた目安。</summary>
+        /// <see cref="WeaponSpec.KeepFireIntervalOnRespawn"/> で引き継いだ待ちを含む。MP で発射の権威が無いピアでは、届いた発射から数えた目安。</summary>
         public float FireCooldownRemaining { get { return _driver.FireCooldownRemaining; } }
 
         /// <summary>

@@ -140,6 +140,7 @@ EWL.Api.WeaponSpec::FireDelay : System.Single
 EWL.Api.WeaponSpec::FireDelayRandomExtra : System.Single
 EWL.Api.WeaponSpec::FireInterval : System.Single
 EWL.Api.WeaponSpec::FireSounds : System.Collections.Generic.List`1<UnityEngine.AudioClip>
+EWL.Api.WeaponSpec::KeepFireIntervalOnRespawn : System.Boolean
 EWL.Api.WeaponSpec::MagazineCapacity : System.Int32
 EWL.Api.WeaponSpec::MuzzleFlash : UnityEngine.GameObject
 EWL.Api.WeaponSpec::MuzzleFlashPosition : UnityEngine.Vector3
@@ -204,6 +205,7 @@ EWL.Modules.EwlWeaponModule::FireRateSlider : Modding.Serialization.MSliderRefer
 EWL.Modules.EwlWeaponModule::FireSounds : System.Collections.Generic.List`1<Modding.Serialization.ResourceReference> XmlArray(FireSounds) DefaultValue() Reloadable()
 EWL.Modules.EwlWeaponModule::HoldToFire : System.Boolean XmlElement() DefaultValue(True) Reloadable()
 EWL.Modules.EwlWeaponModule::HoldToFireToggle : Modding.Serialization.MToggleReference XmlElement() DefaultValue()
+EWL.Modules.EwlWeaponModule::KeepFireIntervalOnRespawn : System.Boolean XmlElement() DefaultValue(False) Reloadable()
 EWL.Modules.EwlWeaponModule::MagazineCapacity : System.Int32 XmlElement() DefaultValue(0) Reloadable()
 EWL.Modules.EwlWeaponModule::MagazineCapacitySlider : Modding.Serialization.MSliderReference XmlElement() DefaultValue()
 EWL.Modules.EwlWeaponModule::MuzzleFlash : System.String XmlElement() DefaultValue() Reloadable()

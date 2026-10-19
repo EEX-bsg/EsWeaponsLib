@@ -121,6 +121,7 @@ namespace EWL.Modules
                 BurstCount = module.BurstCount,
                 BurstInterval = module.BurstInterval,
                 StartDelay = module.StartDelay,
+                KeepFireIntervalOnRespawn = module.KeepFireIntervalOnRespawn,
                 TotalAmmo = module.TotalAmmo,
                 // 弾倉は武装の生成時に詰めるので、容量はシミュ開始時だけ読む(発射ごとの ApplySliders には入れない)
                 MagazineCapacity = _magazineCapacitySlider != null
