@@ -185,6 +185,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(0f)] public float Thrust = 0f;
         [XmlElement, DefaultValue(float.PositiveInfinity)] public float ThrustTime = float.PositiveInfinity;
         [XmlElement, DefaultValue(0f)] public float Stability = 0f;
+        [XmlElement, DefaultValue(0f)] public float Lift = 0f;
         [XmlElement, DefaultValue(0f)] public float MaxSpeed = 0f;
     }
 

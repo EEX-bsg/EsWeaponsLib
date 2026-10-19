@@ -29,6 +29,7 @@ EWL.Api.Attacker::Player : Modding.Common.Player {get}
 EWL.Api.Attacker::PlayerId : System.UInt16 {get}
 EWL.Api.Attacker::static EWL.Api.Attacker GetDetonator(BlockBehaviour)
 EWL.Api.Attacker::Team : MPTeam {get}
+EWL.Api.BoosterSpec::Lift : System.Single
 EWL.Api.BoosterSpec::MaxSpeed : System.Single
 EWL.Api.BoosterSpec::Stability : System.Single
 EWL.Api.BoosterSpec::System.Void .ctor()
@@ -157,6 +158,7 @@ EWL.Modules.BlockMaterialXml::Bounciness : System.Single XmlElement() DefaultVal
 EWL.Modules.BlockMaterialXml::Friction : System.Single XmlElement() DefaultValue(0.6)
 EWL.Modules.BlockMaterialXml::FrictionCombine : UnityEngine.PhysicMaterialCombine XmlElement() DefaultValue()
 EWL.Modules.BlockMaterialXml::System.Void .ctor()
+EWL.Modules.BoosterXml::Lift : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.BoosterXml::MaxSpeed : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.BoosterXml::Stability : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.BoosterXml::System.Void .ctor()

@@ -302,6 +302,13 @@ namespace EWL.Weapons
             var forward = transform.forward;
             // 風見トルク: forward × velocity は大きさが機首に垂直な速度成分で、機首を速度へ回す軸を向く
             if (booster.Stability > 0f) _rb.AddTorque(Vector3.Cross(forward, _rb.velocity) * booster.Stability, ForceMode.Acceleration);
+            // 揚力: 機首に垂直な速度成分を打ち消し、飛ぶ向きを機首へ寄せる(1フレームで打ち消し過ぎて振動しないよう上限を置く)
+            if (booster.Lift > 0f)
+            {
+                var velocity = _rb.velocity;
+                float lift = Mathf.Min(booster.Lift, 1f / Time.fixedDeltaTime);
+                _rb.AddForce((forward * Vector3.Dot(velocity, forward) - velocity) * lift, ForceMode.Acceleration);
+            }
             if (booster.Thrust > 0f && _age < _thrustTime && BelowMaxSpeed(booster, _rb.velocity)) _rb.AddForce(forward * booster.Thrust); // NaN でも力を加えない
             _flightVelocity = _rb.velocity;
         }

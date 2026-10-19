@@ -187,6 +187,7 @@ namespace EWL.Modules
             projectile.Booster.Thrust = boosterXml.Thrust;
             projectile.Booster.ThrustTime = boosterXml.ThrustTime;
             projectile.Booster.Stability = boosterXml.Stability;
+            projectile.Booster.Lift = boosterXml.Lift;
             projectile.Booster.MaxSpeed = boosterXml.MaxSpeed;
             projectile.Guidance.Gain = projectileXml.Guidance.Gain;
             projectile.Guidance.ReleaseAngle = projectileXml.Guidance.ReleaseAngle;
