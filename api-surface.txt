@@ -77,6 +77,7 @@ EWL.Api.ProjectileHit::Shooter : EWL.Api.Attacker {get}
 EWL.Api.ProjectileHit::ShooterBlock : BlockBehaviour {get}
 EWL.Api.ProjectileHit::Source : EWL.Api.HitSource {get}
 EWL.Api.ProjectileHit::Weapon : EWL.Api.Weapon {get}
+EWL.Api.ProjectileSpec::AerodynamicStability : System.Single
 EWL.Api.ProjectileSpec::AngularDrag : System.Single
 EWL.Api.ProjectileSpec::AttachedEffect : UnityEngine.GameObject
 EWL.Api.ProjectileSpec::AttachOnHit : System.Boolean
@@ -250,6 +251,7 @@ EWL.Modules.JointRotationXml::Damper : System.Single XmlElement() DefaultValue(0
 EWL.Modules.JointRotationXml::Limit : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.JointRotationXml::Spring : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.JointRotationXml::System.Void .ctor()
+EWL.Modules.ProjectileXml::AerodynamicStability : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ProjectileXml::AngularDrag : System.Single XmlElement() DefaultValue(0)
 EWL.Modules.ProjectileXml::AttachedEffect : System.String XmlElement() DefaultValue()
 EWL.Modules.ProjectileXml::AttachOnHit : System.Boolean XmlElement() DefaultValue(False)

@@ -192,9 +192,12 @@ namespace EWL.Weapons
             float travelTime = drag > 0.0001f ? (1f - Mathf.Exp(-drag * elapsed)) / drag : elapsed;
             var predicted = _networkPosition + _networkVelocity * travelTime;
             if (!_spec.IgnoreGravity) predicted += Physics.gravity * (0.5f * elapsed * elapsed);
-            // 誘導弾・安定翼付きの弾は向きが変わるので、受け取った速度の向きへ回す(スナップショットに向きは無い)
-            if ((_guidanceGain > 0f || _spec.Booster.Stability > 0f) && _networkVelocity.sqrMagnitude > 0.01f)
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(_networkVelocity), 1f - Mathf.Exp(-CorrectionRate * Time.deltaTime));
+            // 誘導弾・安定翼付きの弾は向きが変わるので、受け取った速度の向きへ回す(スナップショットに向きは無い)。
+            // 空力安定だけの弾はホストと同じく遅いほど弱く寄せる(転がる弾を速度の向きへ回し続けない)
+            float turnRate = _guidanceGain > 0f || _spec.Booster.Stability > 0f ? CorrectionRate
+                : Mathf.Min(_spec.AerodynamicStability * _networkVelocity.magnitude, CorrectionRate);
+            if (turnRate > 0f && _networkVelocity.sqrMagnitude > 0.01f)
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(_networkVelocity), 1f - Mathf.Exp(-turnRate * Time.deltaTime));
             var booster = _spec.Booster;
             if (booster.Thrust > 0f && _age < _thrustTime && _spec.Mass > 0f && BelowMaxSpeed(booster, _networkVelocity))
                 predicted += transform.forward * (booster.Thrust / _spec.Mass * 0.5f * elapsed * elapsed);
@@ -311,6 +314,7 @@ namespace EWL.Weapons
             var forward = transform.forward;
             // 風見トルク: forward × velocity は大きさが機首に垂直な速度成分で、機首を速度へ回す軸を向く
             if (booster.Stability > 0f) _rb.AddTorque(Vector3.Cross(forward, _rb.velocity) * booster.Stability, ForceMode.Acceleration);
+            if (_spec.AerodynamicStability > 0f) ApplyAerodynamicStability(forward);
             // 揚力: 機首に垂直な速度成分を打ち消し、飛ぶ向きを機首へ寄せる(1フレームで打ち消し過ぎて振動しないよう上限を置く)
             if (booster.Lift > 0f)
             {
@@ -397,6 +401,21 @@ namespace EWL.Weapons
         }
 
         // 通ったブロックそれぞれに1回ずつダメージ・衝撃力・命中イベントを与え、最後のブロックの刺さる先を返す
+        // 空力安定: 固有角振動数 = 値 × 速さ の臨界減衰ばねで機首を速度へ寄せる(復元は速さの2乗、減衰は速さに比例し、遅い弾には効かない)。
+        // 減衰の目標は重力で曲がる弾道の回転なので、放物線の上で機首が遅れない。物理の刻みで発散しないよう、固有角振動数に上限を置く
+        private void ApplyAerodynamicStability(Vector3 forward)
+        {
+            var velocity = _rb.velocity;
+            float speed = velocity.magnitude;
+            if (!(speed >= 0.01f)) return; // NaN でもトルクを加えない
+            var direction = velocity / speed;
+            float frequency = Mathf.Min(_spec.AerodynamicStability * speed, 0.5f / Time.fixedDeltaTime);
+            var angularVelocity = _rb.angularVelocity;
+            var pitchYawRate = angularVelocity - direction * Vector3.Dot(angularVelocity, direction); // 飛ぶ向きを軸にした回転(旋転)は残す
+            if (_rb.useGravity) pitchYawRate -= Vector3.Cross(direction, Physics.gravity) / speed;
+            _rb.AddTorque(Vector3.Cross(forward, direction) * (frequency * frequency) - pitchYawRate * (2f * frequency), ForceMode.Acceleration);
+        }
+
         private Transform HitPassedBlocks()
         {
             var spec = _spec;

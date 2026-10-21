@@ -18,6 +18,7 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 - `StartDelay`(`WeaponSpec.StartDelay`、既定0)を追加。シミュ開始・リスポーンのたびに撃てない時間 [s]。
 - `KeepFireIntervalOnRespawn`(`WeaponSpec.KeepFireIntervalOnRespawn`、既定 false)を追加。true ならレベルロジックのリスポーンで発射間隔の残りを引き継ぎ、`StartDelay` とは長い方を待つ。通常のシミュ停止・開始では引き継がない。
 - `Weapon.FireCooldownRemaining`(次の発射を受け付けるまでの残り [s])を追加。
+- `Projectile/AerodynamicStability`(`ProjectileSpec.AerodynamicStability` [1/m]、既定0)を追加。飛行中に機首を飛ぶ向きへ寄せ(約 1/値 m で向き直る)、曲射した弾の機首が放物線に沿う。速いほど強く、遅い弾にはほとんど効かない。
 
 ## [0.2.1] - 2026-10-19
 

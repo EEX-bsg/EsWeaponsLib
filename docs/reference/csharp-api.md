@@ -93,6 +93,7 @@
 | `Mass` | `float` | `1` | 弾の質量 \[kg]。反動・推進の加速度と、物理的な衝突に効く(命中時に与える力はImpactForceで決まる)。 |
 | `Drag` | `float` | `0` | 空気抵抗(Rigidbody.drag)。 |
 | `AngularDrag` | `float` | `0` | 回転の抵抗(Rigidbody.angularDrag)。 |
+| `AerodynamicStability` | `float` | `0` | 空力安定の強さ \[1/m]。飛行中、機首を飛ぶ向きへ寄せる(砲弾の尾翼・旋転安定のように、放物線に沿って機首が下がる)。機首が向き直るまでに飛ぶ距離はおよそ 1/この値 \[m](0.1なら約10m)。向き直りの速さは弾の速さに比例し、振れは自動で減衰するので `ProjectileSpec.AngularDrag` は要らない。遅い弾(転がる・跳ねる弾)にはほとんど効かない。弾の質量・形に依らない。推進・誘導の有無に関係なく、命中まで働く。0なら働かない。`BoosterSpec.Stability`(速さに依らない風見安定)と併用すると両方が働く。 |
 | `IgnoreGravity` | `bool` | `false` | trueなら重力を受けない。 |
 | `CollisionMode` | `CollisionDetectionMode` | `ContinuousDynamic` | 衝突検出の方式。速い弾がすり抜けないよう、既定はContinuousDynamic。 |
 | `Lifetime` | `float` | `20` | 寿命 \[s]。着弾しなくてもこの時間で消える。 |

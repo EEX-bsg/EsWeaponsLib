@@ -128,8 +128,11 @@
     <IgnoreGravity>false</IgnoreGravity>
     <Lifetime>10</Lifetime>         <!-- [s]。何にも当たらなくてもこの時間で消える -->
     <ImpactForce>10</ImpactForce>   <!-- 命中した剛体に 弾の速度 × この値 の力 -->
+    <AerodynamicStability>0.1</AerodynamicStability> <!-- [1/m]。飛行中に機首を飛ぶ向きへ寄せる。約 1/値 m 飛ぶ間に向き直る -->
 </Projectile>
 ```
+
+`AerodynamicStability` を入れると、曲射した砲弾の機首が放物線に沿って下がります。向き直りは速いほど強く、転がるほど遅い弾にはほとんど効きません。
 
 ### 見た目とコライダー
 

@@ -142,6 +142,7 @@ namespace EWL.Modules
             projectile.Mass = projectileXml.Mass;
             projectile.Drag = projectileXml.Drag;
             projectile.AngularDrag = projectileXml.AngularDrag;
+            projectile.AerodynamicStability = projectileXml.AerodynamicStability;
             projectile.IgnoreGravity = projectileXml.IgnoreGravity;
             projectile.CollisionMode = projectileXml.CollisionMode;
             projectile.Lifetime = projectileXml.Lifetime;
