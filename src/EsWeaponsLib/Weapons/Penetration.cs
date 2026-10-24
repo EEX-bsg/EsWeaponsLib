@@ -5,7 +5,8 @@ namespace EWL.Weapons
     // 貫通: 命中点から進行方向へ、通った装甲の厚みの合計が上限に達する所(上限までに装甲を抜けたら抜けた所)を求める。
     // 線分上の全コライダーの入口を前向き、出口を逆向きのレイ1本ずつで取り、コライダーごとの区間を近い順にたどる。
     // 重なった区間(1ブロックの複数コライダー・ブロック同士の重なり)は和集合として数えるので二重に数えない。
-    // firstBlockOnly なら命中したブロック(剛体。剛体が無ければコライダー)の区間だけを数え、そのブロックを抜けた所で止まる。
+    // 装甲はマシンのブロックだけ。地形・レベルの物体は線分上にあっても無いものとして扱う。
+    // firstBlockOnly なら命中したブロック(剛体)の区間だけを数え、そのブロックを抜けた所で止まる。
     internal static class Penetration
     {
         private const float StartBack = 0.05f;     // 命中点から最低これだけ手前から探す
@@ -66,7 +67,7 @@ namespace EWL.Weapons
             for (int i = 0; i < _spanCount; i++)
                 if (SpanColliders[i] == hit) { cursor = SpanStarts[i]; break; }
             float remaining = depth;
-            Object hitBlock = BlockOf(hit); // 区間の先頭ではなく実際に当たった物(隣のブロックのコライダーが手前にはみ出していることがある)
+            var hitBlock = BlockOf(hit); // 区間の先頭ではなく実際に当たった物(隣のブロックのコライダーが手前にはみ出していることがある)
             bool started = false;
             for (int i = 0; i < _spanCount; i++)
             {
@@ -109,17 +110,18 @@ namespace EWL.Weapons
             PassedPoints[_passedCount++] = entry;
         }
 
-        private static Object BlockOf(Collider collider)
+        // ブロック = 剛体(数えるコライダーは必ず剛体を持つ。子ブロックは親ブロックと同じ剛体で、1つとして数える)
+        private static Rigidbody BlockOf(Collider collider)
         {
-            var rb = collider.attachedRigidbody;
-            return rb != null ? (Object)rb : collider;
+            return collider.attachedRigidbody;
         }
 
+        // 装甲に数えるのはマシンのブロックだけ(地形・レベルの物体・弾は数えない)
         private static bool Counts(Collider collider, Rigidbody self)
         {
             if (collider == null) return false;
             var rb = collider.attachedRigidbody;
-            return rb == null || (rb != self && rb.GetComponent<Projectile>() == null); // 弾自身・他の弾は装甲に数えない
+            return rb != null && rb != self && rb.GetComponent<BlockBehaviour>() != null;
         }
 
         private static int IndexOf(Collider collider)

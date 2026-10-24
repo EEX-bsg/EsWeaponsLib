@@ -337,35 +337,39 @@ namespace EWL.Weapons
             // 同じ武装の弾同士は無視。参照で比べる(武装が破棄済みだと Unity の == は別々の武装でも一致する)
             if (other != null && ReferenceEquals(other._owner, _owner)) return;
 
-            var spec = _spec;
             var hitCollider = collision.collider;
             var point = collision.contacts.Length > 0 ? collision.contacts[0].point : transform.position;
             var normal = collision.contacts.Length > 0 ? collision.contacts[0].normal : -transform.forward;
-            bool exited;
-            if (_penetrationLeft > 0f && Penetrate(collision.collider, point, out hitCollider, out point, out exited))
+            // 貫通するのはマシンのブロックだけ。地形・レベルの物体には普通に当たる(物理の衝突で跳ねる)
+            bool penetrated = false;
+            if (_penetrationLeft > 0f && Damage.BlockOf(hitCollider) != null)
             {
-                var attachTo = HitPassedBlocks();
-                if (exited) { PassThrough(point, normal); return; }
-                // 装甲の中で止まり、止まった先のブロックと一緒に動く。中で押し出されないよう当たり判定を切る
-                _hit = true;
-                foreach (var collider in _colliders) collider.enabled = false;
-                transform.position = point;
-                var stopBody = hitCollider != null ? hitCollider.attachedRigidbody : null; // ダメージで壊れていることがある
-                AttachTo(attachTo != null ? attachTo : (stopBody != null ? stopBody.transform : null));
+                bool exited;
+                penetrated = Penetrate(hitCollider, point, normal, out exited);
+                if (exited) return; // 抜けて飛び続ける
             }
-            else
-            {
-                _hit = true;
-                var attachTo = Damage.ApplyHit(hitCollider, _rb.velocity, spec.ImpactForce, spec.BlockDamage, spec.EntityDamage, spec.AttachOnHit, _shooter);
-                if (Weapon.HasHitListeners(_weapon))
-                    RaiseHit(Damage.BlockOf(hitCollider), hitCollider, point, HitKind.Direct);
-                if (spec.AttachOnHit) AttachTo(attachTo);
-            }
+            if (!penetrated) HitDirectly(hitCollider, point);
+            EndFlight(normal);
+        }
+
+        // 普通の命中: 当たった物にダメージ・衝撃力を与える。弾は物理の衝突のまま跳ねる(AttachOnHit なら刺さる)
+        private void HitDirectly(Collider hitCollider, Vector3 point)
+        {
+            var spec = _spec;
+            _hit = true;
+            var attachTo = Damage.ApplyHit(hitCollider, _rb.velocity, spec.ImpactForce, spec.BlockDamage, spec.EntityDamage, spec.AttachOnHit, _shooter);
+            if (Weapon.HasHitListeners(_weapon))
+                RaiseHit(Damage.BlockOf(hitCollider), hitCollider, point, HitKind.Direct);
+            if (spec.AttachOnHit) AttachTo(attachTo);
+        }
+
+        // 命中で飛行を終える: 起爆するか、消える
+        private void EndFlight(Vector3 normal)
+        {
             EffectPlayer.Fade(_trail);
             _trail = null;
-
             if (Explodes) Detonate(DetonationDelay(), Quaternion.FromToRotation(Vector3.forward, normal));
-            else if (spec.DespawnOnHit) Despawn();
+            else if (_spec.DespawnOnHit) Despawn();
             else StartCoroutine(DespawnAfter(RemoveAfterHit));
         }
 
@@ -374,25 +378,37 @@ namespace EWL.Weapons
             return Random.Range(_spec.DetonationDelay, _spec.DetonationDelay + _spec.DetonationDelayRandomExtra);
         }
 
-        // 貫通: 命中を止まった位置(抜けたなら出口)とそこのコライダーに置き換える。判定できなければ false(通常の命中)
-        private bool Penetrate(Collider hit, Vector3 contact, out Collider stopCollider, out Vector3 stopPoint, out bool exited)
+        // 貫通: 通ったブロックにダメージを与え、抜けたら出口の外から飛び続け(exited)、抜けなければ止まった所に刺さる。
+        // 判定できなければ false(普通の命中として扱う)
+        private bool Penetrate(Collider hit, Vector3 contact, Vector3 normal, out bool exited)
         {
-            stopCollider = hit;
-            stopPoint = contact;
             exited = false;
             float speed = _flightVelocity.magnitude;
             if (speed < 0.01f) return false;
-            float used, rear, front;
             var direction = _flightVelocity / speed;
+            float rear, front;
             ExtentAlong(direction, out rear, out front);
+            bool firstBlock = _spec.PenetrationMode == PenetrationMode.FirstBlock;
+            Vector3 stopPoint;
+            Collider stopCollider;
+            float used;
             if (!Penetration.Resolve(contact, direction, speed * Time.fixedDeltaTime, _penetrationLeft, rear + front + PassThroughGap, hit,
-                    _spec.PenetrationMode == PenetrationMode.FirstBlock, _rb, CollisionMask(gameObject.layer), out stopPoint, out stopCollider, out exited, out used))
-            {
-                stopCollider = hit;
-                stopPoint = contact;
+                    firstBlock, _rb, CollisionMask(gameObject.layer), out stopPoint, out stopCollider, out exited, out used))
                 return false;
+            // FirstBlock は1ブロックで貫通を終え、抜けた後は普通の弾として当たる。Total は残りの貫通量で次の装甲も貫通する
+            _penetrationLeft = firstBlock ? 0f : _penetrationLeft - used;
+            var attachTo = HitPassedBlocks();
+            if (exited)
+            {
+                PassThrough(stopPoint, normal);
+                return true;
             }
-            _penetrationLeft -= used;
+            // 装甲の中で止まり、止まった先のブロックと一緒に動く。中で押し出されないよう当たり判定を切る
+            _hit = true;
+            foreach (var collider in _colliders) collider.enabled = false;
+            transform.position = stopPoint;
+            var stopBody = stopCollider != null ? stopCollider.attachedRigidbody : null; // ダメージで壊れていることがある
+            AttachTo(attachTo != null ? attachTo : (stopBody != null ? stopBody.transform : null));
             return true;
         }
 
