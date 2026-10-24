@@ -40,9 +40,6 @@ namespace EWL.Weapons
         private MissileGuidance _guidance; // 誘導する弾だけ。弾のオブジェクトと一緒に使い回す
         private float _guidanceGain; // 発射時の値。0 なら誘導しない
         private float _age;
-        private Vector3 _flightVelocity; // 直前の物理フレームの速度(命中時の _rb.velocity は衝突後の値)
-        private Vector3 _flightAngularVelocity; // 同じく角速度と向き(装甲を抜けた弾を衝突前の状態で飛ばし直す)
-        private Quaternion _flightRotation;
         private float _penetrationLeft; // 残りの貫通量 [m]。装甲を抜けた分だけ減る
         private float _passThroughTime; // 装甲を抜けた物理フレームの Time.fixedTime(同じフレームの残りの接触を無視する)
         private float _timeFuse; // 発射時の値(スライダーで変わっても飛行中の弾は変えない)
@@ -60,6 +57,11 @@ namespace EWL.Weapons
         private float _networkTime;
 
         internal Vector3 Velocity { get { return _rb.velocity; } }
+
+        // 1物理フレーム前(この弾の FixedUpdate の時点)の状態。衝突の通知の中で読むと衝突前の値になる(_rb.velocity 等は衝突後)
+        internal Vector3 PreviousVelocity { get; private set; }
+        internal Vector3 PreviousAngularVelocity { get; private set; }
+        internal Quaternion PreviousRotation { get; private set; }
 
         /// <summary>撃った人(実弾のみ。プロキシ・待機中は null)。</summary>
         internal Attacker Shooter { get { return _shooter; } }
@@ -103,9 +105,9 @@ namespace EWL.Weapons
             _rb.collisionDetectionMode = spec.CollisionMode;
             _rb.velocity = velocity;
             _rb.angularVelocity = Vector3.zero;
-            _flightVelocity = velocity;
-            _flightAngularVelocity = Vector3.zero;
-            _flightRotation = rot;
+            PreviousVelocity = velocity;
+            PreviousAngularVelocity = Vector3.zero;
+            PreviousRotation = rot;
             if (_guidanceGain > 0f) // 目標は発射要求の時点で確定済み。飛行中は変えない
             {
                 if (_guidance == null) _guidance = new MissileGuidance();
@@ -303,7 +305,11 @@ namespace EWL.Weapons
 
         private void FixedUpdate()
         {
-            if (!_active || _proxy || _hit || _detonating) return;
+            if (!_active || _proxy) return;
+            PreviousVelocity = _rb.velocity;
+            PreviousAngularVelocity = _rb.angularVelocity;
+            PreviousRotation = _rb.rotation;
+            if (_hit || _detonating) return;
             var booster = _spec.Booster;
             bool thrusting = booster.Thrust > 0f && _age < _thrustTime && _spec.Mass > 0f;
             if (_guidanceGain > 0f)
@@ -319,9 +325,6 @@ namespace EWL.Weapons
                 _rb.AddForce((forward * Vector3.Dot(velocity, forward) - velocity) * lift, ForceMode.Acceleration);
             }
             if (booster.Thrust > 0f && _age < _thrustTime && BelowMaxSpeed(booster, _rb.velocity)) _rb.AddForce(forward * booster.Thrust); // NaN でも力を加えない
-            _flightVelocity = _rb.velocity;
-            _flightAngularVelocity = _rb.angularVelocity;
-            _flightRotation = _rb.rotation;
         }
 
         private static bool BelowMaxSpeed(BoosterSpec booster, Vector3 velocity)
@@ -357,7 +360,7 @@ namespace EWL.Weapons
         {
             var spec = _spec;
             _hit = true;
-            var attachTo = Damage.ApplyHit(hitCollider, _rb.velocity, spec.ImpactForce, spec.BlockDamage, spec.EntityDamage, spec.AttachOnHit, _shooter);
+            var attachTo = Damage.ApplyHit(hitCollider, PreviousVelocity, spec.ImpactForce, spec.BlockDamage, spec.EntityDamage, spec.AttachOnHit, _shooter);
             if (Weapon.HasHitListeners(_weapon))
                 RaiseHit(Damage.BlockOf(hitCollider), hitCollider, point, HitKind.Direct);
             if (spec.AttachOnHit) AttachTo(attachTo);
@@ -378,14 +381,14 @@ namespace EWL.Weapons
             return Random.Range(_spec.DetonationDelay, _spec.DetonationDelay + _spec.DetonationDelayRandomExtra);
         }
 
-        // 貫通: 通ったブロックにダメージを与え、抜けたら出口の外から飛び続け(exited)、抜けなければ止まった所に刺さる。
+        // 貫通: 通ったブロックにダメージを与え、抜けたら出口の外から飛び続け(exited)、抜けなければ止まった所に置く(AttachOnHit なら刺さる)。
         // 判定できなければ false(普通の命中として扱う)
         private bool Penetrate(Collider hit, Vector3 contact, Vector3 normal, out bool exited)
         {
             exited = false;
-            float speed = _flightVelocity.magnitude;
+            float speed = PreviousVelocity.magnitude;
             if (speed < 0.01f) return false;
-            var direction = _flightVelocity / speed;
+            var direction = PreviousVelocity / speed;
             float rear, front;
             ExtentAlong(direction, out rear, out front);
             bool firstBlock = _spec.PenetrationMode == PenetrationMode.FirstBlock;
@@ -403,12 +406,14 @@ namespace EWL.Weapons
                 PassThrough(stopPoint, normal);
                 return true;
             }
-            // 装甲の中で止まり、止まった先のブロックと一緒に動く。中で押し出されないよう当たり判定を切る
+            // 装甲の中で止まる。当たり判定は残し、重なりは物理の押し出しに任せる(AttachOnHit なら普通の命中と同じく刺さる)
             _hit = true;
-            foreach (var collider in _colliders) collider.enabled = false;
             transform.position = stopPoint;
-            var stopBody = stopCollider != null ? stopCollider.attachedRigidbody : null; // ダメージで壊れていることがある
-            AttachTo(attachTo != null ? attachTo : (stopBody != null ? stopBody.transform : null));
+            if (_spec.AttachOnHit)
+            {
+                var stopBody = stopCollider != null ? stopCollider.attachedRigidbody : null; // ダメージで壊れていることがある
+                AttachTo(attachTo != null ? attachTo : (stopBody != null ? stopBody.transform : null));
+            }
             return true;
         }
 
@@ -422,7 +427,7 @@ namespace EWL.Weapons
             {
                 var collider = Penetration.Passed(i);
                 if (collider == null) continue; // 先のブロックの処理で壊れた
-                attachTo = Damage.ApplyHit(collider, _flightVelocity, spec.ImpactForce, spec.BlockDamage, spec.EntityDamage, spec.AttachOnHit, _shooter);
+                attachTo = Damage.ApplyHit(collider, PreviousVelocity, spec.ImpactForce, spec.BlockDamage, spec.EntityDamage, spec.AttachOnHit, _shooter);
                 if (raise) RaiseHit(Damage.BlockOf(collider), collider, Penetration.PassedPoint(i), HitKind.Direct);
             }
             return attachTo;
@@ -448,13 +453,13 @@ namespace EWL.Weapons
         private void PassThrough(Vector3 exit, Vector3 normal)
         {
             _passThroughTime = Time.fixedTime;
-            var direction = _flightVelocity.normalized;
+            var direction = PreviousVelocity.normalized;
             float rear, front;
             ExtentAlong(direction, out rear, out front);
-            transform.rotation = _flightRotation;
+            transform.rotation = PreviousRotation;
             transform.position = exit + direction * (rear + PassThroughGap);
-            _rb.velocity = _flightVelocity;
-            _rb.angularVelocity = _flightAngularVelocity;
+            _rb.velocity = PreviousVelocity;
+            _rb.angularVelocity = PreviousAngularVelocity;
             if (Explodes) Detonate(DetonationDelay(), Quaternion.FromToRotation(Vector3.forward, normal));
         }
 
