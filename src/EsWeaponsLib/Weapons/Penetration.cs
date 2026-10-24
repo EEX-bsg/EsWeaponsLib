@@ -35,19 +35,20 @@ namespace EWL.Weapons
         /// <summary>
         /// 止まる位置と、そこにある(抜けた場合は最後に抜けた)コライダーを求める。厚みは命中したコライダーの入口から測る。
         /// exited: 上限に達する前に装甲を抜けた(stopPoint は出口)。embedded: 上限に達して装甲の中で止まった(stopCollider の中)。
-        /// どちらも false なら、抜けたが先の装甲が近すぎて裏面で止まった。used: 使った貫通量 [m]。
+        /// どちらも false なら、抜けたが先の装甲が近すぎて裏面で止まった(blocker がその装甲)。used: 使った貫通量 [m]。
         /// back: 命中点からどれだけ手前から探すか [m]。速い弾は接触が装甲の中で報告されることがあるので、1物理フレームに進む距離を渡す。
         /// clearance: 抜けた弾が出口の先に入るのに要る長さ [m]。これより狭い隙間の先にある装甲は、抜けずに続けて数える
         /// (firstBlockOnly では、次のブロックがこれより近ければ抜けずに裏面で止まる)。
         /// false なら貫通の判定ができなかった(装甲が見つからない等)。通常の命中として扱う。
         /// </summary>
         internal static bool Resolve(Vector3 point, Vector3 direction, float back, float depth, float clearance, Collider hit, bool firstBlockOnly,
-            Rigidbody self, int layerMask, out Vector3 stopPoint, out Collider stopCollider, out bool exited, out bool embedded, out float used)
+            Rigidbody self, int layerMask, out Vector3 stopPoint, out Collider stopCollider, out bool exited, out bool embedded, out Collider blocker, out float used)
         {
             stopPoint = point;
             stopCollider = null;
             exited = false;
             embedded = false;
+            blocker = null;
             used = 0f;
             _passedCount = 0;
             back = Mathf.Max(back, StartBack);
@@ -97,9 +98,9 @@ namespace EWL.Weapons
             stopPoint = origin + direction * cursor;
             used = depth - remaining;
             exited = true;
-            if (firstBlockOnly) // 裏に別のブロックが近ければ、抜けた弾が入らないので裏面で止まる
+            if (firstBlockOnly) // 裏に別のブロックが近ければ、抜けた弾が入らないので裏面で止まる(区間は入口の近い順)
                 for (int i = 0; i < _spanCount; i++)
-                    if (SpanEnds[i] > cursor && SpanStarts[i] - cursor <= gap) { exited = false; break; }
+                    if (SpanEnds[i] > cursor && SpanStarts[i] - cursor <= gap) { exited = false; blocker = SpanColliders[i]; break; }
             return true;
         }
 

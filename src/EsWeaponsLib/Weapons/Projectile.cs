@@ -12,13 +12,14 @@ namespace EWL.Weapons
     // 実弾はシミュ権威側にだけ存在する。MP クライアントではホストの弾の見た目だけを出すプロキシとして使う(当たり判定なし)。
     internal sealed class Projectile : MonoBehaviour
     {
-        private const float PassThroughGap = 0.02f;     // 装甲を抜けた弾の後端と出口の間
+        private const float PassThroughGap = 0.02f;     // 貫通して置き直した弾と、出口・次に当てる装甲の間
         private const float RemoveAfterHit = 1f;         // 爆発も即消滅もしない弾が命中後に消えるまで(ACM と同じ)
         private const float MaxExtrapolation = 0.5f;     // プロキシ: スナップショットが途絶えたら外挿を止める
         private const float CorrectionRate = 10f;        // プロキシ: スナップショットとのずれを詰める速さ [1/s]
         internal const float DefaultRadius = 0.1f;
 
         private static Mesh _sphereMesh;
+        private static readonly Collider[] OverlapBuffer = new Collider[64];
 
         internal ProjectilePool.Pool Home;
         /// <summary>MP の弾 ID。0 なら配信していない(ホスト)/登録されていない(クライアント)。</summary>
@@ -36,12 +37,13 @@ namespace EWL.Weapons
         private Object _simulationScope;
         private ProjectileSpec _spec;
         private Collider[] _ignored;
+        private readonly List<Collider> _relocationIgnored = new List<Collider>(); // 貫通で置き直した所で重なり、衝突しないようにしたブロック
         private PooledEffect _trail, _attachedEffect;
         private MissileGuidance _guidance; // 誘導する弾だけ。弾のオブジェクトと一緒に使い回す
         private float _guidanceGain; // 発射時の値。0 なら誘導しない
         private float _age;
         private float _penetrationLeft; // 残りの貫通量 [m]。装甲を抜けた分だけ減る
-        private float _passThroughTime; // 装甲を抜けた物理フレームの Time.fixedTime(同じフレームの残りの接触を無視する)
+        private float _passThroughTime; // 貫通して置き直した物理フレームの Time.fixedTime(同じフレームの残りの接触を無視する)
         private float _timeFuse; // 発射時の値(スライダーで変わっても飛行中の弾は変えない)
         private float _thrustTime; // 発射時の値(同上)
         private float _colliderEnableDelay; // 発射時の値
@@ -344,14 +346,9 @@ namespace EWL.Weapons
             var point = collision.contacts.Length > 0 ? collision.contacts[0].point : transform.position;
             var normal = collision.contacts.Length > 0 ? collision.contacts[0].normal : -transform.forward;
             // 貫通するのはマシンのブロックだけ。地形・レベルの物体には普通に当たる(物理の衝突で跳ねる)
-            bool penetrated = false;
-            if (_penetrationLeft > 0f && Damage.BlockOf(hitCollider) != null)
-            {
-                bool exited;
-                penetrated = Penetrate(hitCollider, point, normal, out exited);
-                if (exited) return; // 抜けて飛び続ける
-            }
-            if (!penetrated) HitDirectly(hitCollider, point);
+            if (_penetrationLeft > 0f && Damage.BlockOf(hitCollider) != null && Penetrate(hitCollider, point, normal))
+                return; // 貫通して飛び続ける
+            HitDirectly(hitCollider, point);
             EndFlight(normal);
         }
 
@@ -381,11 +378,13 @@ namespace EWL.Weapons
             return Random.Range(_spec.DetonationDelay, _spec.DetonationDelay + _spec.DetonationDelayRandomExtra);
         }
 
-        // 貫通: 通ったブロックにダメージを与え、抜けたら出口の外から飛び続け(exited)、抜けなければ止まった所に置く(AttachOnHit なら刺さる)。
-        // 判定できない・当たったブロックを抜けられないなら false(普通の命中として扱う)
-        private bool Penetrate(Collider hit, Vector3 contact, Vector3 normal, out bool exited)
+        // 貫通: 抜けたブロックにダメージを与え、弾を置き直して衝突前の速度・向きで飛び続けさせる。装甲の中では止めない。
+        //  抜けた: 後端が出口の外に出る所へ。爆発する弾はここで起爆を始める
+        //  FirstBlock で抜けたが、裏のブロックが近く弾が入らない: 前端が裏面の手前に来る所へ。爆発する弾はここで起爆を始める(抜けたのと同じ)
+        //  Total で手前のブロックを抜け、奥のブロックで尽きた: 前端がそのブロックの入口の手前に来る所へ。そのブロックには普通の弾として当たる
+        // 判定できない・当たったブロック自体を抜けられない(貫通失敗)なら false(貫通せず普通の命中として扱う)
+        private bool Penetrate(Collider hit, Vector3 contact, Vector3 normal)
         {
-            exited = false;
             float speed = PreviousVelocity.magnitude;
             if (speed < 0.01f) return false;
             var direction = PreviousVelocity / speed;
@@ -393,48 +392,41 @@ namespace EWL.Weapons
             ExtentAlong(direction, out rear, out front);
             bool firstBlock = _spec.PenetrationMode == PenetrationMode.FirstBlock;
             Vector3 stopPoint;
-            Collider stopCollider;
+            Collider stopCollider, blocker;
+            bool exited, embedded;
             float used;
-            bool embedded;
             if (!Penetration.Resolve(contact, direction, speed * Time.fixedDeltaTime, _penetrationLeft, rear + front + PassThroughGap, hit,
-                    firstBlock, _rb, CollisionMask(gameObject.layer), out stopPoint, out stopCollider, out exited, out embedded, out used))
+                    firstBlock, _rb, CollisionMask(gameObject.layer), out stopPoint, out stopCollider, out exited, out embedded, out blocker, out used))
                 return false;
-            // 当たったブロックを抜けられない(貫通失敗)なら貫通しない。普通の弾として当たる(物理の衝突のまま装甲を押す)
-            if (embedded && Penetration.PassedCount <= 1) return false;
+            int failed = embedded ? Penetration.PassedCount - 1 : -1; // 抜けられなかったブロック(通ったブロックの最後)
+            if (failed == 0) return false;
             // FirstBlock は1ブロックで貫通を終え、抜けた後は普通の弾として当たる。Total は残りの貫通量で次の装甲も貫通する
-            _penetrationLeft = firstBlock ? 0f : _penetrationLeft - used;
-            var attachTo = HitPassedBlocks();
-            if (exited)
+            _penetrationLeft = firstBlock || embedded ? 0f : _penetrationLeft - used;
+            HitPassedBlocks(embedded ? failed : Penetration.PassedCount);
+            if (embedded)
             {
-                PassThrough(stopPoint, normal);
+                var failedCollider = Penetration.Passed(failed);
+                Relocate(Penetration.PassedPoint(failed) - direction * (front + PassThroughGap), failedCollider != null ? failedCollider.attachedRigidbody : null);
                 return true;
             }
-            // 装甲の中で止まる(手前のブロックは抜けた)。当たり判定の前端を止まった所に置き、当たり判定と速度は残して
-            // 重なりは物理の押し出しに任せる(AttachOnHit なら普通の命中と同じく刺さる)
-            _hit = true;
-            transform.position = stopPoint - direction * front;
-            if (_spec.AttachOnHit)
-            {
-                var stopBody = stopCollider != null ? stopCollider.attachedRigidbody : null; // ダメージで壊れていることがある
-                AttachTo(attachTo != null ? attachTo : (stopBody != null ? stopBody.transform : null));
-            }
+            if (exited) Relocate(stopPoint + direction * (rear + PassThroughGap), null);
+            else Relocate(stopPoint - direction * (front + PassThroughGap), blocker != null ? blocker.attachedRigidbody : null);
+            if (Explodes) Detonate(DetonationDelay(), Quaternion.FromToRotation(Vector3.forward, normal));
             return true;
         }
 
-        // 通ったブロックそれぞれに1回ずつダメージ・衝撃力・命中イベントを与え、最後のブロックの刺さる先を返す
-        private Transform HitPassedBlocks()
+        // 通ったブロックのうち先頭から count 個それぞれに、1回ずつダメージ・衝撃力・命中イベントを与える
+        private void HitPassedBlocks(int count)
         {
             var spec = _spec;
             bool raise = Weapon.HasHitListeners(_weapon);
-            Transform attachTo = null;
-            for (int i = 0; i < Penetration.PassedCount; i++)
+            for (int i = 0; i < count; i++)
             {
                 var collider = Penetration.Passed(i);
                 if (collider == null) continue; // 先のブロックの処理で壊れた
-                attachTo = Damage.ApplyHit(collider, PreviousVelocity, spec.ImpactForce, spec.BlockDamage, spec.EntityDamage, spec.AttachOnHit, _shooter);
+                Damage.ApplyHit(collider, PreviousVelocity, spec.ImpactForce, spec.BlockDamage, spec.EntityDamage, spec.AttachOnHit, _shooter);
                 if (raise) RaiseHit(Damage.BlockOf(collider), collider, Penetration.PassedPoint(i), HitKind.Direct);
             }
-            return attachTo;
         }
 
         // 弾のコライダーが、弾の位置から direction の後ろ・前へどれだけ出ているか [m]。
@@ -454,18 +446,65 @@ namespace EWL.Weapons
             }
         }
 
-        // 装甲を抜けた: 弾の後端が出口の外に出る所へ置き直し、衝突前の速度・向きで飛び続ける。爆発する弾はここで起爆を始める
-        private void PassThrough(Vector3 exit, Vector3 normal)
+        // 貫通した弾を置き直し、衝突前の速度・向きで飛び続けさせる。置いた所で重なるマシンのブロックとは衝突しない
+        // (通ってきた装甲に穴が開いた扱い。Despawn で戻す)。next: 次に当てるブロック(重なっていても衝突を残す)
+        private void Relocate(Vector3 position, Rigidbody next)
         {
             _passThroughTime = Time.fixedTime;
-            var direction = PreviousVelocity.normalized;
-            float rear, front;
-            ExtentAlong(direction, out rear, out front);
             transform.rotation = PreviousRotation;
-            transform.position = exit + direction * (rear + PassThroughGap);
+            transform.position = position;
             _rb.velocity = PreviousVelocity;
             _rb.angularVelocity = PreviousAngularVelocity;
-            if (Explodes) Detonate(DetonationDelay(), Quaternion.FromToRotation(Vector3.forward, normal));
+            int mask = CollisionMask(gameObject.layer);
+            foreach (var collider in _colliders)
+            {
+                int count = Overlap(collider, mask);
+                for (int i = 0; i < count; i++)
+                {
+                    var other = OverlapBuffer[i];
+                    var body = other.attachedRigidbody;
+                    if (body == null || body == _rb || body == next || body.GetComponent<BlockBehaviour>() == null) continue;
+                    if (_relocationIgnored.Contains(other)) continue;
+                    _relocationIgnored.Add(other);
+                    foreach (var own in _colliders) Physics.IgnoreCollision(own, other, true);
+                }
+            }
+        }
+
+        private void RestoreRelocationIgnores()
+        {
+            foreach (var other in _relocationIgnored)
+                if (other != null) // 壊れて破棄済みのことがある
+                    foreach (var own in _colliders) Physics.IgnoreCollision(own, other, false);
+            _relocationIgnored.Clear();
+        }
+
+        // 弾のコライダーの今の位置・形で重なるコライダーを OverlapBuffer に集める
+        private static int Overlap(Collider collider, int mask)
+        {
+            var t = collider.transform;
+            var scale = t.lossyScale;
+            scale = new Vector3(Mathf.Abs(scale.x), Mathf.Abs(scale.y), Mathf.Abs(scale.z));
+            var box = collider as BoxCollider;
+            if (box != null)
+                return Physics.OverlapBoxNonAlloc(t.TransformPoint(box.center), Vector3.Scale(box.size, scale) * 0.5f, OverlapBuffer, t.rotation,
+                    mask, QueryTriggerInteraction.Ignore);
+            var sphere = collider as SphereCollider;
+            if (sphere != null)
+                return Physics.OverlapSphereNonAlloc(t.TransformPoint(sphere.center), sphere.radius * Mathf.Max(scale.x, Mathf.Max(scale.y, scale.z)),
+                    OverlapBuffer, mask, QueryTriggerInteraction.Ignore);
+            var capsule = collider as CapsuleCollider;
+            if (capsule != null)
+            {
+                int axis = capsule.direction;
+                float radius = capsule.radius * (axis == 0 ? Mathf.Max(scale.y, scale.z) : axis == 1 ? Mathf.Max(scale.x, scale.z) : Mathf.Max(scale.x, scale.y));
+                float half = Mathf.Max(capsule.height * scale[axis] * 0.5f - radius, 0f);
+                var center = t.TransformPoint(capsule.center);
+                var up = t.rotation * (axis == 0 ? Vector3.right : axis == 1 ? Vector3.up : Vector3.forward);
+                return Physics.OverlapCapsuleNonAlloc(center + up * half, center - up * half, radius, OverlapBuffer, mask, QueryTriggerInteraction.Ignore);
+            }
+            var bounds = collider.bounds; // 弾が持つのは上の3種類だけ
+            return Physics.OverlapBoxNonAlloc(bounds.center, bounds.extents, OverlapBuffer, Quaternion.identity, mask, QueryTriggerInteraction.Ignore);
         }
 
         private static int CollisionMask(int layer)
@@ -556,6 +595,7 @@ namespace EWL.Weapons
         {
             if (!_active) return;
             _active = false;
+            RestoreRelocationIgnores(); // 使い回した弾が他のブロックを素通りしないよう、最初に戻す
             NotifyNetworkRemoved();
             StopAllCoroutines();
             EffectPlayer.Fade(_trail);
