@@ -382,7 +382,7 @@ namespace EWL.Weapons
         }
 
         // 貫通: 通ったブロックにダメージを与え、抜けたら出口の外から飛び続け(exited)、抜けなければ止まった所に置く(AttachOnHit なら刺さる)。
-        // 判定できなければ false(普通の命中として扱う)
+        // 判定できない・当たったブロックを抜けられないなら false(普通の命中として扱う)
         private bool Penetrate(Collider hit, Vector3 contact, Vector3 normal, out bool exited)
         {
             exited = false;
@@ -395,9 +395,12 @@ namespace EWL.Weapons
             Vector3 stopPoint;
             Collider stopCollider;
             float used;
+            bool embedded;
             if (!Penetration.Resolve(contact, direction, speed * Time.fixedDeltaTime, _penetrationLeft, rear + front + PassThroughGap, hit,
-                    firstBlock, _rb, CollisionMask(gameObject.layer), out stopPoint, out stopCollider, out exited, out used))
+                    firstBlock, _rb, CollisionMask(gameObject.layer), out stopPoint, out stopCollider, out exited, out embedded, out used))
                 return false;
+            // 当たったブロックを抜けられない(貫通失敗)なら貫通しない。普通の弾として当たる(物理の衝突のまま装甲を押す)
+            if (embedded && Penetration.PassedCount <= 1) return false;
             // FirstBlock は1ブロックで貫通を終え、抜けた後は普通の弾として当たる。Total は残りの貫通量で次の装甲も貫通する
             _penetrationLeft = firstBlock ? 0f : _penetrationLeft - used;
             var attachTo = HitPassedBlocks();
@@ -406,9 +409,10 @@ namespace EWL.Weapons
                 PassThrough(stopPoint, normal);
                 return true;
             }
-            // 装甲の中で止まる。当たり判定は残し、重なりは物理の押し出しに任せる(AttachOnHit なら普通の命中と同じく刺さる)
+            // 装甲の中で止まる(手前のブロックは抜けた)。当たり判定の前端を止まった所に置き、当たり判定と速度は残して
+            // 重なりは物理の押し出しに任せる(AttachOnHit なら普通の命中と同じく刺さる)
             _hit = true;
-            transform.position = stopPoint;
+            transform.position = stopPoint - direction * front;
             if (_spec.AttachOnHit)
             {
                 var stopBody = stopCollider != null ? stopCollider.attachedRigidbody : null; // ダメージで壊れていることがある
@@ -433,10 +437,11 @@ namespace EWL.Weapons
             return attachTo;
         }
 
-        // 弾のコライダーが、弾の位置から direction の後ろ・前へどれだけ出ているか [m]
+        // 弾のコライダーが、弾の位置から direction の後ろ・前へどれだけ出ているか [m]。
+        // コライダーが弾の位置より後ろだけにあれば front は負(rear + front がコライダーの長さ)
         private void ExtentAlong(Vector3 direction, out float rear, out float front)
         {
-            rear = front = 0f;
+            rear = front = float.NegativeInfinity;
             var position = transform.position;
             foreach (var collider in _colliders)
             {
