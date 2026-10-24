@@ -90,7 +90,7 @@ namespace EWL.Api
         public bool IgnoreGravity = false;
         /// <summary>衝突検出の方式。速い弾がすり抜けないよう、既定はContinuousDynamic。</summary>
         public CollisionDetectionMode CollisionMode = CollisionDetectionMode.ContinuousDynamic;
-        /// <summary>寿命 [s]。着弾しなくてもこの時間で消える。</summary>
+        /// <summary>寿命 [s]。着弾しなくてもこの時間で消える。物理時間で数える(再生速度・fpsに左右されない)。</summary>
         public float Lifetime = 20f;
         /// <summary>発射後、弾のコライダーを有効にするまでの時間 [s]。自機との干渉を防ぐ。初速の遅い弾(ロケット・ミサイル・爆弾等)は
         /// 長めにする。0なら発射と同時に有効(負値は0扱い)。撃った武装ブロックとはこの値に関係なく衝突しない。</summary>
@@ -153,11 +153,13 @@ namespace EWL.Api
         /// <summary>爆発しない弾を命中時に即消す。falseなら命中の1秒後に消える。</summary>
         public bool DespawnOnHit = false;
 
-        /// <summary>時限信管 [s]。発射からこの時間で起爆(爆発しない弾は消える)。0は発射直後に起爆。既定は無限(時限信管なし)。</summary>
+        /// <summary>時限信管 [s]。発射からこの時間で起爆(爆発しない弾は消える)。0は発射直後に起爆。既定は無限(時限信管なし)。
+        /// 物理時間で数える(再生速度・fpsに左右されない)。</summary>
         public float TimeFuse = float.PositiveInfinity;
         /// <summary>時限信管に加える乱数 [s](0〜この値)。発射時に決める。TimeFuseが無限のときは効かない。</summary>
         public float TimeFuseRandomExtra = 0.05f;
-        /// <summary>命中から起爆までの遅延 [s]。</summary>
+        /// <summary>命中から起爆までの遅延 [s]。命中した物理ステップの後、この時間ぶんの物理ステップ(0.01秒ごと、端数は切り上げ)を進めてから起爆する。
+        /// 弾はその間も物理の衝突で当たった物を押し続けるので、長いほど命中の手応えが強くなる。再生速度・fpsに左右されない。</summary>
         public float DetonationDelay = 0f;
         /// <summary>起爆遅延に加える乱数幅 [s](0〜この値)。</summary>
         public float DetonationDelayRandomExtra = 0f;

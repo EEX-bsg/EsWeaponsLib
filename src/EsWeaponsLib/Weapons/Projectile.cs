@@ -41,7 +41,10 @@ namespace EWL.Weapons
         private PooledEffect _trail, _attachedEffect;
         private MissileGuidance _guidance; // 誘導する弾だけ。弾のオブジェクトと一緒に使い回す
         private float _guidanceGain; // 発射時の値。0 なら誘導しない
-        private float _age;
+        private float _age; // 発射後の経過時間 [s](描画フレームごとに足す。当たり判定の有効化・推力・誘導に使う)
+        private float _flightTime; // 発射後に進んだ物理時間 [s](物理ステップごとに足す。時限信管・寿命に使う)
+        private int _detonationSteps = -1; // 起爆までに残っている物理ステップ数。負なら起爆待ちなし
+        private Quaternion _detonationRotation; // 起爆時のエフェクトの向き
         private float _penetrationLeft; // 残りの貫通量 [m]。装甲を抜けた分だけ減る
         private float _passThroughTime; // 貫通して置き直した物理フレームの Time.fixedTime(同じフレームの残りの接触を無視する)
         private float _timeFuse; // 発射時の値(スライダーで変わっても飛行中の弾は変えない)
@@ -140,6 +143,8 @@ namespace EWL.Weapons
             _spec = spec;
             _simulationScope = owner.Scope;
             _age = 0f;
+            _flightTime = 0f;
+            _detonationSteps = -1;
             _colliderEnableDelay = spec.ColliderEnableDelay;
             // 負値・NaN は信管なし扱い(仕様ではない)。無限に乱数を足しても無限
             _timeFuse = spec.TimeFuse >= 0f ? spec.TimeFuse + Random.Range(0f, spec.TimeFuseRandomExtra) : float.PositiveInfinity;
@@ -299,15 +304,24 @@ namespace EWL.Weapons
             if (_proxy) { UpdateProxy(); return; }
             _age += Time.deltaTime;
             if (!_collidersOn && _age >= _colliderEnableDelay) EnableColliders();
-            float lifetime = _spec.Lifetime; // 遅延 0 の起爆はこの場で Despawn まで進み _spec が消える
-            if (!_detonating && _age >= _timeFuse)
-                Detonate(0f, transform.rotation);
-            if (_age >= lifetime) Despawn();
         }
 
         private void FixedUpdate()
         {
             if (!_active || _proxy) return;
+            // 起爆待ち・時限信管・寿命は物理時間で数える。描画フレームで数えると、再生速度や fps で
+            // 命中後に弾が装甲を押せる物理ステップ数が変わり、威力が変わっていた
+            if (_detonationSteps > 0) _detonationSteps--;
+            else if (_detonationSteps == 0) { Explode(); return; }
+            // 時限信管を物理時間で数えるのは実装の筋を優先した選択。炸裂位置の出方が遊びとして良くない結果になるかもしれないので、
+            // 実際のプレイの様子を見て、今後のアップデートで描画フレームで数える(Update で _age を使う)元の仕様へ戻すことがありうる
+            if (!_detonating && _flightTime >= _timeFuse)
+            {
+                Detonate(0f, transform.rotation);
+                if (!_active) return; // 起爆して消えた
+            }
+            if (_flightTime >= _spec.Lifetime) { Despawn(); return; }
+            _flightTime += Time.fixedDeltaTime;
             PreviousVelocity = _rb.velocity;
             PreviousAngularVelocity = _rb.angularVelocity;
             PreviousRotation = _rb.rotation;
@@ -538,15 +552,19 @@ namespace EWL.Weapons
             }
         }
 
+        // 起爆を始める。delay [s] ぶんの物理ステップ(命中した物理ステップの後に数える)を進めてから起爆する。0 以下ならすぐ起爆する
         private void Detonate(float delay, Quaternion effectRotation)
         {
             _detonating = true;
-            StartCoroutine(DetonateAfter(delay, effectRotation));
+            _detonationRotation = effectRotation;
+            if (delay > 0f) _detonationSteps = Mathf.CeilToInt(delay / Time.fixedDeltaTime - 0.001f);
+            else Explode();
         }
 
-        private IEnumerator DetonateAfter(float delay, Quaternion effectRotation)
+        private void Explode()
         {
-            if (delay > 0f) yield return new WaitForSeconds(delay);
+            _detonationSteps = -1;
+            var effectRotation = _detonationRotation;
             var explosion = _spec.Explosion;
             var pos = transform.position + transform.forward * explosion.ForwardOffset;
             if (Explodes)
@@ -562,11 +580,8 @@ namespace EWL.Weapons
                 if (NetworkId != 0) ProjectileSync.Despawned(this, true, pos, rotation);
                 Despawn();
             }
-            else
-            {
-                if (!_spec.DespawnOnHit) yield return new WaitForSeconds(RemoveAfterHit);
-                Despawn();
-            }
+            else if (_spec.DespawnOnHit) Despawn();
+            else StartCoroutine(DespawnAfter(RemoveAfterHit));
         }
 
         private IEnumerator DespawnAfter(float delay)
