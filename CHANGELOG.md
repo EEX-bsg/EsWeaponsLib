@@ -9,6 +9,8 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-25
+
 ### 武装
 
 - 貫通: 上限に達する前に装甲を抜けた弾は、出口の外(弾の大きさの分だけ先)へ出て命中直前の速度・向きのまま飛び続け、残りの貫通量で次の装甲も貫通する。
@@ -107,7 +109,8 @@ E'sWeaponsLib(EWL)の変更履歴です。形式は [Keep a Changelog](https://k
 - 誘導(`ProjectileSpec.Guidance` / XML `Projectile/Guidance`)は仮実装で、今後まとめて作り直す予定です(破壊的変更になります)。
 - 途中参加したプレイヤーには、参加前に撃たれた弾は見えません(次の弾から見えます)。
 
-[Unreleased]: https://github.com/EEX-bsg/EsWeaponsLib/compare/0.2.1...HEAD
+[Unreleased]: https://github.com/EEX-bsg/EsWeaponsLib/compare/0.3.0...HEAD
+[0.3.0]: https://github.com/EEX-bsg/EsWeaponsLib/releases/tag/0.3.0
 [0.2.1]: https://github.com/EEX-bsg/EsWeaponsLib/releases/tag/0.2.1
 [0.2.0]: https://github.com/EEX-bsg/EsWeaponsLib/releases/tag/0.2.0
 [0.1.0]: https://github.com/EEX-bsg/EsWeaponsLib/releases/tag/0.1.0
