@@ -122,6 +122,7 @@ namespace EWL.Modules
         [XmlElement, DefaultValue(1f)] public float Mass = 1f;
         [XmlElement, DefaultValue(0f)] public float Drag = 0f;
         [XmlElement, DefaultValue(0f)] public float AngularDrag = 0f;
+        [XmlElement, DefaultValue(0f)] public float AerodynamicStability = 0f;
         [XmlElement, DefaultValue(false)] public bool IgnoreGravity = false;
         [XmlElement, DefaultValue(CollisionDetectionMode.ContinuousDynamic)] public CollisionDetectionMode CollisionMode = CollisionDetectionMode.ContinuousDynamic;
         [XmlElement, DefaultValue(20f)] public float Lifetime = 20f;
