@@ -20,6 +20,7 @@ namespace EWL.Weapons
 
         private static Mesh _sphereMesh;
         private static readonly Collider[] OverlapBuffer = new Collider[64];
+        private static readonly WaitForFixedUpdate WaitForStep = new WaitForFixedUpdate(); // 中身を持たないので使い回せる
 
         internal ProjectilePool.Pool Home;
         /// <summary>MP の弾 ID。0 なら配信していない(ホスト)/登録されていない(クライアント)。</summary>
@@ -41,8 +42,8 @@ namespace EWL.Weapons
         private PooledEffect _trail, _attachedEffect;
         private MissileGuidance _guidance; // 誘導する弾だけ。弾のオブジェクトと一緒に使い回す
         private float _guidanceGain; // 発射時の値。0 なら誘導しない
-        private float _age; // 発射後の経過時間 [s](描画フレームごとに足す。当たり判定の有効化・推力・誘導に使う)
-        private float _flightTime; // 発射後に進んだ物理時間 [s](物理ステップごとに足す。時限信管・寿命に使う)
+        private float _age; // プロキシ: 生成後の経過時間 [s](描画フレームごとに足す。推力の外挿・取りこぼし対策の寿命に使う)
+        private float _flightTime; // 実弾: 発射後に進んだ物理時間 [s](物理ステップの最後に足す。当たり判定の有効化・推力・誘導・時限信管・寿命に使う)
         private int _detonationSteps = -1; // 起爆までに残っている物理ステップ数。負なら起爆待ちなし
         private Quaternion _detonationRotation; // 起爆時のエフェクトの向き
         private float _penetrationLeft; // 残りの貫通量 [m]。装甲を抜けた分だけ減る
@@ -304,35 +305,39 @@ namespace EWL.Weapons
         private void Update()
         {
             if (_simulationScope == null) { Despawn(); return; } // シミュ終了(武装ブロックが壊れても弾は飛び続ける)
-            if (_proxy) { UpdateProxy(); return; }
-            _age += Time.deltaTime;
-            if (!_collidersOn && _age >= _colliderEnableDelay) EnableColliders();
+            if (_proxy) UpdateProxy();
         }
 
         private void FixedUpdate()
         {
             if (!_active || _proxy) return;
-            // 起爆待ち・時限信管・寿命は物理時間で数える。描画フレームで数えると、再生速度や fps で
-            // 命中後に弾が装甲を押せる物理ステップ数が変わり、威力が変わっていた
+            // 実弾の時間(当たり判定の有効化・起爆待ち・時限信管・寿命・推力・誘導・命中後の消滅)はすべて物理時間で数える。
+            // 描画フレームで数えると、再生速度や fps で当たり判定が付く位置・推力の総量・命中後に弾が装甲を押せる物理ステップ数が変わり、威力が変わっていた
+            if (!_collidersOn && _flightTime >= _colliderEnableDelay) EnableColliders();
             if (_detonationSteps > 0) _detonationSteps--;
             else if (_detonationSteps == 0) { Explode(); return; }
             // 時限信管を物理時間で数えるのは実装の筋を優先した選択。炸裂位置の出方が遊びとして良くない結果になるかもしれないので、
-            // 実際のプレイの様子を見て、今後のアップデートで描画フレームで数える(Update で _age を使う)元の仕様へ戻すことがありうる
+            // 実際のプレイの様子を見て、今後のアップデートで描画フレームで数える(Update で数える)元の仕様へ戻すことがありうる
             if (!_detonating && _flightTime >= _timeFuse)
             {
                 Detonate(0f, transform.rotation);
                 if (!_active) return; // 起爆して消えた
             }
             if (_flightTime >= _spec.Lifetime) { Despawn(); return; }
-            _flightTime += Time.fixedDeltaTime;
             PreviousVelocity = _rb.velocity;
             PreviousAngularVelocity = _rb.angularVelocity;
             PreviousRotation = _rb.rotation;
-            if (_hit || _detonating) return;
+            if (!_hit && !_detonating) Fly();
+            _flightTime += Time.fixedDeltaTime;
+        }
+
+        // 推力・誘導は、このステップの開始までの物理時間(_flightTime)で判定する
+        private void Fly()
+        {
             var booster = _spec.Booster;
-            bool thrusting = booster.Thrust > 0f && _age < _thrustTime && _spec.Mass > 0f;
+            bool thrusting = booster.Thrust > 0f && _flightTime < _thrustTime && _spec.Mass > 0f;
             if (_guidanceGain > 0f)
-                _guidance.Step(_rb, transform, _guidanceGain, _age, thrusting ? booster.Thrust / _spec.Mass : 0f, booster.MaxSpeed);
+                _guidance.Step(_rb, transform, _guidanceGain, _flightTime, thrusting ? booster.Thrust / _spec.Mass : 0f, booster.MaxSpeed);
             var forward = transform.forward;
             // 風見トルク: forward × velocity は大きさが機首に垂直な速度成分で、機首を速度へ回す軸を向く
             if (booster.Stability > 0f) _rb.AddTorque(Vector3.Cross(forward, _rb.velocity) * booster.Stability, ForceMode.Acceleration);
@@ -344,7 +349,7 @@ namespace EWL.Weapons
                 float lift = Mathf.Min(booster.Lift, 1f / Time.fixedDeltaTime);
                 _rb.AddForce((forward * Vector3.Dot(velocity, forward) - velocity) * lift, ForceMode.Acceleration);
             }
-            if (booster.Thrust > 0f && _age < _thrustTime && BelowMaxSpeed(booster, _rb.velocity)) _rb.AddForce(forward * booster.Thrust); // NaN でも力を加えない
+            if (booster.Thrust > 0f && _flightTime < _thrustTime && BelowMaxSpeed(booster, _rb.velocity)) _rb.AddForce(forward * booster.Thrust); // NaN でも力を加えない
         }
 
         private static bool BelowMaxSpeed(BoosterSpec booster, Vector3 velocity)
@@ -603,9 +608,11 @@ namespace EWL.Weapons
             else StartCoroutine(DespawnAfter(RemoveAfterHit));
         }
 
+        // delay [s] ぶんの物理ステップ(端数は切り上げ)を進めてから消す
         private IEnumerator DespawnAfter(float delay)
         {
-            yield return new WaitForSeconds(delay);
+            for (int steps = Mathf.CeilToInt(delay / Time.fixedDeltaTime - 0.001f); steps > 0; steps--)
+                yield return WaitForStep;
             Despawn();
         }
 
