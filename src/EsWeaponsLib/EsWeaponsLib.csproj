@@ -78,6 +78,7 @@
     <Compile Include="Besiege\VanillaProjectiles.cs" />
     <Compile Include="Effects\EffectPlayer.cs" />
     <Compile Include="HitLog.cs" />
+    <Compile Include="WeaponLog.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="ModRoot.cs" />
     <Compile Include="SceneRoot.cs" />
