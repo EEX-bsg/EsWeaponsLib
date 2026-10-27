@@ -39,7 +39,7 @@
 | `int Ammo { get; }` | すぐ撃てる残弾(弾倉を使う武装は弾倉内の弾)。負値は無制限。 |
 | `int ReserveAmmo { get; }` | 弾倉の外の予備弾。負値は無制限。弾倉を使わない武装は 0。 |
 | `bool IsReloading { get; }` | リロード中なら true(撃てない)。 |
-| `float FireCooldownRemaining { get; }` | 発射間隔・StartDelay で次の発射を受け付けるまでの残り \[s]。0 なら待ちなし(弾切れ・リロードは含まない)。`WeaponSpec.KeepFireIntervalOnRespawn` で引き継いだ待ちを含む。MP で発射の権威が無いピアでは、届いた発射から数えた目安。 |
+| `float FireCooldownRemaining { get; }` | 発射間隔・StartDelay で次の発射を受け付けるまでの残り \[s]。0 なら待ちなし(弾切れ・リロードは含まない)。`WeaponSpec.KeepFireIntervalOnRespawn` で引き継いだ待ちを含む。MP で発射の権威が無いピアでは、届いた発射から数えた目安(引き継ぎは、レベルのシミュが止まらずに続いている間のリスポーンで行う)。 |
 | `string PoolKey { get; }` | この武装が使う弾のプールのキー。`ProjectileSpec.PoolKey` が空ならこの武装専用のキー。破棄済みなら null。プールの置き場はシーン直下の "EsWeaponsLib (Scene)/ProjectilePool/(キー)" で、待機中・飛行中の弾はその子(命中物にくっついた弾はその命中物の子)。弾に直接触るのは推奨しない(足りない操作は API への追加を提案してほしい)。置き場の構成は 1.0 まで変わりうる。 |
 | `Transform Target { get; set; }` | 誘導の目標(敵マシンのコアブロックの Transform。`Weapon.FindTarget` で探す)。`Weapon.TryFire` が発射を受け付けた時点の値で、その発射で出る弾(遅延・バーストで後から出る弾を含む)の目標が確定する。確定した後に変えても、発射待ち・飛行中の弾には効かない。null、または発射の受付時に有効な敵のコアでない(味方・壊れた・リスポーンした・任意の物体等)なら、その発射の弾は無誘導で飛ぶ。`GuidanceSpec.Gain` が0の武装では使われない。MP: 撃つブロックの持ち主のピアで設定する。持ち主がクライアント(グローバルシミュ)なら実行権威のホストへ送られ、ホストは持ち主以外からの指定を受け付けず、敵のコアでない指定は null として扱う。ホスト側でクライアントのブロックの目標を決めないこと(ホストのカメラはそのクライアントの照準ではない)。読むと、このピアで最後に設定・受信した値。 |
 | `bool IsAlive { get; }` | 破棄済みなら false。 |

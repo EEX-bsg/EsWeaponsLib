@@ -107,7 +107,11 @@ namespace EWL.Net
 
         private void Update()
         {
-            if (!Simulation.IsLevelSimulating) _lastReceivedFrame = -1; // 次のシミュ(別のホストのこともある)は番号が戻る
+            if (!Simulation.IsLevelSimulating)
+            {
+                _lastReceivedFrame = -1; // 次のシミュ(別のホストのこともある)は番号が戻る
+                FireCooldowns.ForgetEstimates(); // 目安の発射間隔はレベルシミュをまたいで引き継がない
+            }
             if (!_snapshotPending || Time.unscaledTime < _nextSnapshotTime) return;
             _nextSnapshotTime = Time.unscaledTime + SnapshotInterval;
             if (!Simulation.PublishesProjectiles)

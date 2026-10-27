@@ -29,6 +29,7 @@ namespace EWL.Weapons
         private float _nextFireTime;
         private bool _bursting;
         private int _pendingShots; // 遅延待ちで、まだ弾が出ていない発射
+        private float _proxyPendingUntil; // MP クライアント: 発射が届いてから弾のプロキシが出るまで(取りこぼしても遅延の上限で切れる)
         private float _nextTargetResendTime;
         private LoadedProjectileVisual _loadedVisual;
         private string _privatePoolKey;
@@ -83,7 +84,7 @@ namespace EWL.Weapons
         private void Update()
         {
             bool show = Spec.ShowLoadedProjectile && !IsReloading && HasAmmo()
-                && (_pendingShots > 0 || (Time.time >= _nextFireTime && !_bursting));
+                && (_pendingShots > 0 || Time.time < _proxyPendingUntil || (Time.time >= _nextFireTime && !_bursting));
             if (show)
             {
                 if (_loadedVisual == null)
@@ -266,7 +267,7 @@ namespace EWL.Weapons
             var projectile = Spec.Projectile;
             var proxy = ProjectilePool.Acquire(PoolKey, projectile);
             proxy.LaunchProxy(this, projectile, position, rotation, velocity, MaterialFor(projectile));
-            _nextFireTime = Time.time + Spec.FireInterval; // 待機弾の表示を発射間隔だけ消す
+            _proxyPendingUntil = 0f; // 弾が出たので待機弾を消す(発射間隔の目安は ReceiveState で数えている)
             PlayShotEffects();
             return proxy;
         }
@@ -276,7 +277,15 @@ namespace EWL.Weapons
             Ammo = ammo;
             ReserveAmmo = reserveAmmo;
             IsReloading = (flags & WeaponStateFlags.Reloading) != 0;
-            if ((flags & WeaponStateFlags.Fired) != 0 && Fired != null) Fired();
+            if ((flags & WeaponStateFlags.Fired) != 0)
+            {
+                // 発射間隔の目安。ホストはバーストの最後の弾から数えるので、届くたびに上書きすれば揃う(ずれは遅延ぶん遅れる向き)
+                float now = Time.time;
+                _nextFireTime = now + Spec.FireInterval;
+                _proxyPendingUntil = now + Spec.FireDelay + Spec.FireDelayRandomExtra + Time.fixedDeltaTime;
+                if (Spec.KeepFireIntervalOnRespawn) FireCooldowns.RecordEstimate(_block, NetworkIndex, _nextFireTime);
+                if (Fired != null) Fired();
+            }
             if ((flags & WeaponStateFlags.ReloadStarted) != 0)
             {
                 if (ReloadStarted != null) ReloadStarted();
